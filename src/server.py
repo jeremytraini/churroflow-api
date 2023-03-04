@@ -1,70 +1,61 @@
 import signal
-from json import dumps
-from flask import Flask, request, send_from_directory
-from flask_cors import CORS # type: ignore
-from src import config
+from src.config import base_url, port
 from src.health_check import health_check_v1
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from src.error import AccessError, InputError
+import uvicorn
 
-def quit_gracefully(*args):
-    '''For coverage'''
-    exit(0)
+app = FastAPI()
 
-def defaultHandler(err):
-    response = err.get_response()
-    print('response', err, err.get_response())
-    response.data = dumps({
-        "code": err.code,
-        "name": "System Error",
-        "message": err.get_description(),
-    })
-    response.content_type = 'application/json'
-    return response
 
-APP = Flask(__name__, static_url_path='/static/')
-CORS(APP)
+@app.exception_handler(Exception)
+async def validation_exception_handler(request, err):
+    # print(vars(err))
+    return JSONResponse(
+        status_code=err.code,
+        content={
+            "code": err.code,
+            "name": "System Error",
+            "message": err.message
+            },
+    )
 
-APP.config['TRAP_HTTP_EXCEPTIONS'] = True
-APP.register_error_handler(Exception, defaultHandler)
 
-#### NO NEED TO MODIFY ABOVE THIS POINT, EXCEPT IMPORTS
-
-@APP.route("/health_check/v1", methods=['GET'])
-def health_check():
-    
-    return dumps(health_check_v1())
+@app.get("/health_check/v1")
+async def health_check():
+    return health_check_v1()
 
 
 # Samples below
 
-@APP.route("/test/post/v1", methods=['POST'])
-def test_post():
+@app.post("/test/post/v1")
+async def test_post():
     data = request.json
     val = data["val"]
     
-    return dumps(val)
+    return val
 
-@APP.route("/test/get/v1", methods=['GET'])
+@app.get("/test/get/v1")
 def test_get():
     val = request.args.get('val')
     
-    return dumps(val)
+    return val
 
-@APP.route("/test/put/v1", methods=['PUT'])
-def test_put(): 
+@app.put("/test/put/v1")
+async def test_put(): 
     data = request.json
     val = data['val']
 
-    return dumps(val)
+    return val
 
-@APP.route("/test/delete/v1", methods=['DELETE'])
-def test_delete(): 
+@app.delete("/test/delete/v1")
+async def test_delete(): 
     data = request.json
     val = data['val']
 
-    return dumps(val)
+    return val
 
-#### NO NEED TO MODIFY BELOW THIS POINT
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, quit_gracefully) # For coverage
-    APP.run(port=config.port) # Do not edit this port
+    uvicorn.run(app, host=base_url, port=port)
