@@ -3,7 +3,7 @@ from src.config import base_url, port
 from src.health_check import health_check_v1
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from src.error import AccessError, InputError
+from src.error import AuthenticationError, InputError
 import uvicorn
 
 app = FastAPI()
