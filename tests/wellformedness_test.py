@@ -48,15 +48,16 @@ def test_wellformed_valid_invoice():
     assert abn_violation["location"]["xpath"]
 
 
-# Root element - closing tag + nesting
-# Attributes in quotes
-# Case sensitive
-# declaration at the beginning- version has to be less than 2.1
-# escape xml special characters
+# Root element - closing tag + nesting - Ricardo
+# Attributes in quotes - currencyID="AUD" - currency + schemeID="HWB" - Ahona - remove the quotes and test
+# Case sensitive - Mohamad
+# declaration at the beginning- version has to be less than 2.1 - Ahona
+# escape xml special characters - Ricardo
 # <Invoice>\n\Hello World < <Invoice>
 
 # - Check failing and success case
 # do them all separately
+# DO failing and success test in each case
 
 # 5 errors
 # 1 2 3 4 5
