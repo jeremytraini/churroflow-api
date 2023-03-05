@@ -125,4 +125,7 @@ dmypy.json
 
 # Other
 *.py~
-data_store.p
+bin/
+pyvenv.cfg
+lib64
+

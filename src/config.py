@@ -1,3 +1,5 @@
 port = 8900
 
-url = f"http://localhost:{port}/"
+base_url = f"localhost"
+
+full_url = f"http://{base_url}:{port}/"
