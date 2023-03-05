@@ -1,9 +1,9 @@
-from werkzeug.exceptions import HTTPException
+from fastapi import HTTPException
 
 class AuthenticationError(HTTPException):
-    code = 403
-    message = 'You are unauthorised to access this resource'
+    status_code = 403
+    detail = 'You are unauthorised to access this resource'
 
 class InputError(HTTPException):
-    code = 400
-    message = 'The input you have provided is invalid'
+    status_code = 400
+    detail = 'The input you have provided is invalid'
