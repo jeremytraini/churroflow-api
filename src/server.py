@@ -24,38 +24,25 @@ async def validation_exception_handler(request: Request, exc: Exception):
 
 @app.get("/health_check/v1")
 async def health_check():
-    raise AuthenticationError()
-    
     return health_check_v1()
 
 
 # Samples below
 
 @app.post("/test/post/v1")
-async def test_post():
-    data = request.json
-    val = data["val"]
-    
+async def test_post(val: str):
     return val
 
 @app.get("/test/get/v1")
-def test_get():
-    val = request.args.get('val')
-    
+def test_get(val: str):
     return val
 
 @app.put("/test/put/v1")
-async def test_put(): 
-    data = request.json
-    val = data['val']
-
+async def test_put(val: str):
     return val
 
 @app.delete("/test/delete/v1")
-async def test_delete(): 
-    data = request.json
-    val = data['val']
-
+async def test_delete(val: str):
     return val
 
 # ENDPOINTS ABOVE
