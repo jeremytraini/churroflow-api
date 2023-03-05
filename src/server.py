@@ -1,7 +1,7 @@
 import signal
 from src.config import base_url, port
 from src.health_check import health_check_v1
-from src.report import report_syntax_v1, report_peppol_v1
+from src.report import report_syntax_v1, report_peppol_v1, report_wellformedness_v1, report_schemavalid_v1
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from src.error import AuthenticationError, InputError
@@ -44,6 +44,21 @@ async def report_peppol(name: str = "My Invoice",
                         data: str = ""):
     return report_peppol_v1(name, format, source, data)
 
+
+@app.post("/report/wellformedness/v1")
+async def report_wellformedness(name: str = "My Invoice",
+                        format: str = "xml",
+                        source: str = "text",
+                        data: str = ""):
+    return report_wellformedness_v1(name, format, source, data)
+
+
+@app.post("/report/schemavalid/v1")
+async def report_schemavalid(name: str = "My Invoice",
+                        format: str = "xml",
+                        source: str = "text",
+                        data: str = ""):
+    return report_schemavalid_v1(name, format, source, data)
 
 # Samples below
 
