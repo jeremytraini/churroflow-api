@@ -42,7 +42,7 @@ async def report_peppol(name: str = "My Invoice",
                         format: str = "xml",
                         source: str = "text",
                         data: str = ""):
-    return report_peppol_v1()
+    return report_peppol_v1(name, format, source, data)
 
 
 # Samples below

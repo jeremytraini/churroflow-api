@@ -9,10 +9,19 @@ def health_check_v1():
     return json.loads(response.text)
 
 
-# Sample calls below
+def report_peppol_v1(name, format, source, data):
+    payload = {
+        "name": name,
+        "format": format,
+        "source": source,
+        "data": data
+    }
+    response = requests.post(full_url + 'report/peppol/v1', json=payload)
 
-def sample_clear():
-    requests.delete(full_url + 'test/delete/v1')
+    return json.loads(response.text)
+
+
+# Sample calls below
 
 def sample_post(val):
     payload = {
