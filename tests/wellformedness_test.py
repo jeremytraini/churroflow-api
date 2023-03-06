@@ -62,3 +62,98 @@ def test_wellformed_valid_invoice():
 # 5 errors
 # 1 2 3 4 5
 # 1 st error + terminates
+
+def test_wellformedness_version_missing():
+    name = "My Invoice"
+    format = "xml"
+    source = "text"
+    data = VALID_INVOICE_TEXT
+
+    # Invalidating the version number
+    data = remove_part_of_string(data, 40, 41)
+
+    wellformed_evaluation = report_wellformedness_v1(name, format, source, data)
+
+    # We expect exactly 1 rule to fail due to the invalid ABN
+    assert wellformed_evaluation["num_rules_failed"] == 1
+
+    # We expect exactly 1 violation due to the invalid ABN
+    assert wellformed_evaluation["num_violations"] == 1
+
+    # Thus there should be exactly 1 violation in the violation list
+    assert len(wellformed_evaluation["violations"]) == 1
+
+    version_missing = wellformed_evaluation["violations"][0]
+
+    # Check that the violation is for the correct rule and is flagged as fatal
+    assert version_missing["rule_id"] == "wellformedness_invalid_error"
+    assert version_missing["is_fatal"] == True
+
+    # Check that the violation has a non-empty message, test and suggestion
+    assert version_missing["message"]
+    assert version_missing["test"]
+    assert version_missing["suggestion"]
+
+    assert version_missing["location"]["type"] == "xpath"
+
+    # Check that the location xpath is not empty
+    assert version_missing["location"]["xpath"]
+
+def test_wellformedness_version_invalid():
+    name = "My Invoice"
+    format = "xml"
+    source = "text"
+    data = VALID_INVOICE_TEXT
+
+    # invalid version number
+    data = data.replace('version="1.0"', 'version="-1.0"' )
+    wellformed_evaluation = report_wellformedness_v1(name, format, source, data)
+
+    # We expect exactly 1 rule to fail due to the invalid version
+    assert wellformed_evaluation["num_rules_failed"] == 1
+
+    # We expect exactly 1 violation due to the invalid version
+    assert wellformed_evaluation["num_violations"] == 1
+
+    # Thus there should be exactly 1 violation in the violation list
+    assert len(wellformed_evaluation["violations"]) == 1
+
+    version_invalid = wellformed_evaluation["violations"][0]
+
+    # Check that the violation is for the correct rule and is flagged as fatal
+    assert version_invalid["rule_id"] == "wellformedness_invalid_error"
+    assert version_invalid["is_fatal"] == True
+
+    # Check that the violation has a non-empty message, test and suggestion
+    assert version_invalid["message"]
+    assert version_invalid["test"]
+    assert version_invalid["suggestion"]
+
+    assert version_invalid["location"]["type"] == "xpath"
+
+    # Check that the location xpath is not empty
+    assert version_invalid["location"]["xpath"]
+
+
+
+    # ver1 = 'version=1'
+    # ver2 = 'version=2'
+
+    # with open(r'/SENG2021/se2021-23t1-einvoicing-api-h18a-churros-validation-api/tests/constants.py', 'r') as file:
+    #     # read all content of a file
+    #     content = file.read()
+    #     # check if string present in a file
+    #     assert (ver1 in content or ver2 in content) == True
+    #     assert (ver1 not in content or ver2 not in content) == False
+
+
+    # # We expect exactly 1 rule to fail due to the invalid version
+    # assert wellformed_evaluation["num_rules_failed"] == 1
+
+    # # We expect exactly 1 violation due to the invalid version
+    # assert wellformed_evaluation["num_violations"] == 1
+
+    # # Thus there should be exactly 1 violation in the violation list
+    # assert len(wellformed_evaluation["violations"]) == 1
+
+
