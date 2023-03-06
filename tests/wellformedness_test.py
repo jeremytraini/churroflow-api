@@ -1,6 +1,6 @@
 from tests.server_calls import report_wellformedness_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import remove_part_of_string
+from tests.helpers import remove_part_of_string, replace_part_of_string
 
 """
 =====================================
@@ -47,6 +47,65 @@ def test_wellformed_valid_invoice():
     # Check that the location xpath is not empty
     assert abn_violation["location"]["xpath"]
 
+def test_wellformed_case_sensitive_tags_invalid():
+    name = "My Invoice"
+    format = "xml"
+    source = "text"
+    data = VALID_INVOICE_TEXT
+
+    # Invalidating the tags so that only one is capitalised
+    data = replace_part_of_string(data, 2256, 2258, "id")
+
+    wellformed_evaluation = report_wellformedness_v1(name, format, source, data)
+
+    # We expect exactly 1 rule to fail due to the invalid ABN
+    assert wellformed_evaluation["num_rules_failed"] == 1
+
+    # We expect exactly 1 violation due to the invalid ABN
+    assert wellformed_evaluation["num_violations"] == 1
+
+    # Thus there should be exactly 1 violation in the violation list
+    assert len(wellformed_evaluation["violations"]) == 1
+
+    violation = wellformed_evaluation["violations"][0]
+
+    # PEPPOL-COMMON-R050 | Australian Business Number (ABN) MUST be stated in the correct format. | Same | warning
+
+    # Check that the violation is for the correct rule and is flagged as fatal
+    assert violation["rule_id"] == "PEPPOL-COMMON-R050" # need to find correct rule_id
+    assert violation["is_fatal"] == True
+
+    # Check that the violation has a non-empty message, test and suggestion
+    assert violation["message"]
+    assert violation["test"]
+    assert violation["suggestion"]
+
+    assert violation["location"]["type"] == "line"
+
+    # Check that the location line/column are valid
+    assert violation["location"]["line"] >= 0
+    assert violation["location"]["column"] >= 0
+
+def test_wellformed_case_sensitive_tags_valid():
+    name = "My Invoice"
+    format = "xml"
+    source = "text"
+    data = VALID_INVOICE_TEXT
+
+    # Replacing both tags so that they still match
+    data = replace_part_of_string(data, 2244, 2246, "id")
+    data = replace_part_of_string(data, 2256, 2258, "id")
+
+    wellformed_evaluation = report_wellformedness_v1(name, format, source, data)
+
+    # We expect 0 rules to fail as it should be wellformed
+    assert wellformed_evaluation["num_rules_failed"] == 0
+
+    # We expect 0 violations
+    assert wellformed_evaluation["num_violations"] == 0
+
+    # There should be no violations in the list
+    assert len(wellformed_evaluation["violations"]) == 0
 
 # Root element - closing tag + nesting - Ricardo
 # Attributes in quotes - currencyID="AUD" - currency + schemeID="HWB" - Ahona - remove the quotes and test

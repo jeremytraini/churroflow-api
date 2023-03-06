@@ -5,3 +5,5 @@
 def remove_part_of_string(string, start, end):
     return string[:start] + string[end:]
 
+def replace_part_of_string(string, start, end, replace):
+    return string[:start] + replace + string[end:]
