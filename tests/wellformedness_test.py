@@ -58,18 +58,16 @@ def test_wellformed_case_sensitive_tags_invalid():
 
     wellformed_evaluation = report_wellformedness_v1(name, format, source, data)
 
-    # We expect exactly 1 rule to fail due to the invalid ABN
+    # We expect exactly 1 rule to fail due to the capitalised tag
     assert wellformed_evaluation["num_rules_failed"] == 1
 
-    # We expect exactly 1 violation due to the invalid ABN
+    # We expect exactly 1 violation due to the capitalised tag
     assert wellformed_evaluation["num_violations"] == 1
 
     # Thus there should be exactly 1 violation in the violation list
     assert len(wellformed_evaluation["violations"]) == 1
 
     violation = wellformed_evaluation["violations"][0]
-
-    # PEPPOL-COMMON-R050 | Australian Business Number (ABN) MUST be stated in the correct format. | Same | warning
 
     # Check that the violation is for the correct rule and is flagged as fatal
     assert violation["rule_id"] == "PEPPOL-COMMON-R050" # need to find correct rule_id
