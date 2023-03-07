@@ -22,12 +22,9 @@ def report_peppol_v1(name, format, source, data) -> Evaluation:
     return json.loads(response.text)
 
 
-def report_wellformedness_v1(name, format, source, data) -> Evaluation:
+def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
     payload = {
-        "name": name,
-        "format": format,
-        "source": source,
-        "data": data
+        **invoice.dict()
     }
     response = requests.post(full_url + 'report/wellformedness/v1', json=payload)
 

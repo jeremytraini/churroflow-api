@@ -54,7 +54,7 @@ def test_wellformed_case_sensitive_tags_invalid():
 
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 
-    wellformed_evaluation = report_wellformedness_v1(**invoice.dict())
+    wellformed_evaluation = report_wellformedness_v1(invoice)
 
     assert wellformed_evaluation.aspect == "wellformedness"
 
@@ -92,7 +92,7 @@ def test_wellformed_case_sensitive_tags_valid():
 
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 
-    wellformed_evaluation = report_wellformedness_v1(**invoice.dict())
+    wellformed_evaluation = report_wellformedness_v1(invoice)
 
     # We expect 0 rules to fail as it should be wellformed
     assert wellformed_evaluation.num_rules_failed == 0
