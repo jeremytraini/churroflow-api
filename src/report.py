@@ -1,5 +1,5 @@
 import os
-from src.classes import Validator_lxml
+from src.classes.Validator_lxml import Validator
 from src.types import *
 
 # Syntax report stub
