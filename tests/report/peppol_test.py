@@ -1,6 +1,6 @@
 from tests.server_calls import report_peppol_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import remove_part_of_string
+from tests.helpers import invalidate_invoice
 
 """
 =====================================
@@ -37,10 +37,15 @@ def test_peppol_single_volation():
     name = "My Invoice"
     format = "xml"
     source = "text"
-    data = VALID_INVOICE_TEXT
     
-    # Invalidating the ABN
-    data = remove_part_of_string(data, 1938, 1939)
+    # Invalidating the ABN, changing the content of the ABN
+    data = invalidate_invoice(
+        'tests/AUInvoice.xml',
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        'Not an ABN',
+        1
+    )
     
     peppol_evaluation = report_peppol_v1(name, format, source, data)
     
@@ -78,11 +83,22 @@ def test_peppol_multiple_violations_same_rule():
     name = "My Invoice"
     format = "xml"
     source = "text"
-    data = VALID_INVOICE_TEXT
     
-    # Invalidating the 3 ABNs
-    data = remove_part_of_string(data, 1938, 1939)
-    data = remove_part_of_string(data, 2829, 2830)
+    # Invalidating the 2 ABNs
+    data = invalidate_invoice(
+        'tests/AUInvoice.xml',
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        'Not an ABN 1',
+        1
+    )
+    data = invalidate_invoice(
+        'tests/InvalidInvoice.xml',
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        'Not an ABN 2',
+        2
+    )
     
     peppol_evaluation = report_peppol_v1(name, format, source, data)
     
@@ -111,13 +127,37 @@ def test_peppol_multiple_violations_different_rules():
     source = "text"
     data = VALID_INVOICE_TEXT
     
-    # Invalidating the 3 ABNs
-    data = remove_part_of_string(data, 1677, 1678)
-    data = remove_part_of_string(data, 2829, 2830)
+    # Invalidating the 2 ABNs
+    data = invalidate_invoice(
+        'tests/AUInvoice.xml',
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        'Not an ABN 1',
+        1
+    )
+    data = invalidate_invoice(
+        'tests/InvalidInvoice.xml',
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        'Not an ABN 2',
+        2
+    )
     
     # Invalidating the 2 addresses
-    data = remove_part_of_string(data, 2061, 2062)
-    data = remove_part_of_string(data, 3508, 3509)
+    data = invalidate_invoice(
+        'tests/InvalidInvoice.xml',
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}StreetName', 
+        'This is not an address',
+        2
+    )
+    data = invalidate_invoice(
+        'tests/InvalidInvoice.xml',
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CityName', 
+        'Not a city name',
+        2
+    )
     
     peppol_evaluation = report_peppol_v1(name, format, source, data)
     
@@ -154,7 +194,13 @@ def test_peppol_warning_doesnt_invalidate_report():
     data = VALID_INVOICE_TEXT
     
     # Invalidating the ABN
-    data = remove_part_of_string(data, 1677, 1679)
+    data = invalidate_invoice(
+        'tests/AUInvoice.xml',
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        'Not an ABN 1',
+        1
+    )
     
     peppol_evaluation = report_peppol_v1(name, format, source, data)
     
