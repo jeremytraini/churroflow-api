@@ -9,6 +9,19 @@ def health_check_v1():
     return json.loads(response.text)
 
 
+def report_syntax_v1(name, format, source, data):
+    payload = {
+        "name": name,
+        "format": format,
+        "source": source,
+        "data": data
+    }
+    response = requests.post(full_url + 'report/syntax/v1', json=payload)
+
+    return json.loads(response.text)
+
+
+
 def report_peppol_v1(name, format, source, data):
     payload = {
         "name": name,
@@ -19,6 +32,8 @@ def report_peppol_v1(name, format, source, data):
     response = requests.post(full_url + 'report/peppol/v1', json=payload)
 
     return json.loads(response.text)
+
+
 
 
 # Sample calls below
