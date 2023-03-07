@@ -22,6 +22,13 @@ async def validation_exception_handler(request: Request, exc: Exception):
     )
 
 
+class Invoice(BaseModel):
+    name: str
+    format: str
+    source: str
+    data: str
+
+
 # ENDPOINTS BELOW
 
 @app.get("/health_check/v1")
@@ -30,19 +37,13 @@ async def health_check():
 
 
 @app.post("/report/syntax/v1")
-async def report_syntax(name: str = "My Invoice",
-                        format: str = "xml",
-                        source: str = "text",
-                        data: str = ""):
-    return report_syntax_v1()
+async def report_syntax(invoice: Invoice):
+    return report_syntax_v1(invoice.name, invoice.format, invoice.source, invoice.data)
 
 
 @app.post("/report/peppol/v1")
-async def report_peppol(name: str = "My Invoice",
-                        format: str = "xml",
-                        source: str = "text",
-                        data: str = ""):
-    return report_peppol_v1(name, format, source, data)
+async def report_peppol(invoice: Invoice):
+    return report_peppol_v1(invoice.name, invoice.format, invoice.source, invoice.data)
 
 
 # Samples below

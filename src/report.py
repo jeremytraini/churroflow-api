@@ -4,15 +4,27 @@ from tempfile import NamedTemporaryFile
 import requests
 
 
-def generate_xslt_report(invoice_text, xslt_path) -> Dict:
+def generate_xslt_evaluation(invoice_text, xslt_path) -> Dict:
     with PySaxonProcessor(license=False) as proc:
+        
+        print(xslt_path)
+        
         xsltproc = proc.new_xslt30_processor()
         executable = xsltproc.compile_stylesheet(stylesheet_file=xslt_path)
         
-        with NamedTemporaryFile(mode='w+') as tmp:
-            tmp.write(invoice_text)
-
-            schematron_output = executable.transform_to_value(source_file=tmp.name)
+        if xsltproc.exception_occurred:
+            raise Exception("XSLT failed to load! " + xsltproc.error_message)
+        
+        if executable.exception_occurred:
+            raise Exception("Executable failed to load! " + executable.error_message)
+        
+        print(len(invoice_text))
+        
+        tmp = NamedTemporaryFile(mode='w', delete=False)
+        tmp.write(invoice_text)
+        tmp.close()
+        
+        schematron_output = executable.transform_to_value(source_file=tmp.name)
         
         if not schematron_output:
             raise Exception("Schematron output is empty")
@@ -27,12 +39,10 @@ def generate_xslt_report(invoice_text, xslt_path) -> Dict:
             if item.name and item.name.endswith("failed-assert"):
                 id_name = item.get_attribute_value("id")
                 rules_failed.add(id_name)
-                flag = item.get_attribute_value("flag")
+                is_fatal = item.get_attribute_value("flag") == "fatal"
                 
-                if is_valid and flag == "fatal":
+                if is_valid and is_fatal:
                     is_valid = False
-                    
-                # print(item)
                 
                 location = item.get_attribute_value("location")
                 test = item.get_attribute_value("test")
@@ -44,9 +54,12 @@ def generate_xslt_report(invoice_text, xslt_path) -> Dict:
                     suggestion = item.children[1].string_value
                 
                 violations.append({
-                    "id": id_name,
-                    "flag": flag,
-                    "location": location,
+                    "rule_id": id_name,
+                    "is_fatal": is_fatal,
+                    "location": {
+                                    "type": "xpath",
+                                    "xpath": location
+                                    },
                     "test": test,
                     "message": message,
                     "suggestion": suggestion
@@ -68,7 +81,7 @@ def generate_xslt_report(invoice_text, xslt_path) -> Dict:
 def report_syntax_v1(name, format, source, data) -> Dict:
     return {}
 
-# Peppol report stub
+
 def report_peppol_v1(name, format, source, data) -> Dict:
     if source == "file":
         with open(data, 'r') as f:
@@ -79,7 +92,7 @@ def report_peppol_v1(name, format, source, data) -> Dict:
             raise Exception("Could not retrieve file from url")
 
         data = response.text
-        
-    return generate_xslt_report(data, "validation_artefacts/AUNZ-PEPPOL-validation.xslt")
+    
+    return generate_xslt_evaluation(data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
         
     

@@ -1,5 +1,27 @@
 import lxml.etree as ET
 
+def remove_part_of_string(string, start, end):
+    '''
+    Removes a part of a string and returns the new string.
+
+    Arguments:
+        string (str) - The string we want to change
+        start (int) - The start index of the substring we want to remove
+        end (int) - The end index of the substring we want to remove
+
+    Exceptions:
+        None
+
+    Return Value:
+        The new string with the removed part
+
+    Sample Calls:
+    remove_part_of_string(VALID_INVOICE_TEXT, 2061, 2062)
+    remove_part_of_string(VALID_INVOICE_TEXT, 3508, 3509)
+    '''
+    
+    return string[:start] + string[end:]
+
 def invalidate_invoice(invoice, choice, tag_name, text, index):
     '''
     Invalidating the default invoice (AUInvoice.xml) by changing either the tag or the content into a new text.
