@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Literal
-import datetime
 
 class Invoice(BaseModel):
     name: str
@@ -38,13 +37,13 @@ class Evaluation(BaseModel):
 class Report(BaseModel):
     report_id: int
     score: int
-    date_generated: datetime
+    date_generated: str
     invoice_name: str
     invoice_raw: str
     invoice_hash: str
     is_valid: bool
     total_num_violations: int
     wellformedness: Evaluation
-    schema: Evaluation
+    schemaEvaluation: Evaluation
     syntax: Evaluation
     peppol: Evaluation
