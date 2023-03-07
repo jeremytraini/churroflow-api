@@ -1,3 +1,5 @@
+import os
+from src.classes import Validator_lxml
 from src.types import *
 
 # Syntax report stub
@@ -14,4 +16,13 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
 
 # Peppol report stub
 def report_schemavalid_v1(name, format, source, data) -> Evaluation:
+    validator = Validator("xsd/maindoc/UBL-Invoice-2.1.xsd")
+
+    # The directory with XML files
+    file_path = "AUInvoice.xml"
+
+    if validator.validate(file_path):
+        print('Valid! :)')
+    else:
+        print('Not valid! :(')
     return {}
