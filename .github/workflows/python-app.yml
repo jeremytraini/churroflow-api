@@ -24,6 +24,8 @@ jobs:
         pytest tests/
         kill -SIGINT %1
         cat $SERVER_LOG
+    - name: Generate coverage report
+      run: |
         coverage report
         coverage html
       env:
