@@ -1,4 +1,5 @@
-import lxml.etree as ET
+from lxml import etree
+from io import StringIO, BytesIO
 
 def remove_part_of_string(string, start, end):
     '''
@@ -22,13 +23,14 @@ def remove_part_of_string(string, start, end):
     
     return string[:start] + string[end:]
 
-def invalidate_invoice(invoice, choice, tag_name, text, index):
+def invalidate_invoice(invoice_text, choice, tag_name, text, index):
     '''
-    Invalidating the default invoice (AUInvoice.xml) by changing either the tag or the content into a new text.
-    Writes the output into a file tests/output.xml
+    Invalidating the given invoice by changing either the tag or the content into a new text.
+    Changes the index-th tag or content that matches the tag_name.
+    Returns the result as a string.
 
     Arguments:
-        invoice (str) - Path to the invoice we want to change
+        invoice_text (str) - The invoice text
         choice (str) - Choice whether the user wants to replace the tag or the content
         tag_name (str) - The tag that we want to change
         text (str) - The replacement text for either the tag or the content 
@@ -42,7 +44,7 @@ def invalidate_invoice(invoice, choice, tag_name, text, index):
     
     Sample Calls:
     invalidate_invoice(
-        'tests/AUInvoice.xml',
+        data,
         'tag', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CustomizationID', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}TEST1',
@@ -50,7 +52,7 @@ def invalidate_invoice(invoice, choice, tag_name, text, index):
     )
 
     invalidate_invoice(
-        'tests/AUInvoice.xml',
+        data,
         'tag', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}InvoicePeriod', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}TEST2',
@@ -58,7 +60,7 @@ def invalidate_invoice(invoice, choice, tag_name, text, index):
     )
 
     invalidate_invoice(
-        'tests/InvalidInvoice.xml',
+        data,
         'content',
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CustomizationID',
         'Hello World!',
@@ -66,31 +68,27 @@ def invalidate_invoice(invoice, choice, tag_name, text, index):
     )
 
     invalidate_invoice(
-        'tests/InvalidInvoice.xml',
+        data,
         'tag', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}ID', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}TEST1',
         2
     )
     '''
+    
+    root = etree.fromstring(invoice_text.encode('utf-8'))
 
-    tag_counter = 0
-
-    #adding the encoding when the file is opened and written is needed to avoid a charmap error
-    with open(invoice, encoding="utf8") as f:
-        tree = ET.parse(f)
-        root = tree.getroot()
-
-        for elem in root.getiterator():
-            try:
-                if choice == 'tag' and elem.tag == tag_name:
-                    tag_counter += 1
-                    if tag_counter == index:
-                        elem.tag = text
-                elif choice == 'content' and elem.tag == tag_name:
+    for elem in root.getiterator():
+        try:
+            if choice == 'tag' and elem.tag == tag_name:
+                index -= 1
+                if index == 0:
+                    elem.tag = text
+            elif choice == 'content' and elem.tag == tag_name:
+                index -= 1
+                if index == 0:
                     elem.text = text
-            except AttributeError:
-                pass
+        except AttributeError:
+            pass
 
-    # Adding the xml_declaration and method helped keep the header info at the top of the file.
-    tree.write('tests/InvalidInvoice.xml', xml_declaration=True, method='xml', encoding="utf8")
+    return etree.tostring(root).decode('utf-8')

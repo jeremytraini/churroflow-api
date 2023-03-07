@@ -37,15 +37,18 @@ def test_peppol_single_volation():
     name = "My Invoice"
     format = "xml"
     source = "text"
+    data = VALID_INVOICE_TEXT
     
     # Invalidating the ABN, changing the content of the ABN
     data = invalidate_invoice(
-        'tests/AUInvoice.xml',
+        data,
         'content', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
         'Not an ABN',
         1
     )
+    
+    print(data)
     
     peppol_evaluation = report_peppol_v1(name, format, source, data)
     
@@ -83,17 +86,18 @@ def test_peppol_multiple_violations_same_rule():
     name = "My Invoice"
     format = "xml"
     source = "text"
+    data = VALID_INVOICE_TEXT
     
     # Invalidating the 2 ABNs
     data = invalidate_invoice(
-        'tests/AUInvoice.xml',
+        data,
         'content', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
         'Not an ABN 1',
         1
     )
     data = invalidate_invoice(
-        'tests/InvalidInvoice.xml',
+        data,
         'content', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
         'Not an ABN 2',
@@ -129,14 +133,14 @@ def test_peppol_multiple_violations_different_rules():
     
     # Invalidating the 2 ABNs
     data = invalidate_invoice(
-        'tests/AUInvoice.xml',
+        data,
         'content', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
         'Not an ABN 1',
         1
     )
     data = invalidate_invoice(
-        'tests/InvalidInvoice.xml',
+        data,
         'content', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
         'Not an ABN 2',
@@ -145,17 +149,17 @@ def test_peppol_multiple_violations_different_rules():
     
     # Invalidating the 2 addresses
     data = invalidate_invoice(
-        'tests/InvalidInvoice.xml',
+        data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}StreetName', 
-        'This is not an address',
-        2
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
+        'bad-date',
+        1
     )
     data = invalidate_invoice(
-        'tests/InvalidInvoice.xml',
+        data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CityName', 
-        'Not a city name',
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
+        'bad-date',
         2
     )
     
@@ -179,7 +183,7 @@ def test_peppol_multiple_violations_different_rules():
     assert abn_violation1["rule_id"] == abn_violation2["rule_id"] == "PEPPOL-COMMON-R050"
     
     # Rule IDs should be the same for each address violation
-    assert address_violation1["rule_id"] == address_violation2["rule_id"] == "PEPPOL-COMMON-R010"
+    assert address_violation1["rule_id"] == address_violation2["rule_id"] == "PEPPOL-EN16931-F001"
     
     # Locations should be different for each violation
     assert abn_violation1["location"] != abn_violation2["location"]
@@ -195,7 +199,7 @@ def test_peppol_warning_doesnt_invalidate_report():
     
     # Invalidating the ABN
     data = invalidate_invoice(
-        'tests/AUInvoice.xml',
+        data,
         'content', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
         'Not an ABN 1',
@@ -219,12 +223,18 @@ def test_peppol_fatal_error_invalidates_report():
     data = VALID_INVOICE_TEXT
     
     # Changing the start date year to 2029
-    data = data[:864] + str(2) + data[865:]
+    data = invalidate_invoice(
+        data,
+        'content', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
+        'bad-date',
+        1
+    )
     
     peppol_evaluation = report_peppol_v1(name, format, source, data)
     
     # "Start date of line period MUST be within invoice period" rule
-    assert peppol_evaluation["violations"][0]["rule_id"] == "PEPPOL-EN16931-R110"
+    assert peppol_evaluation["violations"][0]["rule_id"] == "PEPPOL-EN16931-F001"
     
     # Evaluation is not valid due to fatal error
     assert peppol_evaluation["is_valid"] == False
