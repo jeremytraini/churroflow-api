@@ -1,10 +1,12 @@
 import signal
 from src.config import base_url, port
 from src.health_check import health_check_v1
+from src.report import report_syntax_v1, report_peppol_v1
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from src.error import AuthenticationError, InputError
 import uvicorn
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -20,11 +22,28 @@ async def validation_exception_handler(request: Request, exc: Exception):
     )
 
 
+class Invoice(BaseModel):
+    name: str
+    format: str
+    source: str
+    data: str
+
+
 # ENDPOINTS BELOW
 
 @app.get("/health_check/v1")
 async def health_check():
     return health_check_v1()
+
+
+@app.post("/report/syntax/v1")
+async def report_syntax(invoice: Invoice):
+    return report_syntax_v1(invoice.name, invoice.format, invoice.source, invoice.data)
+
+
+@app.post("/report/peppol/v1")
+async def report_peppol(invoice: Invoice):
+    return report_peppol_v1(invoice.name, invoice.format, invoice.source, invoice.data)
 
 
 # Samples below
