@@ -1,20 +1,16 @@
 from typing import Dict
 from saxonche import PySaxonProcessor
 from tempfile import NamedTemporaryFile
+import requests
 
 
-# Syntax report stub
-def report_syntax_v1(name, format, source, data) -> Dict:
-    return {}
-
-# Peppol report stub
-def report_peppol_v1(name, format, source, data) -> Dict:
+def generate_xslt_report(invoice_text, xslt_path) -> Dict:
     with PySaxonProcessor(license=False) as proc:
         xsltproc = proc.new_xslt30_processor()
-        executable = xsltproc.compile_stylesheet(stylesheet_file="AUNZ-UBL-validation.xslt")
+        executable = xsltproc.compile_stylesheet(stylesheet_file=xslt_path)
         
         with NamedTemporaryFile(mode='w+') as tmp:
-            tmp.write(data)
+            tmp.write(invoice_text)
 
             schematron_output = executable.transform_to_value(source_file=tmp.name)
         
@@ -66,3 +62,24 @@ def report_peppol_v1(name, format, source, data) -> Dict:
         }
         
         return result
+
+
+# Syntax report stub
+def report_syntax_v1(name, format, source, data) -> Dict:
+    return {}
+
+# Peppol report stub
+def report_peppol_v1(name, format, source, data) -> Dict:
+    if source == "file":
+        with open(data, 'r') as f:
+            data = f.read()
+    elif source == "url":
+        response = requests.get(data)
+        if response.status_code != 200:
+            raise Exception("Could not retrieve file from url")
+
+        data = response.text
+        
+    return generate_xslt_report(data, "validation_artefacts/AUNZ-PEPPOL-validation.xslt")
+        
+    
