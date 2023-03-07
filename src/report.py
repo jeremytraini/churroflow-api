@@ -1,5 +1,6 @@
 from typing import Dict
 from saxonche import PySaxonProcessor
+from tempfile import NamedTemporaryFile
 
 
 # Syntax report stub
@@ -10,17 +11,15 @@ def report_syntax_v1(name, format, source, data) -> Dict:
 def report_peppol_v1(name, format, source, data) -> Dict:
     with PySaxonProcessor(license=False) as proc:
         xsltproc = proc.new_xslt30_processor()
-        executable = xsltproc.compile_stylesheet(stylesheet_file="AUNZ-PEPPOL-validation.xslt")
+        executable = xsltproc.compile_stylesheet(stylesheet_file="AUNZ-UBL-validation.xslt")
         
-        node = proc.parse_xml(xml_text=data)
-        schematron_output = executable.transform_to_value(source_text=node)
-            
-        # schematron_output = executable.transform_to_value(source_file="AUInvoice3.xml")
+        with NamedTemporaryFile(mode='w+') as tmp:
+            tmp.write(data)
+
+            schematron_output = executable.transform_to_value(source_file=tmp.name)
         
-        # if not schematron_output:
-        #     print(schematron_output.error_message)
-        #     print("messed")
-        #     exit()
+        if not schematron_output:
+            raise Exception("Schematron output is empty")
         
         violations = []
         is_valid = True
