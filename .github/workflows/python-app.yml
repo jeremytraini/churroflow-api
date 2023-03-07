@@ -20,6 +20,7 @@ jobs:
       run: |
         SERVER_LOG=$(mktemp)
         coverage run -m src.server >& $SERVER_LOG &
+        sleep 3
         pytest tests/
         kill -SIGINT %1
         cat $SERVER_LOG
