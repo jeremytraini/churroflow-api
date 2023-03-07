@@ -1,6 +1,7 @@
 import requests
 import json
 from src.config import full_url
+from src.types import *
 
 
 def health_check_v1():
@@ -9,7 +10,7 @@ def health_check_v1():
     return json.loads(response.text)
 
 
-def report_peppol_v1(name, format, source, data):
+def report_peppol_v1(name, format, source, data) -> Evaluation:
     payload = {
         "name": name,
         "format": format,
@@ -21,7 +22,7 @@ def report_peppol_v1(name, format, source, data):
     return json.loads(response.text)
 
 
-def report_wellformedness_v1(name, format, source, data):
+def report_wellformedness_v1(name, format, source, data) -> Evaluation:
     payload = {
         "name": name,
         "format": format,
@@ -33,7 +34,7 @@ def report_wellformedness_v1(name, format, source, data):
     return json.loads(response.text)
 
 
-def report_schemavalid_v1(name, format, source, data):
+def report_schemavalid_v1(name, format, source, data) -> Evaluation:
     payload = {
         "name": name,
         "format": format,
