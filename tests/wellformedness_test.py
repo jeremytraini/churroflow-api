@@ -7,6 +7,8 @@ from tests.helpers import remove_part_of_string, append_to_string, replace_part_
 /report/wellformedness/v1 TESTS - (7 CASES TO BE TESTED)
 =====================================
 """
+
+
 # Wellformedness Testing that the report was generated properly and matches input data
 def test_wellformed_valid_invoice():
     name = "My Invoice"
@@ -77,6 +79,7 @@ def test_two_root_elements_invalid():
     assert violation["test"]
     assert violation["suggestion"]
 
+
 def test_no_closing_tag_invalid():
     name = "My Invoice"
     format = "xml"
@@ -115,7 +118,7 @@ def test_wrong_nesting_invalid():
     data = VALID_INVOICE_TEXT
 
     data = remove_part_of_string(data, 11512, 11530)
-    data = append_to_string(data, """</cac:InvoiceLine>""") 
+    data = append_to_string(data, """</cac:InvoiceLine>""")
     wellformed_evaluation = report_wellformedness_v1(name, format, source, data)
 
     # We expect exactly 1 rule to fail due to having no closing tag in the corresponding nest
@@ -169,37 +172,6 @@ def test_no_escape_for_special_char_invalid():
     assert violation["suggestion"]
 
 
-    # Tag opens in a nest but closes outside
-def test_no_escape_for_special_char_invalid():
-    name = "My Invoice"
-    format = "xml"
-    source = "text"
-    data = VALID_INVOICE_TEXT
-
-    data = replace_part_of_string(data, 499, 500, "<")
-    wellformed_evaluation = report_wellformedness_v1(name, format, source, data)
-
-    # We expect exactly 1 rule to fail due to not escaping a special character
-    assert wellformed_evaluation["num_rules_failed"] == 1
-
-    # We expect exactly 1 violation due to the special character
-    assert wellformed_evaluation["num_violations"] == 1
-
-    # Thus there should be exactly 1 violation in the violation list
-    assert len(wellformed_evaluation["violations"]) == 1
-
-    violation = wellformed_evaluation["violations"][0]
-
-    # Check that the violation is for the correct rule and is flagged as fatal
-    assert violation["rule_id"] == "errorName" # need to find correct rule_id
-    assert violation["is_fatal"] == True
-
-    # Check that the violation has a non-empty message, test and suggestion
-    assert violation["message"]
-    assert violation["test"]
-    assert violation["suggestion"]
-
-
 def test_escape_special_char_valid():
     name = "My Invoice"
     format = "xml"
@@ -217,19 +189,3 @@ def test_escape_special_char_valid():
 
     # Thus there should've be any violation
     assert len(wellformed_evaluation["violations"]) == 0
-
-
-# Root element - closing tag + nesting - Ricardo
-# Attributes in quotes - currencyID="AUD" - currency + schemeID="HWB" - Ahona - remove the quotes and test
-# Case sensitive - Mohamad
-# declaration at the beginning- version has to be less than 2.1 - Ahona
-# escape xml special characters - Ricardo
-# <Invoice>\n\Hello World < <Invoice>
-
-# - Check failing and success case
-# do them all separately
-# DO failing and success test in each case
-
-# 5 errors
-# 1 2 3 4 5
-# 1 st error + terminates
