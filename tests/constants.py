@@ -385,3 +385,6 @@ VALID_INVOICE_TEXT = """<?xml version="1.0" encoding="UTF-8"?>
 
 </Invoice>"""
 
+CAC = "{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}"
+
+CBC = "{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}"

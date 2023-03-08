@@ -1,5 +1,6 @@
 from lxml import etree
 from io import StringIO, BytesIO
+from tests.constants import CAC, CBC
 
 def remove_part_of_string(string, start, end):
     '''
@@ -44,42 +45,31 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
         None
     
     Sample Calls:
-    invalidate_invoice(
-        data,
-        'tag', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CustomizationID',
-        '',
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}TEST1',
-        1
-    )
+    invalidate_invoice(data, 'tag', 'cbc:CustomizationID', '', 'cbc:TEST1', 1)
 
-    invalidate_invoice(
-        data,
-        'tag', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}InvoicePeriod', 
-        '',
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}TEST2',
-        1
-    )
+    invalidate_invoice(data, 'tag', 'cac:InvoicePeriod', '', 'cac:TEST2', 1)
 
-    invalidate_invoice(
-        data,
-        'content',
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CustomizationID',
-        '',
-        'Hello World!',
-        1
-    )
+    invalidate_invoice(data, 'content', 'cbc:CustomizationID', '', 'Hello World!', 1)
 
-    invalidate_invoice(
-        data,
-        'attrib', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}Amount', 
-        'currencyID',
-        'TEST',
-        1
-    )
+    invalidate_invoice(data, 'attrib', 'cbc:Amount', 'currencyID', 'TEST', 1)
     '''
+
+    tags = tag_name.split(':')
+    texts = text.split(':')
+
+    # Get the tag name
+    if tags[0] == 'cac':
+        tag_name = CAC + tags[1]
+    elif tags[0] == 'cbc':
+        tag_name = CBC + tags[1]
+    
+    # Get the text
+    if texts[0] == 'cac':
+        text = CAC + texts[1]
+    elif texts[0] == 'cbc':
+        text = CBC + texts[1]
+    else:
+        text = texts[0]
     
     root = etree.fromstring(invoice_text.encode('utf-8'))
 
