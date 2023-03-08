@@ -16,7 +16,17 @@ def report_schema_v1(name, format, source, data) -> Dict:
     return {}
 
 def report_syntax_v1(name, format, source, data) -> Dict:
-    return {}
+    if source == "file":
+        with open(data, 'r') as f:
+            data = f.read()
+    elif source == "url":
+        response = requests.get(data)
+        if response.status_code != 200:
+            raise Exception("Could not retrieve file from url")
+
+        data = response.text
+    
+    return generate_xslt_evaluation("syntax", data, "src/validation_artefacts/AUNZ-UBL-validation.xslt")
 
 def report_peppol_v1(name, format, source, data) -> Dict:
     if source == "file":
@@ -29,7 +39,7 @@ def report_peppol_v1(name, format, source, data) -> Dict:
 
         data = response.text
     
-    return generate_xslt_evaluation(data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
+    return generate_xslt_evaluation("peppol", data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
 
 def report_get_v1(report_id) -> Dict:
     return {}
@@ -60,7 +70,7 @@ def report_bulk_export_v1(report_ids, report_format) -> Dict:
 
 # Helper functions
 
-def generate_xslt_evaluation(invoice_text, xslt_path) -> Dict:
+def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Dict:
     with PySaxonProcessor(license=False) as proc:
         
         print(xslt_path)
@@ -122,7 +132,7 @@ def generate_xslt_evaluation(invoice_text, xslt_path) -> Dict:
                 })
         
         result =  {
-            "aspect": "peppol",
+            "aspect": aspect,
             "is_valid": is_valid,
             "num_rules_fired": len(output),
             "num_rules_failed": len(rules_failed),
