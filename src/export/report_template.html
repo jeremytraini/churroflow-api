@@ -5,68 +5,214 @@
     <title>Invoice Validation</title>
     <style>
         body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        .main {
             font-family: sans-serif;
             width: 21cm;
-            height: 29.7cm;
-            /* margin: 30mm 45mm 30mm 45mm;  */
-            margin: 0;
-            border: 1px solid black;
+            /* height: 29.7cm; */
+            margin: 30mm auto 30mm auto;
+            padding: 0;
+            /* border: 1px solid black; */
         }
         h1 {
             font-size: 2em;
             font-weight: bold;
+            text-align: center;
         }
         h2 {
             font-size: 1.5em;
             font-weight: bold;
         }
-        .overview {
-            width: 400px;
-            margin: 0 auto;
-            border: 1px solid black;
-            padding: 10px;
+        .card {
+            border: #e6e6e6 1px solid;
+            border-radius: 10px;
+            padding: 0 20px 40px 20px;
+            margin: 10px;
         }
-        .titles {
-            float: left;
+
+        #overview tr {
+            height: 35px;
+        }
+
+        #overview td {
+            padding: 0 10px 0 5px;
+        }
+
+        .overview h2 {
+            width: 100%;
+        }
+
+        .title {
             text-align: right;
-            padding-right: 15px;
-            width: 160px;
+            font-weight: bold;
+        }
+        .values {
+            text-align: left;
+            width: 200px;
+        }
+        .status {
+            color: white;
+            padding: 4px;
+            margin: 2px;
+            border-radius: 3px;
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+        }
+        #fail {
+            background-color: #ff4242;
+        }
+
+        #success {
+            background-color: #56cb32;
+        }
+
+        img {
+            width: 30px;
+            height: 30px;
+            padding-right: 10px;
+        }
+
+        .violation {
+            padding: 10px;
+            margin: 0 auto;
+            display: flex;
+            border: #ff4242 1px solid;
+            border-radius: 10px;
+        }
+
+        .no-violation {
+            width: 500px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .evaluation {
+
+        }
+
+        pre code {
+            background-color: #f3f3f3;
+            border: 0.5px solid #000000;
+            border-radius: 4px;
+            display: inline-block;
+            white-space: normal;
+            overflow-wrap: break-word;
+            width: 200px;
+            padding: 5px;
+            margin: 0;
         }
     </style>
 </head>
 <body>
-    <h1>Invoice Validation Report</h1>
-    <h2>Overview</h2>
-    <div class="overview">
-        <div class="titles">
-            <p>Invoice Number:</p>
-            <p>Invoice Date:</p>
-            <p>Invoice Total:</p>
-            <p>Invoice Currency:</p>
-            <p>Invoice Supplier:</p>
-            <p>Invoice Customer:</p>
+    <div class="main">
+        <h1>Invoice Validation Report</h1>
+        <div class="card">
+            <h2>Overview</h2>
+            <table id="overview">
+                <tr>
+                    <td class="title">Invoice name:</td>
+                    <td>123456</td>
+                </tr>
+                <tr>
+                    <td class="title">Generation Date:</td>
+                    <td>2018-01-01</td>
+                </tr>
+                <tr>
+                    <td class="title">Validation Score:</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <td class="title">Invoice Hash:</td>
+                    <td>EUIBEBFIE75565IEFEFE</td>
+                </tr>
+                <tr>
+                    <td class="title">Total Violations:</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td class="title">Total Warnings:</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td class="title">Total Fatal Violations:</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <td class="title">Result:</td>
+                    <td><p class="status" id="success">VALID</p></td>
+                    <!-- <p class="status" id="fail">INVALID</p> -->
+                </tr>
+            </table>
         </div>
-        <div class="values">
-            <p>123456</p>
-            <p>2018-01-01</p>
-            <p>100.00</p>
-            <p>AUD</p>
-            <p>Supplier Name</p>
-            <p>Customer Name</p>
+        <div class="evaluation card">
+            <h2>Wellformedness Evaluation</h2>
+            <p>An evaluation of the wellformedness of the given invoice</p>
+            <div class="no-violation">
+                <img src="https://img.icons8.com/color/48/000000/ok.png" alt="ok">
+                <h3>No violations found</h3>
+            </div>
         </div>
         
+        <div class="evaluation card">
+            <h2>Schema Evaluation</h2>
+            <p>An evaluation of the schema of the given invoice</p>
+            <div class="no-violation">
+                <img src="https://img.icons8.com/color/48/000000/ok.png" alt="ok">
+                <h3>No violations found</h3>
+            </div>
+        </div>
+
+        <div class="evaluation card">
+            <h2>Syntax Evaluation</h2>
+            <p>An evaluation of the syntax of the given invoice</p>
+            <div class="no-violation">
+                <img src="https://img.icons8.com/color/48/000000/ok.png" alt="ok">
+                <h3>No violations found</h3>
+            </div>
+        </div>
+
+        <div class="evaluation card">
+            <h2>PEPPOL Evaluation</h2>
+            <p>An evaluation of the PEPPOL of the given invoice</p>
+        
+            <div class="violation">
+                <img src="https://img.icons8.com/color/48/000000/error.png" alt="warning">
+                <img src="https://img.icons8.com/color/48/000000/cancel.png" alt="fatal">
+                <div class="vinfo">
+                    <h3>{Rule ID}</h3>
+                    <p>Description:</p>
+                    <p>Severity:</p>
+                    <p>Test failed:</p>
+                    <p>Location:</p>
+                    <p>Offending excerpt:</p>
+                </div>
+                <div class="vvals">
+                    <pre>
+                        <code>
+&lt;cbc:PriceAmount currencyID=&quot;AUD&quot;&gt;29.99&lt;/cbc:PriceAmount&gt;
+                        </code>
+                    </pre>
+                    <pre>
+                        <code>
+/*:Invoice[namespace-uri()='urn:oasis:names:specification:ubl:schema:xsd:Invoice-2'][1]/*:TaxRepresentativeParty[namespace-uri()='urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'][1]
+                        </code>
+                    </pre>
+                    
+                </div>
+            </div>
+        
+            <div class="no-violation">
+                <img src="https://img.icons8.com/color/48/000000/ok.png" alt="ok">
+                <h3>No violations found</h3>
+            </div>
+        </div>
     </div>
-    <h2>Wellformedness Evaluation</h2>
-    <p>An evaluation of the wellformedness of the given invoice</p>
-
-    <h2>Schema Evaluation</h2>
-    <p>An evaluation of the schema of the given invoice</p>
-
-    <h2>Syntax Evaluation</h2>
-    <p>An evaluation of the syntax of the given invoice</p>
-
-    <h2>PEPPOL Evaluation</h2>
-    <p>An evaluation of the PEPPOL of the given invoice</p>
 </body>
 </html>
 
