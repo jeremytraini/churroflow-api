@@ -3,16 +3,16 @@ from saxonche import PySaxonProcessor
 from tempfile import NamedTemporaryFile
 import requests
 
-def report_json_report_v1(invoice) -> Dict:
+def report_json_report_v1(name, format, source, data) -> Dict:
     return {}
 
-def report_visual_report_v1(invoice, format) -> Dict:
+def report_visual_report_v1(name, format, source, data, report_format) -> Dict:
     return {}
 
-def report_wellformedness_v1(invoice) -> Dict:
+def report_wellformedness_v1(name, format, source, data) -> Dict:
     return {}
 
-def report_schema_v1(invoice) -> Dict:
+def report_schema_v1(name, format, source, data) -> Dict:
     return {}
 
 def report_syntax_v1(name, format, source, data) -> Dict:
