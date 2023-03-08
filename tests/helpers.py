@@ -23,7 +23,7 @@ def remove_part_of_string(string, start, end):
     
     return string[:start] + string[end:]
 
-def invalidate_invoice(invoice_text, choice, tag_name, text, index):
+def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index):
     '''
     Invalidating the given invoice by changing either the tag or the content into a new text.
     Changes the index-th tag or content that matches the tag_name.
@@ -33,6 +33,7 @@ def invalidate_invoice(invoice_text, choice, tag_name, text, index):
         invoice_text (str) - The invoice text
         choice (str) - Choice whether the user wants to replace the tag or the content
         tag_name (str) - The tag that we want to change
+        attrib_name(str) - The attribute name that we want to change, only used if the choice is 'attrib'
         text (str) - The replacement text for either the tag or the content 
         index (int) - Which tag to be replaced
 
@@ -46,7 +47,8 @@ def invalidate_invoice(invoice_text, choice, tag_name, text, index):
     invalidate_invoice(
         data,
         'tag', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CustomizationID', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CustomizationID',
+        '',
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}TEST1',
         1
     )
@@ -55,6 +57,7 @@ def invalidate_invoice(invoice_text, choice, tag_name, text, index):
         data,
         'tag', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}InvoicePeriod', 
+        '',
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}TEST2',
         1
     )
@@ -63,16 +66,18 @@ def invalidate_invoice(invoice_text, choice, tag_name, text, index):
         data,
         'content',
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}CustomizationID',
+        '',
         'Hello World!',
         1
     )
 
     invalidate_invoice(
         data,
-        'tag', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}ID', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}TEST1',
-        2
+        'attrib', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}Amount', 
+        'currencyID',
+        'TEST',
+        1
     )
     '''
     
@@ -88,6 +93,10 @@ def invalidate_invoice(invoice_text, choice, tag_name, text, index):
                 index -= 1
                 if index == 0:
                     elem.text = text
+            elif choice == 'attrib' and elem.tag == tag_name:
+                index -= 1
+                if index == 0:
+                    elem.attrib[attrib_name] = text
         except AttributeError:
             pass
 
