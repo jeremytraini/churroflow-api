@@ -1,22 +1,18 @@
 from pydantic import BaseModel
-from typing import Literal
+from typing import Any, Dict, Literal
 
+Server_call_return = Dict[str, Any]
 class Invoice(BaseModel):
     name: str
     format: Literal["XML", "JSON", "HTML", "PDF"]
     source: Literal["url", "file_upload", "raw_data", "text"]
     data: str
 
-class LocationXpath(BaseModel):
-    type = "xpath"
+class Location(BaseModel):
+    type = Literal["xpath", "line"]
     xpath: str
-
-class LocationLine(BaseModel):
-    type = "line"
     line: int
     column: int
-
-Location = LocationXpath | LocationLine
 
 class Violation(BaseModel):
     rule_id: str
@@ -33,6 +29,7 @@ class Evaluation(BaseModel):
     num_rules_failed: int
     num_violations: int
     violations: list[Violation]
+
 
 class Report(BaseModel):
     report_id: int
