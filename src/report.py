@@ -69,7 +69,7 @@ def report_schemavalid_v1(invoice: Invoice) -> Evaluation:
     validator = Validator("src/classes/UBL-Invoice-2.1.xsd")
 
     # The directory with XML files
-    file_path = "src/AUInvoice_valid.xml"
+    file_path = "test/example_files/AUInvoice_valid.xml"
 
     if validator.validate(file_path):
         print('Valid! :)')
