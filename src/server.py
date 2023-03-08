@@ -6,10 +6,12 @@ from src.report import report_json_report_v1, report_visual_report_v1, report_we
     report_change_name_v1, report_delete_v1, report_bulk_generate_v1, report_bulk_export_v1
 from src.invoice import invoice_quick_fix_wellformedness_v1, invoice_quick_fix_syntax_v1, invoice_quick_fix_peppol_v1, \
     invoice_quick_fix_schema_v1, invoice_check_validity_v1, invoice_generate_hash_v1, invoice_bulk_quick_fix_v1
+from src.report import report_syntax_v1, report_peppol_v1
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from src.error import AuthenticationError, InputError
 import uvicorn
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -23,6 +25,13 @@ async def validation_exception_handler(request: Request, exc: Exception):
             "message": str(exc)
             },
     )
+
+
+class Invoice(BaseModel):
+    name: str
+    format: str
+    source: str
+    data: str
 
 
 # ENDPOINTS BELOW
@@ -48,12 +57,13 @@ async def report_schema(invoice):
     return report_schema_v1(invoice)
 
 @app.post("/report/syntax/v1")
-async def report_syntax(invoice):
-    return report_syntax_v1(invoice)
+async def report_syntax(invoice: Invoice):
+    return report_syntax_v1(invoice.name, invoice.format, invoice.source, invoice.data)
+
 
 @app.post("/report/peppol/v1")
-async def report_peppol(invoice):
-    return report_peppol_v1(invoice)
+async def report_peppol(invoice: Invoice):
+    return report_peppol_v1(invoice.name, invoice.format, invoice.source, invoice.data)
 
 @app.get("/report/get/v1")
 async def report_get(report_id):
@@ -114,6 +124,7 @@ async def invoice_bulk_quick_fix(invoices):
 @app.get("/report/bulk_export/v1")
 async def report_bulk_export(report_ids, report_format):
     return report_bulk_export_v1(report_ids, report_format)
+
 
 # Samples below
 
