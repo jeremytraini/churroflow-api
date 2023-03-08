@@ -9,7 +9,7 @@ class Invoice(BaseModel):
     data: str
 
 class Location(BaseModel):
-    type = Literal["xpath", "line"]
+    type: Literal["xpath", "line"]
     xpath: str
     line: int
     column: int

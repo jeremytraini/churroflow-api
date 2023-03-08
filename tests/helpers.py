@@ -5,5 +5,8 @@
 def remove_part_of_string(string, start, end):
     return string[:start] + string[end:]
 
+def insert_into_string(string, start, insert):
+    return string[:start] + insert + string[start:]
+
 def replace_part_of_string(string, start, end, replace):
     return string[:start] + replace + string[end:]
