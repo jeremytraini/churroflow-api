@@ -30,6 +30,7 @@ jobs:
       run: |
         coverage report
         coverage html
+      coverage: '/TOTAL.*\s+(\d+%)$/'
       env:
         COVERAGE_REPORT: ${{ github.workspace }}/htmlcov/index.html
     # - name: Run pylint
