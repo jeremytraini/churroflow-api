@@ -40,7 +40,7 @@ class Report(BaseModel):
     invoice_hash: str
     is_valid: bool
     total_num_violations: int
-    wellformedness: Evaluation
-    schemaEvaluation: Evaluation
-    syntax: Evaluation
-    peppol: Evaluation
+    wellformedness: Evaluation | None
+    schemaEvaluation: Evaluation | None
+    syntax: Evaluation | None
+    peppol: Evaluation | None

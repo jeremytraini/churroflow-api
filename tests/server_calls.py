@@ -10,30 +10,34 @@ def health_check_v1():
     return json.loads(response.text)
 
 
-def report_peppol_v1(name, format, source, data) -> Server_call_return:
-    payload = {
-        "name": name,
-        "format": format,
-        "source": source,
-        "data": data
-    }
-    response = requests.post(full_url + 'report/peppol/v1', json=payload)
-
-    return json.loads(response.text)
-
-
 def report_wellformedness_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()
     response = requests.post(full_url + 'report/wellformedness/v1', json=payload)
-
+    
     return json.loads(response.text)
 
 
 def report_schemavalid_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()
-    response = requests.post(full_url + 'report/schemavalid/v1', json=payload)
+    response = requests.post(full_url + 'report/schema/v1', json=payload)
 
     return json.loads(response.text)
+
+
+def report_syntax_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
+    response = requests.post(full_url + 'report/syntax/v1', json=payload)
+
+    return json.loads(response.text)
+
+
+def report_peppol_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
+    response = requests.post(full_url + 'report/peppol/v1', json=payload)
+
+    return json.loads(response.text)
+
+
 # Sample calls below
 
 def sample_post(val):

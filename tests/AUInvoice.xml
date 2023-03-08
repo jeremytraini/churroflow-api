@@ -1,5 +1,4 @@
-
-VALID_INVOICE_TEXT = """<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
     xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
     xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
@@ -19,7 +18,7 @@ VALID_INVOICE_TEXT = """<?xml version="1.0" encoding="UTF-8"?>
     </cac:InvoicePeriod>
     <cac:OrderReference>
        <cbc:ID>PurchaseOrderReference</cbc:ID>
-       <cbc:SalesOrderID>12345678</cbc:SalesOrderID>
+		<cbc:SalesOrderID>12345678</cbc:SalesOrderID>
     </cac:OrderReference>
     <cac:BillingReference>
        <cac:InvoiceDocumentReference>
@@ -383,5 +382,4 @@ VALID_INVOICE_TEXT = """<?xml version="1.0" encoding="UTF-8"?>
     </cac:InvoiceLine>
 
 
-</Invoice>"""
-
+</Invoice>
