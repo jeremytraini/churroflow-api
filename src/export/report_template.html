@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice Validation</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            width: 21cm;
+            height: 29.7cm;
+            /* margin: 30mm 45mm 30mm 45mm;  */
+            margin: 0;
+            border: 1px solid black;
+        }
+        h1 {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .overview {
+            width: 400px;
+            margin: 0 auto;
+            border: 1px solid black;
+            padding: 10px;
+        }
+        .titles {
+            float: left;
+            text-align: right;
+            padding-right: 15px;
+            width: 160px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Invoice Validation Report</h1>
+    <h2>Overview</h2>
+    <div class="overview">
+        <div class="titles">
+            <p>Invoice Number:</p>
+            <p>Invoice Date:</p>
+            <p>Invoice Total:</p>
+            <p>Invoice Currency:</p>
+            <p>Invoice Supplier:</p>
+            <p>Invoice Customer:</p>
+        </div>
+        <div class="values">
+            <p>123456</p>
+            <p>2018-01-01</p>
+            <p>100.00</p>
+            <p>AUD</p>
+            <p>Supplier Name</p>
+            <p>Customer Name</p>
+        </div>
+        
+    </div>
+    <h2>Wellformedness Evaluation</h2>
+    <p>An evaluation of the wellformedness of the given invoice</p>
+
+    <h2>Schema Evaluation</h2>
+    <p>An evaluation of the schema of the given invoice</p>
+
+    <h2>Syntax Evaluation</h2>
+    <p>An evaluation of the syntax of the given invoice</p>
+
+    <h2>PEPPOL Evaluation</h2>
+    <p>An evaluation of the PEPPOL of the given invoice</p>
+</body>
+</html>
+
+
+
+
+
