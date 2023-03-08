@@ -44,6 +44,7 @@ def test_peppol_single_volation():
         data,
         'content', 
         '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        '',
         'Not an ABN',
         1
     )
@@ -92,14 +93,16 @@ def test_peppol_multiple_violations_same_rule():
     data = invalidate_invoice(
         data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID',  
+        '',
         'Not an ABN 1',
         1
     )
     data = invalidate_invoice(
         data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID',  
+        '',
         'Not an ABN 2',
         2
     )
@@ -135,14 +138,16 @@ def test_peppol_multiple_violations_different_rules():
     data = invalidate_invoice(
         data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID',  
+        '',
         'Not an ABN 1',
         1
     )
     data = invalidate_invoice(
         data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID',  
+        '',
         'Not an ABN 2',
         2
     )
@@ -151,14 +156,16 @@ def test_peppol_multiple_violations_different_rules():
     data = invalidate_invoice(
         data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate',  
+        '',
         'bad-date',
         1
     )
     data = invalidate_invoice(
         data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate',  
+        '',
         'bad-date',
         2
     )
@@ -201,7 +208,8 @@ def test_peppol_warning_doesnt_invalidate_report():
     data = invalidate_invoice(
         data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID',  
+        '',
         'Not an ABN 1',
         1
     )
@@ -226,7 +234,8 @@ def test_peppol_fatal_error_invalidates_report():
     data = invalidate_invoice(
         data,
         'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
+        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate',  
+        '',
         'bad-date',
         1
     )
