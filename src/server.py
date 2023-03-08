@@ -35,7 +35,7 @@ async def report_syntax(name: str = "My Invoice",
                         format: str = "xml",
                         source: str = "text",
                         data: str = ""):
-    return report_syntax_v1()
+    return report_syntax_v1(name, format, source, data)
 
 
 @app.post("/report/peppol/v1")
@@ -52,11 +52,8 @@ async def report_wellformedness(invoice: Invoice) -> Evaluation:
 
 
 @app.post("/report/schemavalid/v1")
-async def report_schemavalid(name: str = "My Invoice",
-                        format: str = "xml",
-                        source: str = "text",
-                        data: str = ""):
-    return report_schemavalid_v1(name, format, source, data)
+async def report_schemavalid(invoice: Invoice):
+    return report_schemavalid_v1(invoice)
 
 # Samples below
 
