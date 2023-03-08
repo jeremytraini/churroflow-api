@@ -1,4 +1,4 @@
-from src.types import Invoice, LocationLine, LocationXpath
+from src.types import *
 from tests.server_calls import report_wellformedness_v1
 from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import remove_part_of_string, replace_part_of_string
@@ -18,7 +18,9 @@ def test_wellformed_valid_invoice():
     # Invalidating the ABN
     data = remove_part_of_string(data, 11554, 11555)
 
-    wellformed_evaluation = report_wellformedness_v1(name, format, source, data)
+    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+
+    wellformed_evaluation = report_wellformedness_v1(invoice)
 
     # We expect exactly 1 rule to fail due to the invalid ABN
     assert wellformed_evaluation["num_rules_failed"] == 1
@@ -55,7 +57,8 @@ def test_wellformed_case_sensitive_tags_invalid():
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
-
+    wellformed_evaluation = Evaluation(**wellformed_evaluation)
+    
     assert wellformed_evaluation.aspect == "wellformedness"
 
     # We expect exactly 1 rule to fail due to the capitalised tag
@@ -68,7 +71,6 @@ def test_wellformed_case_sensitive_tags_invalid():
     assert len(wellformed_evaluation.violations) == 1
 
     violation = wellformed_evaluation.violations[0]
-
     # Check that the violation is flagged as fatal
     assert violation.is_fatal
 
@@ -76,14 +78,12 @@ def test_wellformed_case_sensitive_tags_invalid():
     assert violation.message
     assert violation.test
     assert violation.suggestion
-
-    location = LocationLine(violation.location)
     
-    assert location.type == "line"
+    assert violation.location.type == "line"
 
     # Check that the location line/column are were the violation is
-    assert location.line == 1
-    assert location.column == 2256
+    assert violation.location.line == 1
+    assert violation.location.column == 2256
 
 def test_wellformed_case_sensitive_tags_valid():
     # Replacing both tags so that they still match
@@ -93,7 +93,7 @@ def test_wellformed_case_sensitive_tags_valid():
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
-
+    wellformed_evaluation = Evaluation(**wellformed_evaluation)
     # We expect 0 rules to fail as it should be wellformed
     assert wellformed_evaluation.num_rules_failed == 0
 
