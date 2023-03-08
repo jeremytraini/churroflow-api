@@ -28,20 +28,20 @@ async def health_check():
     return health_check_v1()
 
 @app.post("/report/json_report/v1")
-async def report_json_report(invoice) -> Report:
+async def report_json_report(invoice: Invoice) -> Report:
     return report_json_report_v1(invoice)
 
 # TODO: return type
 @app.post("/report/visual_report/v1")
-async def report_visual_report(invoice, format):
+async def report_visual_report(invoice: Invoice, format):
     return report_visual_report_v1(invoice, format)
 
 @app.post("/report/wellformedness/v1")
-async def report_wellformedness(invoice) -> Evaluation:
+async def report_wellformedness(invoice: Invoice) -> Evaluation:
     return report_wellformedness_v1(invoice)
 
 @app.post("/report/schema/v1")
-async def report_schema(invoice) -> Evaluation:
+async def report_schema(invoice: Invoice) -> Evaluation:
     return report_schema_v1(invoice)
 
 @app.post("/report/syntax/v1")
@@ -56,71 +56,76 @@ async def report_peppol(invoice: Invoice) -> Evaluation:
 async def report_schemavalid(invoice: Invoice) -> Evaluation:
     return report_schemavalid_v1(invoice)
 
+# TODO: input type
 @app.get("/report/get/v1")
 async def report_get(report_id) -> Report:
     return report_get_v1(report_id)
 
+# TODO: input type
 @app.get("/report/list_all/v1")
 async def report_list_all(order_by) -> list[Report]:
     return report_list_all_v1(order_by)
 
+# TODO: input type
 @app.get("/report/list_score/v1")
 async def report_list_score(score, order_by) -> list[Report]:
     return report_list_score_v1(score, order_by)
 
-# TODO: return type
+# TODO: input and return type
 @app.get("/report/export/v1")
 async def report_export(report_id, report_format):
     return report_export_v1(report_id, report_format)
 
+# TODO: input type
 @app.put("/report/change_name/v1")
 async def report_change_name(report_id, new_name) -> Dict[None, None]:
     return report_change_name_v1(report_id, new_name)
 
+# TODO: input type
 @app.delete("/report/delete/v1")
 async def report_delete(report_id) -> Dict[None, None]:
     return report_delete_v1(report_id)
 
-# TODO: return type
+# TODO: input and return type
 @app.get("/invoice/quick_fix_wellformedness/v1")
 async def invoice_quick_fix_wellformedness(report_id):
     return invoice_quick_fix_wellformedness_v1(report_id)
 
-# TODO: return type
+# TODO: input and return type
 @app.get("/invoice/quick_fix_syntax/v1")
 async def invoice_quick_fix_syntax(report_id):
     return invoice_quick_fix_syntax_v1(report_id)
 
-# TODO: return type
+# TODO: input and return type
 @app.get("/invoice/quick_fix_peppol/v1")
 async def invoice_quick_fix_peppol(report_id):
     return invoice_quick_fix_peppol_v1(report_id)
 
-# TODO: return type
+# TODO:input and  return type
 @app.get("/invoice/quick_fix_schema/v1")
 async def invoice_quick_fix_schema(report_id):
     return invoice_quick_fix_schema_v1(report_id)
 
-# TODO: return type
+# TODO: input and return type
 @app.get("/invoice/check_validity/v1")
 async def invoice_check_validity(report_id):
     return invoice_check_validity_v1(report_id)
 
 # TODO: return type
 @app.post("/invoice/generate_hash/v1")
-async def invoice_generate_hash(invoice):
+async def invoice_generate_hash(invoice: Invoice):
     return invoice_generate_hash_v1(invoice)
 
 # TODO: return type
 @app.post("/report/bulk_generate/v1")
-async def report_bulk_generate(invoices):
+async def report_bulk_generate(invoices: list[Invoice]):
     return report_bulk_generate_v1(invoices)
 
 @app.get("/invoice/bulk_quick_fix/v1")
-async def invoice_bulk_quick_fix(invoices) -> list[Invoice]:
+async def invoice_bulk_quick_fix(invoices: list[Invoice]) -> list[Invoice]:
     return invoice_bulk_quick_fix_v1(invoices)
 
-# TODO: return type
+# TODO: input and return type
 @app.get("/report/bulk_export/v1")
 async def report_bulk_export(report_ids, report_format):
     return report_bulk_export_v1(report_ids, report_format)

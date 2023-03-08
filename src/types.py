@@ -10,9 +10,9 @@ class Invoice(BaseModel):
 
 class Location(BaseModel):
     type: Literal["xpath", "line"]
-    xpath: str
-    line: int
-    column: int
+    xpath: str | None
+    line: int | None
+    column: int | None
 
 class Violation(BaseModel):
     rule_id: str

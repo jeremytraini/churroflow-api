@@ -53,8 +53,8 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
         aspect="wellformedness",
         is_valid=True,
         num_rules_fired=0,
-        num_rules_failed=1,
-        num_violations=1,
+        num_rules_failed=0,
+        num_violations=0,
         violations=[]
     )
     # model of evaluation with one violation
