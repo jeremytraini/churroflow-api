@@ -32,13 +32,6 @@ jobs:
         coverage html
       env:
         COVERAGE_REPORT: ${{ github.workspace }}/htmlcov/index.html
-      if: always()
-      run: echo "coverage-report=$COVERAGE_REPORT" >>$GITHUB_OUTPUT
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v3
-      with:
-        name: coverage-report
-        path: ${{ steps.pytest.outputs.coverage-report }}
     # - name: Run pylint
     #   run: |
     #     find . -type f -name "*.py" | egrep -v ".git/*" | xargs pylint
