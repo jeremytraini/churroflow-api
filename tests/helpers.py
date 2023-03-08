@@ -1,5 +1,3 @@
-
-
 # Used to invalidate invoice
 # To be replaced with Denzel's better function
 def remove_part_of_string(string, start, end):
@@ -10,3 +8,6 @@ def insert_into_string(string, start, insert):
 
 def replace_part_of_string(string, start, end, replace):
     return string[:start] + replace + string[end:]
+
+def append_to_string(string, txt):
+    return string + txt
