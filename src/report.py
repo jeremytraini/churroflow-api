@@ -3,6 +3,62 @@ from saxonche import PySaxonProcessor
 from tempfile import NamedTemporaryFile
 import requests
 
+def report_json_report_v1(name, format, source, data) -> Dict:
+    return {}
+
+def report_visual_report_v1(name, format, source, data, report_format) -> Dict:
+    return {}
+
+def report_wellformedness_v1(name, format, source, data) -> Dict:
+    return {}
+
+def report_schema_v1(name, format, source, data) -> Dict:
+    return {}
+
+def report_syntax_v1(name, format, source, data) -> Dict:
+    return {}
+
+def report_peppol_v1(name, format, source, data) -> Dict:
+    if source == "file":
+        with open(data, 'r') as f:
+            data = f.read()
+    elif source == "url":
+        response = requests.get(data)
+        if response.status_code != 200:
+            raise Exception("Could not retrieve file from url")
+
+        data = response.text
+    
+    return generate_xslt_evaluation(data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
+
+def report_get_v1(report_id) -> Dict:
+    return {}
+
+def report_list_all_v1(order_by) -> Dict:
+    return {}
+
+def report_list_score_v1(score, order_by) -> Dict:
+    return {}
+
+def report_export_v1(report_id, report_format) -> Dict:
+    return {}
+
+def report_change_name_v1(report_id, new_name) -> Dict:
+    return {}
+
+def report_delete_v1(report_id) -> Dict:
+    return {}
+
+def report_bulk_generate_v1(invoices) -> Dict:
+    return {}
+
+def report_bulk_export_v1(report_ids, report_format) -> Dict:
+    return {}
+
+def report_bulk_export_v1(report_ids, report_format) -> Dict:
+    return {}
+
+# Helper functions
 
 def generate_xslt_evaluation(invoice_text, xslt_path) -> Dict:
     with PySaxonProcessor(license=False) as proc:
@@ -75,24 +131,3 @@ def generate_xslt_evaluation(invoice_text, xslt_path) -> Dict:
         }
         
         return result
-
-
-# Syntax report stub
-def report_syntax_v1(name, format, source, data) -> Dict:
-    return {}
-
-
-def report_peppol_v1(name, format, source, data) -> Dict:
-    if source == "file":
-        with open(data, 'r') as f:
-            data = f.read()
-    elif source == "url":
-        response = requests.get(data)
-        if response.status_code != 200:
-            raise Exception("Could not retrieve file from url")
-
-        data = response.text
-    
-    return generate_xslt_evaluation(data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
-        
-    
