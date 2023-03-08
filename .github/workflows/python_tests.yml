@@ -25,6 +25,7 @@ jobs:
         pytest tests/
         kill $serverPID
         cat $SERVER_LOG
+        sleep 3
     - name: Generate coverage report
       run: |
         coverage report
