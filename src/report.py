@@ -26,7 +26,6 @@ def report_json_report_v1(invoice: Invoice) -> Report:
 def report_visual_report_v1(invoice: Invoice, format: Format) -> Dict:
     return {}
 
-# wellformedness report stub
 def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
     evaluation = Evaluation(
         aspect="wellformedness",
@@ -36,19 +35,8 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
         num_violations=0,
         violations=[]
     )
-    if invoice.source == "file":
-        with open(invoice.data, 'r') as f:
-            data = f.read()
-    elif invoice.source == "url":
-        response = requests.get(invoice.data)
-        if response.status_code != 200:
-            raise Exception("Could not retrieve file from url")
 
-        data = response.text
-    elif invoice.source == "text":
-        data = invoice.data
-    else:
-        raise Exception("Invalid Source")
+    data = extract_data_from_invoice(invoice)
 
     try:
         etree.fromstring(data.encode("utf-8"), parser=None)
@@ -72,7 +60,6 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
 
     return evaluation
 
-# schema report stub
 def report_schema_v1(invoice: Invoice) -> Evaluation:
     evaluation = Evaluation(
         aspect="schema",
@@ -82,51 +69,53 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
         num_violations=0,
         violations=[]
     )
-    validator = Validator("src/validation_artefacts/UBL-Invoice-2.1.xsd")
-
-    # The directory with XML files
-    file_path = "test/example_files/AUInvoice_valid.xml"
     
-    if validator.validate(file_path):
-        print('Valid! :)')
-    else:
-        evaluation.is_valid = False
+    data = extract_data_from_invoice(invoice)
+
+    # TODO: can probably do this outside the function so that it isn't repeated
+    # Parse the XSD file
+    xsd_doc = etree.parse("src/xsd/maindoc/UBL-Invoice-2.1.xsd", parser=None)
+    xsd = etree.XMLSchema(xsd_doc)
+    # Parse the XML data
+    xml_doc = etree.fromstring(data.encode("utf-8"), parser=None)
+
+    # Validate the XML against the XSD schema
+    is_valid = xsd.validate(xml_doc)
+    print(is_valid)
+    if not is_valid:
         print('Not valid! :(')
+        evaluation.is_valid = False
+        errors = []
+        for error in xsd.error_log:
+            errors.append(error)
+            evaluation.violations.append(
+                Violation(
+                    rule_id="wellformedness",
+                    is_fatal=True,
+                    location=Location(
+                        type="line",
+                        line=error.lineno,
+                        column=error.offset
+                    ),
+                    test="",
+                    message=error.msg,
+                    suggestion="suggestion"
+                )
+            )
+            evaluation.num_rules_failed += not (error in errors)
+            print(error.message)
+            print()
+    
+    evaluation.num_violations = len(evaluation.violations)
+    
     return evaluation
 
-# Syntax report stub
 def report_syntax_v1(invoice: Invoice) -> Evaluation:
-    if invoice.source == "file":
-        with open(invoice.data, 'r') as f:
-            data = f.read()
-    elif invoice.source == "url":
-        response = requests.get(invoice.data)
-        if response.status_code != 200:
-            raise Exception("Could not retrieve file from url")
-
-        data = response.text
-    elif invoice.source == "text":
-        data = invoice.data
-    else:
-        raise Exception("Invalid Source")
-    
+    data = extract_data_from_invoice(invoice)
     return generate_xslt_evaluation("syntax", data, "src/validation_artefacts/AUNZ-UBL-validation.xslt")
 
 def report_peppol_v1(invoice: Invoice) -> Evaluation:
-    if invoice.source == "file":
-        with open(invoice.data, 'r') as f:
-            data = f.read()
-    elif invoice.source == "url":
-        response = requests.get(invoice.data)
-        if response.status_code != 200:
-            raise Exception("Could not retrieve file from url")
-
-        data = response.text
-    elif invoice.source == "text":
-        data = invoice.data
-    else:
-        raise Exception("Invalid Source")
-    
+    data = extract_data_from_invoice(invoice)
     return generate_xslt_evaluation("peppol", data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
 
 def report_get_v1(report_id: int) -> Report:
@@ -146,7 +135,7 @@ def report_get_v1(report_id: int) -> Report:
     )
     return report
 
-# TODO: test
+# TODO: test order_by parsing
 def report_list_all_v1(order_by: str) -> List[Report]:
     (order, asc) = order_by.split(" ")
     print(order)
@@ -292,3 +281,20 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Evaluation:
         )
         
         return result
+
+def extract_data_from_invoice(invoice: Invoice) -> str:
+    if invoice.source == "file":
+        with open(invoice.data, 'r') as f:
+            data = f.read()
+    elif invoice.source == "url":
+        response = requests.get(invoice.data)
+        if response.status_code != 200:
+            raise Exception("Could not retrieve file from url")
+
+        data = response.text
+    elif invoice.source == "text":
+        data = invoice.data
+    else:
+        raise Exception("Invalid Source")
+
+    return data
