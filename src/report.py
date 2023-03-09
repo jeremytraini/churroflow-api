@@ -131,7 +131,7 @@ def report_get_v1(report_id: int) -> Report:
     return report
 
 # TODO: test
-def report_list_all_v1(order_by: str) -> list[Report]:
+def report_list_all_v1(order_by: str) -> List[Report]:
     (order, asc) = order_by.split(" ")
     print(order)
     print(asc)
@@ -152,7 +152,7 @@ def report_list_all_v1(order_by: str) -> list[Report]:
     reports = [report]
     return reports
 
-def report_list_score_v1(score: int, order_by: str) -> list[Report]:
+def report_list_score_v1(score: int, order_by: str) -> List[Report]:
     report = Report(
         report_id=0,
         score=0,
@@ -180,7 +180,7 @@ def report_change_name_v1(report_id: int, new_name: str) -> Dict[None, None]:
 def report_delete_v1(report_id: int) -> Dict[None, None]:
     return {}
 
-def report_bulk_generate_v1(invoices: list[Invoice]) -> list[Report]:
+def report_bulk_generate_v1(invoices: List[Invoice]) -> List[Report]:
     report = Report(
         report_id=0,
         score=0,
@@ -198,7 +198,7 @@ def report_bulk_generate_v1(invoices: list[Invoice]) -> list[Report]:
     reports = [report]
     return reports
 
-def report_bulk_export_v1(report_ids, report_format) -> list[ReportExport]:
+def report_bulk_export_v1(report_ids, report_format) -> List[ReportExport]:
     export = ReportExport(url="", invoice_hash="")
     exports = [export]
     return exports
