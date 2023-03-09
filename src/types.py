@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Any, Dict, Literal
+from typing import Any, Dict, Literal, Union
 
 Server_call_return = Dict[str, Any]
 
@@ -14,9 +14,9 @@ class Invoice(BaseModel):
 
 class Location(BaseModel):
     type: Literal["xpath", "line"]
-    xpath: str | None
-    line: int | None
-    column: int | None
+    xpath: Union[str, None]
+    line: Union[int, None]
+    column: Union[int, None]
 
 class Violation(BaseModel):
     rule_id: str
@@ -43,10 +43,10 @@ class Report(BaseModel):
     invoice_hash: str
     is_valid: bool
     total_num_violations: int
-    wellformedness: Evaluation | None
-    schemaEvaluation: Evaluation | None
-    syntax: Evaluation | None
-    peppol: Evaluation | None
+    wellformedness:  Union[Evaluation, None]
+    schemaEvaluation: Union[Evaluation, None]
+    syntax: Union[Evaluation, None]
+    peppol: Union[Evaluation, None]
 
 class ReportExport(BaseModel):
     url: str
