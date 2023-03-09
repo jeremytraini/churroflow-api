@@ -3,6 +3,19 @@ from saxonche import PySaxonProcessor
 from tempfile import NamedTemporaryFile
 import requests
 
+def invoice_preprocessor(name, format, source, data):
+    if source == "file":
+        with open(data, 'r') as f:
+            return f.read()
+    elif source == "url":
+        response = requests.get(data)
+        if response.status_code != 200:
+            raise Exception("Could not retrieve invoice from url")
+
+        return response.text
+    elif source == "text":
+        return data
+
 def report_json_report_v1(name, format, source, data) -> Dict:
     return {}
 
@@ -16,30 +29,14 @@ def report_schema_v1(name, format, source, data) -> Dict:
     return {}
 
 def report_syntax_v1(name, format, source, data) -> Dict:
-    if source == "file":
-        with open(data, 'r') as f:
-            data = f.read()
-    elif source == "url":
-        response = requests.get(data)
-        if response.status_code != 200:
-            raise Exception("Could not retrieve file from url")
-
-        data = response.text
+    invoice_text = invoice_preprocessor(name, format, source, data)
     
-    return generate_xslt_evaluation("syntax", data, "src/validation_artefacts/AUNZ-UBL-validation.xslt")
+    return generate_xslt_evaluation("syntax", invoice_text, "src/validation_artefacts/AUNZ-UBL-validation.xslt")
 
 def report_peppol_v1(name, format, source, data) -> Dict:
-    if source == "file":
-        with open(data, 'r') as f:
-            data = f.read()
-    elif source == "url":
-        response = requests.get(data)
-        if response.status_code != 200:
-            raise Exception("Could not retrieve file from url")
-
-        data = response.text
+    invoice_text = invoice_preprocessor(name, format, source, data)
     
-    return generate_xslt_evaluation("peppol", data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
+    return generate_xslt_evaluation("peppol", invoice_text, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
 
 def report_get_v1(report_id) -> Dict:
     return {}
