@@ -82,12 +82,12 @@
             font-weight: bold;
         }
 
-        #fail::before {
+        .fail::before {
             content: "INVALID";
             background-color: #f44336;
         }
 
-        #success::before {
+        .success::before {
             content: "VALID";
             background-color: #56cb32;
         }
@@ -180,36 +180,36 @@
             <h2>Overview</h2>
             <table id="overview">
                 <tr>
+                    <td class="title">Report ID:</td>
+                    <td id="id-value">123456</td>
+                </tr>
+                <tr>
                     <td class="title">Invoice name:</td>
-                    <td>123456</td>
+                    <td id="name-value">123456</td>
                 </tr>
                 <tr>
                     <td class="title">Generation Date:</td>
-                    <td>2018-01-01</td>
-                </tr>
-                <tr>
-                    <td class="title">Validation Score:</td>
-                    <td>100</td>
+                    <td id="gen-value">2018-01-01</td>
                 </tr>
                 <tr>
                     <td class="title">Invoice Hash:</td>
-                    <td>EUIBEBFIE75565IEFEFE</td>
+                    <td id="hash-value">EUIBEBFIE75565IEFEFE</td>
                 </tr>
                 <tr>
                     <td class="title">Total Violations:</td>
-                    <td>0</td>
+                    <td id="violations-value">0</td>
                 </tr>
                 <tr>
                     <td class="title">Total Warnings:</td>
-                    <td>0</td>
+                    <td id="warnings-value">0</td>
                 </tr>
                 <tr>
                     <td class="title">Total Fatal Violations:</td>
-                    <td>0</td>
+                    <td id="fatal-violations-value">0</td>
                 </tr>
                 <tr>
                     <td class="title">Result:</td>
-                    <td><p class="status" id="fail"></p></td>
+                    <td class="status fail" id="result"></td>
                 </tr>
             </table>
         </div>
@@ -236,47 +236,47 @@
 
 
         <!-- TEMPLATES -->
-        <div class="no-violation hide" id="no-violation">
+        <div class="no-violation hide" name="no-violation">
             <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48" width="48px" height="48px"><path fill="#4caf50" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"/><path fill="#ccff90" d="M34.602,14.602L21,28.199l-5.602-5.598l-2.797,2.797L21,33.801l16.398-16.402L34.602,14.602z"/></svg>
             <h3>No violations found</h3>
         </div>
 
-        <div class="no-violation hide" id="no-run">
+        <div class="no-violation hide" name="no-run">
             <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48" width="48px" height="48px"><path fill="#FCC419" d="M24,44C12.972,44,4,35.028,4,24S12.972,4,24,4s20,8.972,20,20S35.028,44,24,44z"/><path fill="#fff" d="M14,21h20v6H14V21z"/></svg>
             <h3>Tests could not be run</h3>
         </div>
 
-        <div class="violation error hide" id="failed-rule">
+        <div class="violation error hide" name="failed-rule">
             <div class="violation-header">
                 <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48" width="48px" height="48px"><path fill="#f44336" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"/><path fill="#fff" d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"/><path fill="#fff" d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"/></svg>
                 <!-- <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48" width="48px" height="48px"><path fill="#FFC107" d="M40,40H8c-0.717,0-1.377-0.383-1.734-1.004c-0.356-0.621-0.354-1.385,0.007-2.004l16-28C22.631,8.378,23.289,8,24,8s1.369,0.378,1.728,0.992l16,28c0.361,0.619,0.363,1.383,0.007,2.004S40.716,40,40,40z"/><path fill="#5D4037" d="M22,34.142c0-0.269,0.047-0.515,0.143-0.746c0.094-0.228,0.229-0.426,0.403-0.592c0.171-0.168,0.382-0.299,0.624-0.393c0.244-0.092,0.518-0.141,0.824-0.141c0.306,0,0.582,0.049,0.828,0.141c0.25,0.094,0.461,0.225,0.632,0.393c0.175,0.166,0.31,0.364,0.403,0.592C25.953,33.627,26,33.873,26,34.142c0,0.27-0.047,0.516-0.143,0.74c-0.094,0.225-0.229,0.419-0.403,0.588c-0.171,0.166-0.382,0.296-0.632,0.392C24.576,35.954,24.3,36,23.994,36c-0.307,0-0.58-0.046-0.824-0.139c-0.242-0.096-0.453-0.226-0.624-0.392c-0.175-0.169-0.31-0.363-0.403-0.588C22.047,34.657,22,34.411,22,34.142 M25.48,30h-2.973l-0.421-12H25.9L25.48,30z"/></svg> -->
-                <h3>FAILED RULE <span class="rule_id">PEPPOL-EN16931-CL007</span></h3>
+                <h3>FAILED RULE <span class="rule_id" name="rule_id">PEPPOL-EN16931-CL007</span></h3>
             </div>
             <table>
                 <tr>
                     <td class="title">Description:</td>
-                    <td>Business process MUST be in the format 'urn:fdc:peppol.eu:2017:poacc:billing:NN:1.0' where NN indicates the process number.</td>
+                    <td name="desc">Business process MUST be in the format 'urn:fdc:peppol.eu:2017:poacc:billing:NN:1.0' where NN indicates the process number.</td>
                 </tr>
                 <tr>
                     <td class="title">Severity:</td>
-                    <td>Fatal</td>
+                    <td name="severity">Fatal</td>
                 </tr>
                 <tr>
                     <td class="title">Test failed:</td>
                     <td>
-                        <pre><code>exists(cac:PartyTaxScheme[cac:TaxScheme/(normalize-space(upper-case(cbc:ID)) = 'GST')]/cbc:CompanyID)</code></pre>
+                        <pre><code name="test">exists(cac:PartyTaxScheme[cac:TaxScheme/(normalize-space(upper-case(cbc:ID)) = 'GST')]/cbc:CompanyID)</code></pre>
                     </td>
                 </tr>
                 <tr>
                     <td class="title">Location:</td>
                     <td>
-                        <pre><code>/*:Invoice[namespace-uri()='urn:oasis:names:specification:ubl:schema:xsd:Invoice-2'][1]/*:TaxRepresentativeParty[namespace-uri()='urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'][1]</code></pre>
+                        <pre><code name="location">/*:Invoice[namespace-uri()='urn:oasis:names:specification:ubl:schema:xsd:Invoice-2'][1]/*:TaxRepresentativeParty[namespace-uri()='urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'][1]</code></pre>
                     </td>
                 </tr>
                 <tr>
                     <td class="title">Excerpt:</td>
                     <td>
-                        <pre><code>&lt;cbc:PriceAmount currencyID=&quot;AUD&quot;&gt;29.99&lt;/cbc:PriceAmount&gt;</code></pre>
+                        <pre><code name="excerpt">&lt;cbc:PriceAmount currencyID=&quot;AUD&quot;&gt;29.99&lt;/cbc:PriceAmount&gt;</code></pre>
                     </td>
                 </tr>
             </table>
