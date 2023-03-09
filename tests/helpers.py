@@ -1,3 +1,4 @@
+from typing import Literal
 from lxml import etree
 from io import StringIO, BytesIO
 from tests.constants import CAC, CBC
@@ -34,7 +35,14 @@ def replace_part_of_string(string, start, end, replace):
 def append_to_string(string, txt):
     return string + txt
 
-def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index):
+def invalidate_invoice(
+        invoice_text: str,
+        choice: Literal["tag", "content", "attrib"],
+        tag_name: str,
+        attrib_name: str,
+        text: str,
+        index: int
+    ):
     '''
     Invalidating the given invoice by changing either the tag or the content into a new text.
     Changes the index-th tag or content that matches the tag_name.
@@ -81,7 +89,7 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
     else:
         text = texts[0]
     
-    root = etree.fromstring(invoice_text.encode('utf-8'))
+    root = etree.fromstring(invoice_text.encode('utf-8'), parser=None)
 
     for elem in root.getiterator():
         try:
