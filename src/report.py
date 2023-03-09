@@ -80,15 +80,17 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
 
 # Syntax report stub
 def report_syntax_v1(invoice: Invoice) -> Evaluation:
-    evaluation = Evaluation(
-        aspect="syntax",
-        is_valid=True,
-        num_rules_fired=0,
-        num_rules_failed=0,
-        num_violations=0,
-        violations=[]
-    )
-    return evaluation
+    if invoice.source == "file":
+        with open(invoice.data, 'r') as f:
+            data = f.read()
+    elif invoice.source == "url":
+        response = requests.get(invoice.data)
+        if response.status_code != 200:
+            raise Exception("Could not retrieve file from url")
+
+        data = response.text
+    
+    return generate_xslt_evaluation("syntax", data, "src/validation_artefacts/AUNZ-UBL-validation.xslt")
 
 def report_peppol_v1(invoice: Invoice) -> Evaluation:
     if invoice.source == "file":
@@ -101,7 +103,7 @@ def report_peppol_v1(invoice: Invoice) -> Evaluation:
 
         data = response.text
     
-    return generate_xslt_evaluation(invoice.data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
+    return generate_xslt_evaluation("peppol", data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
 
 def report_get_v1(report_id: int) -> Report:
     report = Report(
@@ -195,7 +197,7 @@ def report_bulk_export_v1(report_ids, report_format) -> list[ReportExport]:
 
 # Helper functions
 
-def generate_xslt_evaluation(invoice_text, xslt_path) -> Evaluation:
+def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Evaluation:
     with PySaxonProcessor(license=False) as proc:
         
         print(xslt_path)
@@ -257,7 +259,7 @@ def generate_xslt_evaluation(invoice_text, xslt_path) -> Evaluation:
                 })
         
         result =  Evaluation(
-            aspect="peppol",
+            aspect=aspect,
             is_valid=is_valid,
             num_rules_fired=len(output),
             num_rules_failed=len(rules_failed),

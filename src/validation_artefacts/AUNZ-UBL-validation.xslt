@@ -13956,6 +13956,7 @@ Last update: 2022-11-08-->
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
           <svrl:text>[BR-CL-03]-currencyID MUST be coded using ISO code list 4217 alpha-3</svrl:text>
+          <svrl:text>This is a sample suggestion. test test 123</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>

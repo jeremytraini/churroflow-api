@@ -38,13 +38,7 @@ def test_peppol_single_volation():
     data = VALID_INVOICE_TEXT
     
     # Invalidating the ABN, changing the content of the ABN
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
-        'Not an ABN',
-        1
-    )
+    data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN', 1)
     
     print(data)
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
@@ -86,20 +80,8 @@ def test_peppol_multiple_violations_same_rule():
     data = VALID_INVOICE_TEXT
     
     # Invalidating the 2 ABNs
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
-        'Not an ABN 1',
-        1
-    )
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
-        'Not an ABN 2',
-        2
-    )
+    data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN 1', 1)
+    data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN 2', 2)
     
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
     
@@ -129,36 +111,12 @@ def test_peppol_multiple_violations_different_rules():
     data = VALID_INVOICE_TEXT
     
     # Invalidating the 2 ABNs
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
-        'Not an ABN 1',
-        1
-    )
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
-        'Not an ABN 2',
-        2
-    )
+    data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN 1', 1)
+    data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN 2', 2)
     
     # Invalidating the 2 addresses
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
-        'bad-date',
-        1
-    )
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
-        'bad-date',
-        2
-    )
+    data = invalidate_invoice(data, 'content', 'cbc:IssueDate', '', 'bad-date', 1)
+    data = invalidate_invoice(data, 'content', 'cbc:IssueDate', '', 'bad-date', 2)
     
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
     
@@ -195,13 +153,7 @@ def test_peppol_warning_doesnt_invalidate_report():
     data = VALID_INVOICE_TEXT
     
     # Invalidating the ABN
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}EndpointID', 
-        'Not an ABN 1',
-        1
-    )
+    data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN 1', 1)
     
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
     
@@ -220,13 +172,7 @@ def test_peppol_fatal_error_invalidates_report():
     data = VALID_INVOICE_TEXT
     
     # Changing the start date year to 2029
-    data = invalidate_invoice(
-        data,
-        'content', 
-        '{urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2}IssueDate', 
-        'bad-date',
-        1
-    )
+    data = invalidate_invoice(data, 'content', 'cbc:IssueDate', '', 'bad-date', 1)
     
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
     
