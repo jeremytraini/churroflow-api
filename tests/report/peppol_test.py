@@ -13,7 +13,7 @@ from tests.helpers import invalidate_invoice, remove_part_of_string
 def test_peppol_valid_invoice():
     data = VALID_INVOICE_TEXT
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
     
     peppol_evaluation = report_peppol_v1(invoice)
     peppol_evaluation = Evaluation(**peppol_evaluation)
@@ -41,7 +41,7 @@ def test_peppol_single_volation():
     data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN', 1)
     
     print(data)
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
     
     peppol_evaluation = report_peppol_v1(invoice)
     peppol_evaluation = Evaluation(**peppol_evaluation)
@@ -83,7 +83,7 @@ def test_peppol_multiple_violations_same_rule():
     data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN 1', 1)
     data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN 2', 2)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
     
     peppol_evaluation = report_peppol_v1(invoice)
     peppol_evaluation = Evaluation(**peppol_evaluation)
@@ -118,7 +118,7 @@ def test_peppol_multiple_violations_different_rules():
     data = invalidate_invoice(data, 'content', 'cbc:IssueDate', '', 'bad-date', 1)
     data = invalidate_invoice(data, 'content', 'cbc:IssueDate', '', 'bad-date', 2)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
     
     peppol_evaluation = report_peppol_v1(invoice)
     peppol_evaluation = Evaluation(**peppol_evaluation)
@@ -155,7 +155,7 @@ def test_peppol_warning_doesnt_invalidate_report():
     # Invalidating the ABN
     data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN 1', 1)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
     
     peppol_evaluation = report_peppol_v1(invoice)
     peppol_evaluation = Evaluation(**peppol_evaluation)
@@ -174,7 +174,7 @@ def test_peppol_fatal_error_invalidates_report():
     # Changing the start date year to 2029
     data = invalidate_invoice(data, 'content', 'cbc:IssueDate', '', 'bad-date', 1)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
     
     peppol_evaluation = report_peppol_v1(invoice)
     peppol_evaluation = Evaluation(**peppol_evaluation)

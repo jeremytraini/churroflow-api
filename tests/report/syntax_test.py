@@ -13,7 +13,7 @@ from tests.helpers import remove_part_of_string, invalidate_invoice
 def test_syntax_valid_invoice():
     data = VALID_INVOICE_TEXT
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     syntax_evaluation = report_syntax_v1(invoice)
     syntax_evaluation = Evaluation(**syntax_evaluation)
@@ -40,7 +40,7 @@ def test_syntax_single_violation():
     # Invalidating the currency code
     data = invalidate_invoice(data, 'attrib', 'cbc:Amount', 'currencyID', 'TEST', 1)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     syntax_evaluation = report_syntax_v1(invoice)
     syntax_evaluation = Evaluation(**syntax_evaluation)
@@ -82,7 +82,7 @@ def test_syntax_multiple_violations_same_rule():
     data = invalidate_invoice(data, 'attrib', 'cbc:Amount', 'currencyID', 'TEST', 1)
     data = invalidate_invoice(data, 'attrib', 'cbc:Amount', 'currencyID', 'TEST', 2)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     syntax_evaluation = report_syntax_v1(invoice)
     syntax_evaluation = Evaluation(**syntax_evaluation)
@@ -117,7 +117,7 @@ def test_syntax_multiple_violations_different_rules():
     data = invalidate_invoice(data, 'content', 'cbc:IdentificationCode', '', 'TEST', 1)
     data = invalidate_invoice(data, 'content', 'cbc:IdentificationCode', '', 'TEST', 2)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     syntax_evaluation = report_syntax_v1(invoice)
     syntax_evaluation = Evaluation(**syntax_evaluation)
@@ -155,7 +155,7 @@ def test_syntax_warning_doesnt_invalidate_report():
     # Violates [UBL-CR-003]-A UBL invoice should not include the ProfileExecutionID
     data = invalidate_invoice(data, 'tag', 'cbc:Note', '', 'cbc:ProfileExecutionID', 1)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     syntax_evaluation = report_syntax_v1(invoice)
     syntax_evaluation = Evaluation(**syntax_evaluation)
@@ -174,7 +174,7 @@ def test_syntax_fatal_error_invalidates_report():
     # Adding "D" to the currency code to make it invalid
     data = invalidate_invoice(data, 'attrib', 'cbc:Amount', 'currencyID', 'TEST', 1)
     
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     syntax_evaluation = report_syntax_v1(invoice)
     syntax_evaluation = Evaluation(**syntax_evaluation)

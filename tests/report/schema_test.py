@@ -12,7 +12,7 @@ from tests.helpers import *
 #     # Invalidating the date
 #     data = replace_part_of_string(VALID_INVOICE_TEXT, 935, 937, "20")
 
-#     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+#     invoice = Invoice(name="My Invoice", source="text", data=data)
 
 #     schema_evaluation = report_schema_v1(invoice)
 #     schema_evaluation = Evaluation(**schema_evaluation)
@@ -48,7 +48,7 @@ from tests.helpers import *
 #     # Invalidating the date
 #     data = insert_into_string(VALID_INVOICE_TEXT, 8391, "D")
 
-#     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+#     invoice = Invoice(name="My Invoice", source="text", data=data)
 
 #     schema_evaluation = report_schema_v1(invoice)
 #     schema_evaluation = Evaluation(**schema_evaluation)
@@ -84,7 +84,7 @@ from tests.helpers import *
 #     # Invalidating the date
 #     data = insert_into_string(VALID_INVOICE_TEXT, 9064, "0")
 
-#     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+#     invoice = Invoice(name="My Invoice", source="text", data=data)
 
 #     schema_evaluation = report_schema_v1(invoice)
 #     schema_evaluation = Evaluation(**schema_evaluation)

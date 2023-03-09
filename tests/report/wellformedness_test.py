@@ -12,7 +12,7 @@ from tests.helpers import remove_part_of_string, append_to_string, replace_part_
 def test_wellformed_valid_invoice():
     data = VALID_INVOICE_TEXT
 
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -31,7 +31,7 @@ def test_wellformed_valid_invoice():
 #     # Invalidating the tags so that only one of the tags is capitalised
 #     data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
 
-#     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+#     invoice = Invoice(name="My Invoice", source="text", data=data)
 
 #     wellformed_evaluation = report_wellformedness_v1(invoice)
 #     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -67,7 +67,7 @@ def test_wellformed_case_sensitive_tags_valid():
     data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
     data = replace_part_of_string(data, 2045, 2047, "id")
 
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -83,7 +83,7 @@ def test_wellformed_case_sensitive_tags_valid():
 # def test_two_root_elements_invalid():
 #     data = VALID_INVOICE_TEXT
 #     data = append_to_string(data, """<root><h>Second root at the end</h></root>""")
-#     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+#     invoice = Invoice(name="My Invoice", source="text", data=data)
 
 #     wellformed_evaluation = report_wellformedness_v1(invoice)
 #     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -111,7 +111,7 @@ def test_wellformed_case_sensitive_tags_valid():
 # def test_no_closing_tag_invalid():
 #     data = VALID_INVOICE_TEXT
 #     data = remove_part_of_string(data, 11530, 11540)
-#     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+#     invoice = Invoice(name="My Invoice", source="text", data=data)
 
 #     wellformed_evaluation = report_wellformedness_v1(invoice)
 #     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -142,7 +142,7 @@ def test_wellformed_case_sensitive_tags_valid():
 #     data = VALID_INVOICE_TEXT
 #     data = remove_part_of_string(data, 11512, 11530)
 #     data = append_to_string(data, """</cac:InvoiceLine>""") 
-#     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+#     invoice = Invoice(name="My Invoice", source="text", data=data)
 
 #     wellformed_evaluation = report_wellformedness_v1(invoice)
 #     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -171,7 +171,7 @@ def test_wellformed_case_sensitive_tags_valid():
 # def test_no_escape_for_special_char_invalid():
 #     data = VALID_INVOICE_TEXT
 #     data = replace_part_of_string(data, 499, 500, "<")
-#     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+#     invoice = Invoice(name="My Invoice", source="text", data=data)
 
 #     wellformed_evaluation = report_wellformedness_v1(invoice)
 #     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -199,7 +199,7 @@ def test_wellformed_case_sensitive_tags_valid():
 def test_escape_special_char_valid():
     data = VALID_INVOICE_TEXT
     data = replace_part_of_string(data, 499, 503, "&lt;")
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)

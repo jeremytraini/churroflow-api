@@ -4,11 +4,10 @@ from typing import Any, Dict, List, Literal, Union
 Server_call_return = Dict[str, Any]
 
 class Format(BaseModel):
-    format: Literal["HTML", "PDF"]
+    format: Literal["HTML", "PDF", "CSV"]
 
 class Invoice(BaseModel):
     name: str
-    format: Literal["XML", "JSON", "HTML", "PDF"]
     source: Literal["url", "file_upload", "raw_data", "text"]
     data: str
 

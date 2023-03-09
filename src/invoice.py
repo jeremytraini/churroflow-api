@@ -4,7 +4,7 @@ from src.types import *
 from src.report import report_get_v1
 
 def invoice_quick_fix_wellformedness_v1(report_id: int) -> QuickFixReturn:
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data="data")
+    invoice = Invoice(name="My Invoice", source="text", data="data")
     report = Report(
         report_id=0,
         score=0,
@@ -26,7 +26,7 @@ def invoice_quick_fix_wellformedness_v1(report_id: int) -> QuickFixReturn:
     return quick_fix
 
 def invoice_quick_fix_syntax_v1(report_id: int) -> QuickFixReturn:
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data="data")
+    invoice = Invoice(name="My Invoice", source="text", data="data")
     report = Report(
         report_id=0,
         score=0,
@@ -48,7 +48,7 @@ def invoice_quick_fix_syntax_v1(report_id: int) -> QuickFixReturn:
     return quick_fix
 
 def invoice_quick_fix_peppol_v1(report_id: int) -> QuickFixReturn:
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data="data")
+    invoice = Invoice(name="My Invoice", source="text", data="data")
     report = Report(
         report_id=0,
         score=0,
@@ -70,7 +70,7 @@ def invoice_quick_fix_peppol_v1(report_id: int) -> QuickFixReturn:
     return quick_fix
 
 def invoice_quick_fix_schema_v1(report_id: int) -> QuickFixReturn:
-    invoice = Invoice(name="My Invoice", format="XML", source="text", data="data")
+    invoice = Invoice(name="My Invoice", source="text", data="data")
     report = Report(
         report_id=0,
         score=0,
@@ -99,6 +99,6 @@ def invoice_generate_hash_v1(invoice: Invoice) -> str:
     return "hash"
 
 def invoice_bulk_quick_fix_v1(invoices: List[Invoice]) -> List[Invoice]:
-    invoice = Invoice(name="invoice", format="XML", source="text", data="")
+    invoice = Invoice(name="invoice", source="text", data="")
     invoice_list = [invoice]
     return invoice_list
