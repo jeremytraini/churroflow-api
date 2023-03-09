@@ -1,7 +1,7 @@
 from src.types import *
 from tests.server_calls import report_wellformedness_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import remove_part_of_string, append_to_string, replace_part_of_string, replace_part_of_string
+from tests.helpers import remove_part_of_string, append_to_string, replace_part_of_string
 
 """
 =====================================
@@ -29,7 +29,7 @@ def test_wellformed_valid_invoice():
 
 # def test_wellformed_case_sensitive_tags_invalid():
 #     # Invalidating the tags so that only one of the tags is capitalised
-#     data = replace_part_of_string(VALID_INVOICE_TEXT, 2256, 2258, "id")
+#     data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
 
 #     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 
@@ -64,8 +64,8 @@ def test_wellformed_valid_invoice():
 
 def test_wellformed_case_sensitive_tags_valid():
     # Replacing both tags so that they still match
-    data = replace_part_of_string(VALID_INVOICE_TEXT, 2244, 2246, "id")
-    data = replace_part_of_string(data, 2256, 2258, "id")
+    data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
+    data = replace_part_of_string(data, 2045, 2047, "id")
 
     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 

@@ -10,7 +10,7 @@ from tests.helpers import *
 """
 # def test_schema_issue_date_invalid():
 #     # Invalidating the date
-#     data = replace_part_of_string(VALID_INVOICE_TEXT, 530, 532, "20")
+#     data = replace_part_of_string(VALID_INVOICE_TEXT, 935, 937, "20")
 
 #     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 
@@ -46,7 +46,7 @@ from tests.helpers import *
 
 # def test_schema_currency_id_invalid():
 #     # Invalidating the date
-#     data = insert_into_string(VALID_INVOICE_TEXT, 6200, "D")
+#     data = insert_into_string(VALID_INVOICE_TEXT, 8391, "D")
 
 #     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 
@@ -82,7 +82,7 @@ from tests.helpers import *
 
 # def test_schema_percent_invalid():
 #     # Invalidating the date
-#     data = insert_into_string(VALID_INVOICE_TEXT, 6316, "0")
+#     data = insert_into_string(VALID_INVOICE_TEXT, 9064, "0")
 
 #     invoice = Invoice(name="My Invoice", format="XML", source="text", data=data)
 
