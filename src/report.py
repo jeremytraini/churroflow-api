@@ -1,4 +1,3 @@
-from src.classes.Validator_lxml import Validator
 from src.types import *
 from lxml import etree
 from typing import Dict
