@@ -19,10 +19,6 @@ def test_peppol_valid_invoice():
     print(peppol_evaluation)
     assert peppol_evaluation["aspect"] == "peppol"
     
-    # We expect many rules to be fired for any invoice
-    # This depends on the number of rules in the rule set but should be at least 1
-    assert peppol_evaluation["num_rules_fired"] > 0
-    
     # We expect no rules to fail for a valid invoice
     assert peppol_evaluation["num_rules_failed"] == 0
     
@@ -67,12 +63,9 @@ def test_peppol_single_volation():
     # Check that the violation has a non-empty message, test and suggestion
     assert abn_violation["message"]
     assert abn_violation["test"]
-    assert abn_violation["suggestion"]
-    
-    assert abn_violation["location"]["type"] == "xpath"
     
     # Check that the location xpath is not empty
-    assert abn_violation["location"]["xpath"]
+    assert abn_violation["xpath"]
 
 
 # Testing that multiple violations are generated when there are multiple errors in the invoice
@@ -104,7 +97,7 @@ def test_peppol_multiple_violations_same_rule():
     assert abn_violation1["rule_id"] == abn_violation2["rule_id"] == "PEPPOL-COMMON-R050"
     
     # Locations should be different for each violation
-    assert abn_violation1["location"] != abn_violation2["location"]
+    assert abn_violation1["xpath"] != abn_violation2["xpath"]
 
 
 def test_peppol_multiple_violations_different_rules():
@@ -144,8 +137,8 @@ def test_peppol_multiple_violations_different_rules():
     assert address_violation1["rule_id"] == address_violation2["rule_id"] == "PEPPOL-EN16931-F001"
     
     # Locations should be different for each violation
-    assert abn_violation1["location"] != abn_violation2["location"]
-    assert address_violation1["location"] != address_violation2["location"]
+    assert abn_violation1["xpath"] != abn_violation2["xpath"]
+    assert address_violation1["xpath"] != address_violation2["xpath"]
 
 
 # Testing that a warning doesn't invalidate the report

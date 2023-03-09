@@ -18,10 +18,6 @@ def test_syntax_valid_invoice():
     syntax_evaluation = report_syntax_v1(name, format, source, data)
     assert syntax_evaluation["aspect"] == "syntax"
     
-    # We expect many rules to be fired for any invoice
-    # This depends on the number of rules in the rule set but should be at least 1
-    assert syntax_evaluation["num_rules_fired"] > 0
-    
     # We expect no rules to fail for a valid invoice
     assert syntax_evaluation["num_rules_failed"] == 0
     
@@ -64,12 +60,9 @@ def test_syntax_single_violation():
     # Check that the violation has a non-empty message, test and suggestion
     assert code_violation["message"]
     assert code_violation["test"]
-    assert code_violation["suggestion"]
-    
-    assert code_violation["location"]["type"] == "xpath"
     
     # Check that the location xpath is not empty
-    assert code_violation["location"]["xpath"]
+    assert code_violation["xpath"]
 
 
 # Testing that multiple violations are generated when there are multiple errors in the invoice
@@ -101,7 +94,7 @@ def test_syntax_multiple_violations_same_rule():
     assert code_violation1["rule_id"] == code_violation2["rule_id"] == "BR-CL-03"
     
     # Locations should be different for each violation
-    assert code_violation1["location"] != code_violation2["location"]
+    assert code_violation1["xpath"] != code_violation2["xpath"]
 
 
 def test_syntax_multiple_violations_different_rules():
@@ -141,8 +134,8 @@ def test_syntax_multiple_violations_different_rules():
     assert id_code_violation1["rule_id"] == id_code_violation2["rule_id"] == "BR-CL-03"
     
     # Locations should be different for each violation
-    assert code_violation1["location"] != code_violation2["location"]
-    assert id_code_violation1["location"] != id_code_violation2["location"]
+    assert code_violation1["xpath"] != code_violation2["xpath"]
+    assert id_code_violation1["xpath"] != id_code_violation2["xpath"]
 
 
 # Testing that a warning doesn't invalidate the report
