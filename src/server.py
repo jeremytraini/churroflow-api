@@ -3,6 +3,7 @@ from src.config import base_url, port
 from src.health_check import health_check_v1
 from src.report import *
 from src.invoice import *
+from src.types import *
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from src.error import AuthenticationError, InputError
