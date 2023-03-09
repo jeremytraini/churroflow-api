@@ -1,5 +1,6 @@
 from src.classes.Validator_lxml import Validator
 from src.types import *
+from lxml import etree
 from typing import Dict
 from saxonche import PySaxonProcessor
 from tempfile import NamedTemporaryFile
@@ -35,25 +36,40 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
         num_violations=0,
         violations=[]
     )
-    # model of evaluation with one violation
-    # evaluation = Evaluation(
-    #     aspect="wellformedness",
-    #     is_valid=True,
-    #     num_rules_fired=0,
-    #     num_rules_failed=1,
-    #     num_violations=1,
-    #     violations=[Violation(
-    #         rule_id="wellformedness",
-    #         is_fatal=True,
-    #         location=LocationLine(
-    #             line=1,
-    #             column=1
-    #         ),
-    #         test="test",
-    #         message="message",
-    #         suggestion="suggestion"
-    #     )]
-    # )
+    if invoice.source == "file":
+        with open(invoice.data, 'r') as f:
+            data = f.read()
+    elif invoice.source == "url":
+        response = requests.get(invoice.data)
+        if response.status_code != 200:
+            raise Exception("Could not retrieve file from url")
+
+        data = response.text
+    elif invoice.source == "text":
+        data = invoice.data
+    else:
+        raise Exception("Invalid Source")
+
+    try:
+        etree.fromstring(data.encode("utf-8"), parser=None)
+    except etree.XMLSyntaxError as error:
+        evaluation.is_valid = False
+        evaluation.num_rules_failed = 1
+        evaluation.num_violations = 1
+        violation = Violation(
+            rule_id="wellformedness",
+            is_fatal=True,
+            location=Location(
+                type="line",
+                line=error.lineno,
+                column=error.offset
+            ),
+            test="",
+            message=error.msg,
+            suggestion="suggestion"
+        )
+        evaluation.violations.append(violation)
+
     return evaluation
 
 # schema report stub

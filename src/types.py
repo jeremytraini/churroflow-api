@@ -13,9 +13,9 @@ class Invoice(BaseModel):
 
 class Location(BaseModel):
     type: Literal["xpath", "line"]
-    xpath: Union[str, None]
-    line: Union[int, None]
-    column: Union[int, None]
+    xpath: Union[str, None] = None
+    line: Union[int, None] = None
+    column: Union[int, None] = None
 
 class Violation(BaseModel):
     rule_id: str
