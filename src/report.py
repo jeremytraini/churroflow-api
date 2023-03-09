@@ -2,6 +2,8 @@ from typing import Dict
 from saxonche import PySaxonProcessor
 from tempfile import NamedTemporaryFile
 import requests
+from os import unlink
+from src.database import Users, Reports, Violations, Evaluations, db
 
 def invoice_preprocessor(name, format, source, data):
     if source == "file":
@@ -89,6 +91,8 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Dict:
         
         schematron_output = executable.transform_to_value(source_file=tmp.name)
         
+        unlink(tmp.name)
+        
         if not schematron_output:
             raise Exception("Schematron output is empty")
         
@@ -109,32 +113,35 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Dict:
                 
                 location = item.get_attribute_value("location")
                 test = item.get_attribute_value("test")
+                
                 message = ""
                 if item.children:
                     message = item.children[0].string_value
-                suggestion = ""
-                if len(item.children) > 1:
-                    suggestion = item.children[1].string_value
                 
                 violations.append({
                     "rule_id": id_name,
                     "is_fatal": is_fatal,
-                    "location": {
-                                    "type": "xpath",
-                                    "xpath": location
-                                    },
-                    "test": test,
                     "message": message,
-                    "suggestion": suggestion
+                    "test": test,
+                    "xpath": location
                 })
         
         result =  {
             "aspect": aspect,
             "is_valid": is_valid,
-            "num_rules_fired": len(output),
             "num_rules_failed": len(rules_failed),
             "num_violations": len(violations),
             "violations": violations
         }
+    
+        evaluation = Evaluations.create(
+            num_violations = len(violations),
+            num_warnings = 0,
+            num_errors = 0
+        )
+        
+        with db.atomic():
+            for data_dict in violations:
+                Violations.create(evaluation=evaluation, **data_dict)
         
         return result

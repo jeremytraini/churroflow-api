@@ -5,25 +5,22 @@ db = PostgresqlDatabase('validation', host='localhost', port=5433, user='postgre
 
 
 # Defining database models using Peewee's Model class
-class Users(Model):
+
+class BaseModel(Model):
+   class Meta:
+      database = db
+
+class Users(BaseModel):
     email = TextField(unique=True)
     password_hash = TextField()
 
-    class Meta:
-        database=db
-        db_table='Users'
-
-class Evaluations(Model):
+class Evaluations(BaseModel):
     num_violations = IntegerField()
     num_warnings = IntegerField()
     num_errors = IntegerField()
 
-    class Meta:
-        database=db
-        db_table='Evaluations'
 
-
-class Reports(Model):
+class Reports(BaseModel):
     date_generated = DateTimeField()
     invoice_name = TextField()
     invoice_raw = TextField()
@@ -37,24 +34,16 @@ class Reports(Model):
     syntax = ForeignKeyField(Evaluations, backref='syntax')
     peppol = ForeignKeyField(Evaluations, backref='peppol')
 
-    class Meta:
-        database=db
-        db_table='Reports'
 
-
-class Violations(Model):
+class Violations(BaseModel):
     evaluation = ForeignKeyField(Evaluations, backref='violations')
     rule_id = TextField()
     is_fatal = BooleanField()
     message = TextField()
-    test = TextField()
-    xpath = TextField()
-    line = IntegerField()
-    column = IntegerField()
-
-    class Meta:
-        database=db
-        db_table='Violations'
+    test = TextField(null=True, default=None)
+    xpath = TextField(null=True, default=None)
+    line = IntegerField(null=True, default=None)
+    column = IntegerField(null=True,default=None)
 
 # Create the tables in the database
 def create_tables():
