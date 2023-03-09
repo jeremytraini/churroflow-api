@@ -3,7 +3,7 @@ import json
 from src.config import full_url
 
 
-def health_check_v1(): 
+def health_check_v1():
     response = requests.get(full_url + 'health_check/v1')
 
     return json.loads(response.text)
@@ -46,7 +46,7 @@ def sample_post(val):
 
     return json.loads(response.text)
 
-def sample_get(val): 
+def sample_get(val):
     payload = {
         "key": val
     }
@@ -54,7 +54,7 @@ def sample_get(val):
 
     return json.loads(response.text)
 
-def sample_put(val): 
+def sample_put(val):
     payload = {
         "key": val
     }
@@ -68,5 +68,18 @@ def sample_delete(val):
     }
 
     response = requests.delete(full_url + 'test/delete/v1', json=payload)
+
+    return json.loads(response.text)
+
+
+
+def report_wellformedness_v1(name, format, source, data):
+    payload = {
+        "name": name,
+        "format": format,
+        "source": source,
+        "data": data
+    }
+    response = requests.post(full_url + 'report/wellformedness/v1', json=payload)
 
     return json.loads(response.text)

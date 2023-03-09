@@ -25,7 +25,7 @@ def report_syntax_v1(name, format, source, data) -> Dict:
             raise Exception("Could not retrieve file from url")
 
         data = response.text
-    
+
     return generate_xslt_evaluation("syntax", data, "src/validation_artefacts/AUNZ-UBL-validation.xslt")
 
 def report_peppol_v1(name, format, source, data) -> Dict:
@@ -38,7 +38,7 @@ def report_peppol_v1(name, format, source, data) -> Dict:
             raise Exception("Could not retrieve file from url")
 
         data = response.text
-    
+
     return generate_xslt_evaluation("peppol", data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
 
 def report_get_v1(report_id) -> Dict:
@@ -68,48 +68,63 @@ def report_bulk_export_v1(report_ids, report_format) -> Dict:
 def report_bulk_export_v1(report_ids, report_format) -> Dict:
     return {}
 
+
+
+# def report_wellformedness_v1(name, format, source, data) -> Dict:
+#     if source == "file":
+#         with open(data, 'r') as f:
+#             data = f.read()
+#     elif source == "url":
+#         response = requests.get(data)
+#         if response.status_code != 200:
+#             raise Exception("Could not retrieve file from url")
+
+#         data = response.text
+
+#     return generate_xslt_evaluation("wellformedness", data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
+
 # Helper functions
 
 def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Dict:
     with PySaxonProcessor(license=False) as proc:
-        
+
         print(xslt_path)
-        
+
         xsltproc = proc.new_xslt30_processor()
         executable = xsltproc.compile_stylesheet(stylesheet_file=xslt_path)
-        
+
         if xsltproc.exception_occurred:
             raise Exception("XSLT failed to load! " + xsltproc.error_message)
-        
+
         if executable.exception_occurred:
             raise Exception("Executable failed to load! " + executable.error_message)
-        
+
         print(len(invoice_text))
-        
+
         tmp = NamedTemporaryFile(mode='w', delete=False)
         tmp.write(invoice_text)
         tmp.close()
-        
+
         schematron_output = executable.transform_to_value(source_file=tmp.name)
-        
+
         if not schematron_output:
             raise Exception("Schematron output is empty")
-        
+
         violations = []
         is_valid = True
         rules_failed = set()
-        
+
         output = schematron_output.item_at(0).get_node_value().children[0].children
-        
+
         for item in output:
             if item.name and item.name.endswith("failed-assert"):
                 id_name = item.get_attribute_value("id")
                 rules_failed.add(id_name)
                 is_fatal = item.get_attribute_value("flag") == "fatal"
-                
+
                 if is_valid and is_fatal:
                     is_valid = False
-                
+
                 location = item.get_attribute_value("location")
                 test = item.get_attribute_value("test")
                 message = ""
@@ -118,7 +133,7 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Dict:
                 suggestion = ""
                 if len(item.children) > 1:
                     suggestion = item.children[1].string_value
-                
+
                 violations.append({
                     "rule_id": id_name,
                     "is_fatal": is_fatal,
@@ -130,7 +145,7 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Dict:
                     "message": message,
                     "suggestion": suggestion
                 })
-        
+
         result =  {
             "aspect": aspect,
             "is_valid": is_valid,
@@ -139,5 +154,5 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Dict:
             "num_violations": len(violations),
             "violations": violations
         }
-        
+
         return result
