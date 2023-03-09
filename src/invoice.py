@@ -98,7 +98,7 @@ def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
 def invoice_generate_hash_v1(invoice: Invoice) -> str:
     return "hash"
 
-def invoice_bulk_quick_fix_v1(invoices: list[Invoice]) -> list[Invoice]:
+def invoice_bulk_quick_fix_v1(invoices: List[Invoice]) -> List[Invoice]:
     invoice = Invoice(name="invoice", format="XML", source="text", data="")
     invoice_list = [invoice]
     return invoice_list
