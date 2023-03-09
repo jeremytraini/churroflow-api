@@ -89,6 +89,10 @@ def report_syntax_v1(invoice: Invoice) -> Evaluation:
             raise Exception("Could not retrieve file from url")
 
         data = response.text
+    elif invoice.source == "text":
+        data = invoice.data
+    else:
+        raise Exception("Invalid Source")
     
     return generate_xslt_evaluation("syntax", data, "src/validation_artefacts/AUNZ-UBL-validation.xslt")
 
@@ -102,6 +106,10 @@ def report_peppol_v1(invoice: Invoice) -> Evaluation:
             raise Exception("Could not retrieve file from url")
 
         data = response.text
+    elif invoice.source == "text":
+        data = invoice.data
+    else:
+        raise Exception("Invalid Source")
     
     return generate_xslt_evaluation("peppol", data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
 
