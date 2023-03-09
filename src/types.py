@@ -2,6 +2,10 @@ from pydantic import BaseModel
 from typing import Any, Dict, Literal
 
 Server_call_return = Dict[str, Any]
+
+class Format(BaseModel):
+    format: Literal["HTML", "PDF"]
+
 class Invoice(BaseModel):
     name: str
     format: Literal["XML", "JSON", "HTML", "PDF"]
@@ -30,7 +34,6 @@ class Evaluation(BaseModel):
     num_violations: int
     violations: list[Violation]
 
-
 class Report(BaseModel):
     report_id: int
     score: int
@@ -44,3 +47,15 @@ class Report(BaseModel):
     schemaEvaluation: Evaluation | None
     syntax: Evaluation | None
     peppol: Evaluation | None
+
+class ReportExport(BaseModel):
+    url: str
+    invoice_hash: str
+
+class QuickFixReturn(BaseModel):
+    invoice: Invoice
+    report: Report
+
+class CheckValidReturn(BaseModel):
+    is_valid: bool
+    invoice_hash: str

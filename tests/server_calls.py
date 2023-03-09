@@ -9,6 +9,22 @@ def health_check_v1():
 
     return json.loads(response.text)
 
+def report_json_report_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
+    response = requests.post(full_url + 'report/json_report/v1', json=payload)
+    
+    return json.loads(response.text)
+
+
+def report_visual_report_v1(invoice: Invoice, format: Format) -> Server_call_return:
+    payload = {
+        "invoice": invoice.dict(),
+        "format": format.dict()
+    }
+    response = requests.post(full_url + 'report/visual_report/v1', json=payload)
+    
+    return json.loads(response.text)
+
 
 def report_wellformedness_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()
@@ -17,7 +33,7 @@ def report_wellformedness_v1(invoice: Invoice) -> Server_call_return:
     return json.loads(response.text)
 
 
-def report_schemavalid_v1(invoice: Invoice) -> Server_call_return:
+def report_schema_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()
     response = requests.post(full_url + 'report/schema/v1', json=payload)
 

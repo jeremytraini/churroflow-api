@@ -5,29 +5,7 @@ from saxonche import PySaxonProcessor
 from tempfile import NamedTemporaryFile
 import requests
 
-# schema report stub
-def report_schemavalid_v1(invoice: Invoice) -> Evaluation:
-    evaluation = Evaluation(
-        aspect="schema",
-        is_valid=True,
-        num_rules_fired=0,
-        num_rules_failed=0,
-        num_violations=0,
-        violations=[]
-    )
-    validator = Validator("src/validation_artefacts/UBL-Invoice-2.1.xsd")
-
-    # The directory with XML files
-    file_path = "test/example_files/AUInvoice_valid.xml"
-    
-    if validator.validate(file_path):
-        print('Valid! :)')
-    else:
-        evaluation.is_valid = False
-        print('Not valid! :(')
-    return evaluation
-
-def report_json_report_v1(invoice) -> Report:
+def report_json_report_v1(invoice: Invoice) -> Report:
     report = Report(
         report_id=0,
         score=0,
@@ -44,7 +22,7 @@ def report_json_report_v1(invoice) -> Report:
     )
     return report
 
-def report_visual_report_v1(invoice, format) -> Dict:
+def report_visual_report_v1(invoice: Invoice, format: Format) -> Dict:
     return {}
 
 # wellformedness report stub
@@ -78,15 +56,26 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
     # )
     return evaluation
 
-def report_schema_v1(invoice) -> Evaluation:
+# schema report stub
+def report_schema_v1(invoice: Invoice) -> Evaluation:
     evaluation = Evaluation(
-        aspect="syntax",
+        aspect="schema",
         is_valid=True,
         num_rules_fired=0,
         num_rules_failed=0,
         num_violations=0,
         violations=[]
     )
+    validator = Validator("src/validation_artefacts/UBL-Invoice-2.1.xsd")
+
+    # The directory with XML files
+    file_path = "test/example_files/AUInvoice_valid.xml"
+    
+    if validator.validate(file_path):
+        print('Valid! :)')
+    else:
+        evaluation.is_valid = False
+        print('Not valid! :(')
     return evaluation
 
 # Syntax report stub
@@ -114,7 +103,7 @@ def report_peppol_v1(invoice: Invoice) -> Evaluation:
     
     return generate_xslt_evaluation(invoice.data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
 
-def report_get_v1(report_id) -> Report:
+def report_get_v1(report_id: int) -> Report:
     report = Report(
         report_id=0,
         score=0,
@@ -131,7 +120,11 @@ def report_get_v1(report_id) -> Report:
     )
     return report
 
-def report_list_all_v1(order_by) -> list[Report]:
+# TODO: test
+def report_list_all_v1(order_by: str) -> list[Report]:
+    (order, asc) = order_by.split(" ")
+    print(order)
+    print(asc)
     report = Report(
         report_id=0,
         score=0,
@@ -149,7 +142,7 @@ def report_list_all_v1(order_by) -> list[Report]:
     reports = [report]
     return reports
 
-def report_list_score_v1(score, order_by) -> list[Report]:
+def report_list_score_v1(score: int, order_by: str) -> list[Report]:
     report = Report(
         report_id=0,
         score=0,
@@ -167,20 +160,38 @@ def report_list_score_v1(score, order_by) -> list[Report]:
     reports = [report]
     return reports
 
-def report_export_v1(report_id, report_format) -> Dict:
+def report_export_v1(report_id, report_format) -> ReportExport:
+    export = ReportExport(url="", invoice_hash="")
+    return export
+
+def report_change_name_v1(report_id: int, new_name: str) -> Dict[None, None]:
     return {}
 
-def report_change_name_v1(report_id, new_name) -> Dict[None, None]:
+def report_delete_v1(report_id: int) -> Dict[None, None]:
     return {}
 
-def report_delete_v1(report_id) -> Dict[None, None]:
-    return {}
+def report_bulk_generate_v1(invoices: list[Invoice]) -> list[Report]:
+    report = Report(
+        report_id=0,
+        score=0,
+        date_generated="",
+        invoice_name="",
+        invoice_raw="",
+        invoice_hash="",
+        is_valid=True,
+        total_num_violations=0,
+        wellformedness=None,
+        schemaEvaluation=None,
+        syntax=None,
+        peppol=None
+    )
+    reports = [report]
+    return reports
 
-def report_bulk_generate_v1(invoices) -> Dict:
-    return {}
-
-def report_bulk_export_v1(report_ids, report_format) -> Dict:
-    return {}
+def report_bulk_export_v1(report_ids, report_format) -> list[ReportExport]:
+    export = ReportExport(url="", invoice_hash="")
+    exports = [export]
+    return exports
 
 # Helper functions
 
