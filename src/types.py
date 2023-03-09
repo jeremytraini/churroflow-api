@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Any, Dict, Literal, Union
+from typing import Any, Dict, List, Literal, Union
 
 Server_call_return = Dict[str, Any]
 
@@ -32,7 +32,7 @@ class Evaluation(BaseModel):
     num_rules_fired: int
     num_rules_failed: int
     num_violations: int
-    violations: list[Violation]
+    violations: List[Violation]
 
 class Report(BaseModel):
     report_id: int

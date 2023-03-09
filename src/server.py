@@ -59,12 +59,12 @@ async def report_get(report_id: int) -> Report:
 
 # TODO: discuss changing input type
 @app.get("/report/list_all/v1")
-async def report_list_all(order_by: str) -> list[Report]:
+async def report_list_all(order_by: str) -> List[Report]:
     return report_list_all_v1(order_by)
 
 # TODO: discuss changing oreder_by type
 @app.get("/report/list_score/v1")
-async def report_list_score(score: int, order_by: str) -> list[Report]:
+async def report_list_score(score: int, order_by: str) -> List[Report]:
     return report_list_score_v1(score, order_by)
 
 # TODO: check format and output types
@@ -108,16 +108,16 @@ async def invoice_generate_hash(invoice: Invoice) -> str:
 
 # TODO: check return type
 @app.post("/report/bulk_generate/v1")
-async def report_bulk_generate(invoices: list[Invoice]) -> list[Report]:
+async def report_bulk_generate(invoices: List[Invoice]) -> List[Report]:
     return report_bulk_generate_v1(invoices)
 
 @app.get("/invoice/bulk_quick_fix/v1")
-async def invoice_bulk_quick_fix(invoices: list[Invoice]) -> list[Invoice]:
+async def invoice_bulk_quick_fix(invoices: List[Invoice]) -> List[Invoice]:
     return invoice_bulk_quick_fix_v1(invoices)
 
 # TODO: check input and return type
 @app.get("/report/bulk_export/v1")
-async def report_bulk_export(report_ids: list[int], report_format: Format) -> list[ReportExport]:
+async def report_bulk_export(report_ids: List[int], report_format: Format) -> List[ReportExport]:
     return report_bulk_export_v1(report_ids, report_format)
 
 
