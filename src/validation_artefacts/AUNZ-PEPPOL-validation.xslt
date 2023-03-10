@@ -1,4 +1,3 @@
-UPDATED_PEPPOL_50
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 
@@ -308,7 +307,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Document MUST not contain empty elements.\n Make sure all attributes are filled in eg. date, ABN details etc.</svrl:text>
+          <svrl:text>Document MUST not contain empty elements.</svrl:text>
+          <svrl:text>Make sure all attributes are filled in eg. date, ABN details etc.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -336,7 +336,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Business process MUST be provided.\n Check that profile ID is valid</svrl:text>
+          <svrl:text>Business process MUST be provided.</svrl:text>
+          <svrl:text>Check that profile ID is valid</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -351,7 +352,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Business process MUST be in the format 'urn:fdc:peppol.eu:2017:poacc:billing:NN:1.0' where NN indicates the process number.\n Make sure it fits this format</svrl:text>
+          <svrl:text>Business process MUST be in the format 'urn:fdc:peppol.eu:2017:poacc:billing:NN:1.0' where NN indicates the process number.</svrl:text>
+          <svrl:text>Ensure that it fits the above format and has a valid process number. </svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -366,7 +368,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>No more than one note is allowed on document level.\n Your count of notes has to be only 0 or 1. </svrl:text>
+          <svrl:text>No more than one note is allowed on document level.</svrl:text>
+          <svrl:text>Your count of notes has to be only 0 or 1. </svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -381,7 +384,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>A buyer reference or purchase order reference MUST be provided.\n Check that buyerReference and orderReference are valid.</svrl:text>
+          <svrl:text>A buyer reference or purchase order reference MUST be provided.</svrl:text>
+          <svrl:text>Check that buyerReference and orderReference are valid.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -396,7 +400,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Specification identifier MUST have the value 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0'.\n [PEPPOL-EN16931-R004-AUNZ] - an invoice must have a Specification identifier</svrl:text>
+          <svrl:text>Specification identifier MUST have the value 'urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0'.</svrl:text>
+          <svrl:text>[PEPPOL-EN16931-R004-AUNZ] - an invoice must have a Specification identifier</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -411,7 +416,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Only one tax total with tax subtotals MUST be provided.\n count(cac:TaxTotal[cac:TaxSubtotal]) = 1</svrl:text>
+          <svrl:text>Only one tax total with tax subtotals MUST be provided.</svrl:text>
+          <svrl:text>count(Subtotal(tax)) = 1</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -426,7 +432,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Only one tax total without tax subtotals MUST be provided when tax currency code is provided.\n count(cac:TaxTotal[not(cac:TaxSubtotal)]) = (if (cbc:TaxCurrencyCode) then 1 else 0)</svrl:text>
+          <svrl:text>Only one tax total without tax subtotals MUST be provided when tax currency code is provided.</svrl:text>
+          <svrl:text>count(TaxTotal[not(TaxSubtotal)]) = (if (TaxCurrencyCode) then 1 else 0)</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -441,7 +448,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Invoice total tax amount and Invoice total tax amount in accounting currency MUST have the same operational sign.\n Mandatory attribute. Use BT-5 or BT-6. Must be rounded to 2dp.</svrl:text>
+          <svrl:text>Invoice total tax amount and Invoice total tax amount in accounting currency MUST have the same operational sign</svrl:text>
+          <svrl:text>Mandatory attribute. Use BT-5 or BT-6. Must be rounded to 2dp.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -456,7 +464,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Only one invoiced object is allowed on document level. (count(cac:AdditionalDocumentReference[cbc:DocumentTypeCode='130']) <= 1)</svrl:text>
+          <svrl:text>Only one invoiced object is allowed on document level</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -477,7 +485,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Only one project reference is allowed on document level. There can only be one invoiced object. </svrl:text>
+          <svrl:text>Only one project reference is allowed on document level.</svrl:text>
+          <svrl:text>There can only be one invoiced object.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -498,7 +507,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Tax accounting currency code MUST be different from invoice currency code when provided.\n Tax currency code MUST be coded using ISO code list 4217 alpha-3 \n VAT accounting currency code must be different.</svrl:text>
+          <svrl:text>Tax accounting currency code MUST be different from invoice currency code when provided.</svrl:text>
+          <svrl:text> Tax currency code MUST be coded using ISO code list 4217 alpha-3. VAT accounting currency code must be different.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -519,7 +529,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Buyer electronic address MUST be provided eg. 0192 Identifies the Buyer's electronic address to which the invoice is delivered.</svrl:text>
+          <svrl:text>Buyer electronic address MUST be provided.</svrl:text>
+          <svrl:text>eg. 0192 Identifies the Buyer's electronic address to which the invoice is delivered.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -540,7 +551,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Seller electronic address MUST be provided\n Identifies the Seller's electronic address to which the application level response to the invoice may be delivered. eg. 0088</svrl:text>
+          <svrl:text>Seller electronic address MUST be provided.</svrl:text>
+          <svrl:text>Identifies the Seller's electronic address to which the application level response to the invoice may be delivered. eg. 0088</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -561,7 +573,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Allowance/charge base amount MUST be provided when allowance/charge percentage is provided.\n The base amount that may be used, in conjunction with the document level allowance or charge percentage, to calculate the document level allowance or charge amount. Must be rounded to maximum 2 decimals</svrl:text>
+          <svrl:text>Allowance/charge base amount MUST be provided when allowance/charge percentage is provided.</svrl:text>
+          <svrl:text>The base amount that may be used, in conjunction with the document level allowance or charge percentage, to calculate the document level allowance or charge amount. Must be rounded to maximum 2 decimals.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -582,7 +595,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Allowance/charge percentage MUST be provided when allowance/charge base amount is provided\n The base amount that may be used, in conjunction with the document level allowance or charge percentage, to calculate the document level allowance or charge amount. Must be rounded to maximum 2 decimals.</svrl:text>
+          <svrl:text>Allowance/charge percentage MUST be provided when allowance/charge base amount is provided.</svrl:text>
+          <svrl:text>The base amount that may be used, in conjunction with the document level allowance or charge percentage, to calculate the document level allowance or charge amount. Must be rounded to maximum 2 decimals.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -603,7 +617,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Allowance/charge amount must equal base amount * percentage/100 if base amount and percentage exists\n The amount of an allowance or a charge, without VAT. Must be rounded to maximum 2 decimals\n</svrl:text>
+          <svrl:text>Allowance/charge amount must equal base amount * percentage/100 if base amount and percentage exists</svrl:text>
+          <svrl:text>The amount of an allowance or a charge, without VAT. Must be rounded to maximum 2 decimals</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -618,7 +633,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Allowance/charge ChargeIndicator value MUST equal 'true' or 'false'\n Use “true” when informing about Charges and “false” when informing about Allowances</svrl:text>
+          <svrl:text>Allowance/charge ChargeIndicator value MUST equal 'true' or 'false'</svrl:text>
+          <svrl:text>Use “true” when informing about Charges and “false” when informing about Allowances</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -639,7 +655,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>All currencyID attributes must have the same value as the invoice currency code (BT-5), except for the invoice total tax amount in accounting currency (BT-111).\nMandatory attribute.\n Use BT-5. eg. EUR</svrl:text>
+          <svrl:text>All currencyID attributes must have the same value as the invoice currency code (BT-5), except for the invoice total tax amount in accounting currency (BT-111).</svrl:text>
+          <svrl:text>Mandatory attribute.\n Use BT-5. eg. EUR</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -660,7 +677,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Start date of line period MUST be within invoice period. The date when the Invoice period for this Invoice line starts. Format ="YYYY-MM-DD"</svrl:text>
+          <svrl:text>Start date of line period MUST be within invoice period.</svrl:text>
+          <svrl:text>The date when the Invoice period for this Invoice line starts. Format ="YYYY-MM-DD"</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -681,7 +699,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>End date of line period MUST be within invoice period.YYYY-MM-DD\n eg. 2023-10-03</svrl:text>
+          <svrl:text>End date of line period MUST be within invoice period.</svrl:text>
+          <svrl:text>YYYY-MM-DD\n eg. 2023-10-03</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -708,7 +727,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Invoice line net amount MUST equal (Invoiced quantity * (Item net price/item price base quantity) + Sum of invoice line charge amount - sum of invoice line allowance amount\n Must be to 2dp. </svrl:text>
+          <svrl:text>Invoice line net amount MUST equal (Invoiced quantity * (Item net price/item price base quantity) + Sum of invoice line charge amount - sum of invoice line allowance amount - to 2dp.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -723,7 +742,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Base quantity MUST be a positive number above zero - one or more.\nThe number of item units to which the price applies.</svrl:text>
+          <svrl:text>Base quantity MUST be a positive number above zero.</svrl:text>
+          <svrl:text>The number of item units to which the price applies - one or more.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -738,7 +758,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Only one invoiced object is allowed per line - given by seller AB12345. \n Code "130" MUST be used to indicate an invoice object reference. Not used for other additional documents</svrl:text>
+          <svrl:text>Only one invoiced object is allowed per line.</svrl:text>
+          <svrl:text>Given by seller AB12345. \n Code "130" MUST be used to indicate an invoice object reference. Not used for other additional documents</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -753,7 +774,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Element Document reference can only be used for Invoice line object - given by seller AB12345. \n Code "130" MUST be used to indicate an invoice object reference. Not used for other additional documents</svrl:text>
+          <svrl:text>Element Document reference can only be used for Invoice line object</svrl:text>
+          <svrl:text>Given by seller AB12345. \n Code "130" MUST be used to indicate an invoice object reference. Not used for other additional documents</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -774,7 +796,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Charge on price level is NOT allowed. Only value 'false' allowed.\n Mandatory element. Value must be “false”</svrl:text>
+          <svrl:text>Charge on price level is NOT allowed. Only value 'false' allowed.</svrl:text>
+          <svrl:text>Mandatory element. Value must be “false”</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -789,7 +812,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Item net price MUST equal (Gross price - Allowance amount) when gross price is provided.\n The price of an item, exclusive of VAT, after subtracting item price discount. The Item net price has to be equal with the Item gross price less the Item price discount, if they are both provided. Item price can not be negative.</svrl:text>
+          <svrl:text>Item net price MUST equal (Gross price - Allowance amount) when gross price is provided.</svrl:text>
+          <svrl:text>The price of an item, exclusive of VAT, after subtracting item price discount. The Item net price has to be equal with the Item gross price less the Item price discount, if they are both provided. Item price can not be negative.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -833,7 +857,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>GLN must have a valid format according to GS1 rules.\n please refer to the rules here: https://www.gs1au.org/resources/standards-and-guidelines/</svrl:text>
+          <svrl:text>GLN must have a valid format according to GS1 rules.</svrl:text>
+          <svrl:text>Please refer to the rules here: https://www.gs1au.org/resources/standards-and-guidelines/</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -854,7 +879,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Norwegian organization number MUST be stated in the correct format.\n The organisation number (TIN) is a nine digit number starting with 8 or 9. </svrl:text>
+          <svrl:text>Norwegian organization number MUST be stated in the correct format.</svrl:text>
+          <svrl:text>The organisation number (TIN) is a nine digit number starting with 8 or 9. </svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -875,7 +901,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Danish organization number (CVR) MUST be stated in the correct format.\n As a rule “CVR” or “SE” is mentioned in front of the number e.g. CVR 99999999 or SE 99999999. </svrl:text>
+          <svrl:text>Danish organization number (CVR) MUST be stated in the correct format.</svrl:text>
+          <svrl:text>As a rule “CVR” or “SE” is mentioned in front of the number e.g. CVR 99999999 or SE 99999999. </svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -896,7 +923,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Belgian enterprise number MUST be stated in the correct format.\n The EORI number consists of a letter code and a nine to fifteen-digit number combination, depending on the EU country. </svrl:text>
+          <svrl:text>Belgian enterprise number MUST be stated in the correct format.</svrl:text>
+          <svrl:text>The EORI number consists of a letter code and a nine to fifteen-digit number combination, depending on the EU country. </svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -917,7 +945,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>IPA Code (Codice Univoco Unità Organizzativa) must be stated in the correct format\n Must be four digits</svrl:text>
+          <svrl:text>IPA Code (Codice Univoco Unità Organizzativa) must be stated in the correct format</svrl:text>
+          <svrl:text>Must be four digits</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -938,7 +967,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Tax Code (Codice Fiscale) must be stated in the correct format \n The Italian tax code or codice fiscale is an alphanumeric 16 character code generated on the basis of your personal information</svrl:text>
+          <svrl:text>Tax Code (Codice Fiscale) must be stated in the correct format</svrl:text>
+          <svrl:text>The Italian tax code or codice fiscale is an alphanumeric 16 character code generated on the basis of your personal information</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -959,7 +989,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Tax Code (Codice Fiscale) must be stated in the correct format\n The Italian tax code or codice fiscale is an alphanumeric 16 character code generated on the basis of your personal information</svrl:text>
+          <svrl:text>Tax Code (Codice Fiscale) must be stated in the correct format</svrl:text>
+          <svrl:text>The Italian tax code or codice fiscale is an alphanumeric 16 character code generated on the basis of your personal information</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -980,7 +1011,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Italian VAT Code (Partita Iva) must be stated in the correct format\n The VAT number in the Italy consists of the country code IT followed by 11 characters , e.g. IT12345678901.</svrl:text>
+          <svrl:text>Italian VAT Code (Partita Iva) must be stated in the correct format</svrl:text>
+          <svrl:text>The VAT number in the Italy consists of the country code IT followed by 11 characters , e.g. IT12345678901.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1001,7 +1033,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Italian VAT Code (Partita Iva) must be stated in the correct format\n The VAT number in the Italy consists of the country code IT followed by 11 characters , e.g. IT12345678901.</svrl:text>
+          <svrl:text>Italian VAT Code (Partita Iva) must be stated in the correct format</svrl:text>
+          <svrl:text>The VAT number in the Italy consists of the country code IT followed by 11 characters , e.g. IT12345678901.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1022,7 +1055,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Swedish organization number MUST be stated in the correct format.\n Swedish registration number has 10 digits in the format of XXXXXX-XXXX. </svrl:text>
+          <svrl:text>Swedish organization number MUST be stated in the correct format.</svrl:text>
+          <svrl:text>Swedish registration number has 10 digits in the format of XXXXXX-XXXX.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1043,8 +1077,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Australian Business Number (ABN) MUST be stated in the correct format.\n The 11 digit ABN is structured as a 9 digit identifier with two leading check digits.</svrl:text>
-          <svrl:text>This is a sample suggestion. test test 123</svrl:text>
+          <svrl:text>Australian Business Number (ABN) MUST be stated in the correct format.</svrl:text>
+          <svrl:text>he 11 digit ABN is structured as a 9 digit identifier with two leading check digits.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1072,7 +1106,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>[AUNZ-R-001]-An invoice must contain the Seller's ABN if Seller country is Australia - make sure it is a valid ABN by checking the ABN website. </svrl:text>
+          <svrl:text>[AUNZ-R-001]-An invoice must contain the Seller's ABN if Seller country is Australia - make sure it is a valid ABN by checking the ABN lookup website.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1121,7 +1155,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>[AUNZ-R-002]-An invoice must contain the Seller's NZBN if Seller country is New Zealand - check at https://www.nzbn.govt.nz/</svrl:text>
+          <svrl:text>[AUNZ-R-002]-An invoice must contain the Seller's NZBN if Seller country is New Zealand- check at https://www.nzbn.govt.nz/</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1177,7 +1211,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Mime code must be according to subset of IANA code list. - https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry</svrl:text>
+          <svrl:text>Mime code must be according to subset of IANA code list.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1198,7 +1232,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Reason code MUST be according to subset of UNCL 5189 D.16B. -> Please refer to https://docs.peppol.eu/poacc/billing/3.0/codelist/UNCL5189/</svrl:text>
+          <svrl:text>Reason code MUST be according to subset of UNCL 5189 D.16B.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1219,7 +1253,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Reason code MUST be according to UNCL 7161 D.16B. -> Please refer to https://docs.peppol.eu/poacc/billing/3.0/codelist/UNCL5189/</svrl:text>
+          <svrl:text>Reason code MUST be according to UNCL 7161 D.16B.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1240,7 +1274,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Invoice period description code must be according to UNCL 2005 D.16B.-> Please refer to https://docs.peppol.eu/poacc/billing/3.0/codelist/UNCL5189/</svrl:text>
+          <svrl:text>Invoice period description code must be according to UNCL 2005 D.16B.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1261,7 +1295,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Currency code must be according to ISO 4217:2005 -> https://www.iso.org/iso-4217-currency-codes.html</svrl:text>
+          <svrl:text>Currency code must be according to ISO 4217:2005</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1282,7 +1316,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Invoice type code MUST be set according to the profile. -> https://docs.peppol.eu/poacc/billing/3.0/rules/ubl-peppol/PEPPOL-EN16931-P0100/</svrl:text>
+          <svrl:text>Invoice type code MUST be set according to the profile.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1303,7 +1337,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Credit note type code MUST be set according to the profile. -> A code specifying the functional type of the Invoice.</svrl:text>
+          <svrl:text>Credit note type code MUST be set according to the profile.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1324,7 +1358,8 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>A date MUST be formatted YYYY-MM-DD.</svrl:text>
+          <svrl:text>A date
+        MUST be formatted YYYY-MM-DD.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -1345,7 +1380,7 @@ Last update: 2022-11-08-->
           <xsl:attribute name="location">
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
-          <svrl:text>Electronic address identifier scheme must be from the codelist "Electronic Address Identifier Scheme"\n https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/cac-AccountingCustomerParty/cac-Party/cbc-EndpointID/</svrl:text>
+          <svrl:text>Electronic address identifier scheme must be from the codelist "Electronic Address Identifier Scheme"</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
