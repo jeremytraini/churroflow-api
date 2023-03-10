@@ -35,6 +35,7 @@ def replace_part_of_string(string, start, end, replace):
 def append_to_string(string, txt):
     return string + txt
 
+<<<<<<< HEAD
 def invalidate_invoice(
         invoice_text: str,
         choice: Literal["tag", "content", "attrib"],
@@ -43,6 +44,9 @@ def invalidate_invoice(
         text: str,
         index: int
     ):
+=======
+def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index):
+>>>>>>> origin
     '''
     Invalidating the given invoice by changing either the tag or the content into a new text.
     Changes the index-th tag or content that matches the tag_name.
