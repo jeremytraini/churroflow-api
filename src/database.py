@@ -45,6 +45,14 @@ class Violations(BaseModel):
     line = IntegerField(null=True, default=None)
     column = IntegerField(null=True,default=None)
 
+
+class Sessions(BaseModel):
+    user = ForeignKeyField(Users, backref='sessions')
+    token = TextField(unique=True)
+    date_created = DateTimeField()
+    date_expires = DateTimeField()
+
+
 # Create the tables in the database
 def create_tables():
     with db:
