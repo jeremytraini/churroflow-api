@@ -92,3 +92,10 @@ def invalidate_invoice(invoice_text, choice, tag_name, text, index):
             pass
 
     return etree.tostring(root).decode('utf-8')
+
+
+def replace_part_of_string(string, start, end, replace):
+    return string[:start] + replace + string[end:]
+
+def squeeze_text_inbetween(string, cursor, txt):
+    return string[:cursor] + txt + string[cursor:]
