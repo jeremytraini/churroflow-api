@@ -16,7 +16,7 @@ def report_json_report_v1(invoice: Invoice) -> Report:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -43,19 +43,20 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
         evaluation.is_valid = False
         evaluation.num_rules_failed = 1
         evaluation.num_violations = 1
-        violation = Violation(
-            rule_id="wellformedness",
-            is_fatal=True,
-            location=Location(
-                type="line",
-                line=error.lineno,
-                column=error.offset
-            ),
-            test="",
-            message=error.msg,
-            suggestion="suggestion"
+        evaluation.violations.append(
+            Violation(
+                rule_id="wellformedness",
+                is_fatal=True,
+                location=Location(
+                    type="line",
+                    line=error.lineno,
+                    column=error.offset
+                ),
+                test="",
+                message=error.msg,
+                suggestion="suggestion"
+            )
         )
-        evaluation.violations.append(violation)
 
     return evaluation
 
@@ -128,7 +129,7 @@ def report_get_v1(report_id: int) -> Report:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -149,7 +150,7 @@ def report_list_all_v1(order_by: str) -> List[Report]:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -167,15 +168,15 @@ def report_list_score_v1(score: int, order_by: str) -> List[Report]:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
     reports = [report]
     return reports
 
-def report_export_v1(report_id, report_format) -> ReportExport:
-    export = ReportExport(url="", invoice_hash="")
+def report_export_v1(report_id, report_format) -> Report_Export:
+    export = Report_Export(url="", invoice_hash="")
     return export
 
 def report_change_name_v1(report_id: int, new_name: str) -> Dict[None, None]:
@@ -195,15 +196,15 @@ def report_bulk_generate_v1(invoices: List[Invoice]) -> List[Report]:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
     reports = [report]
     return reports
 
-def report_bulk_export_v1(report_ids, report_format) -> List[ReportExport]:
-    export = ReportExport(url="", invoice_hash="")
+def report_bulk_export_v1(report_ids, report_format) -> List[Report_Export]:
+    export = Report_Export(url="", invoice_hash="")
     exports = [export]
     return exports
 

@@ -69,7 +69,7 @@ async def report_list_score(score: int, order_by: str) -> List[Report]:
 
 # TODO: check format and output types
 @app.get("/report/export/v1")
-async def report_export(report_id: int, report_format: Format) -> ReportExport:
+async def report_export(report_id: int, report_format: Format) -> Report_Export:
     return report_export_v1(report_id, report_format)
 
 # TODO: return type
@@ -83,23 +83,23 @@ async def report_delete(report_id: int) -> Dict[None, None]:
     return report_delete_v1(report_id)
 
 @app.get("/invoice/quick_fix_wellformedness/v1")
-async def invoice_quick_fix_wellformedness(report_id: int) -> QuickFixReturn:
+async def invoice_quick_fix_wellformedness(report_id: int) -> Quick_Fix_Return:
     return invoice_quick_fix_wellformedness_v1(report_id)
 
 @app.get("/invoice/quick_fix_syntax/v1")
-async def invoice_quick_fix_syntax(report_id: int) -> QuickFixReturn:
+async def invoice_quick_fix_syntax(report_id: int) -> Quick_Fix_Return:
     return invoice_quick_fix_syntax_v1(report_id)
 
 @app.get("/invoice/quick_fix_peppol/v1")
-async def invoice_quick_fix_peppol(report_id: int) -> QuickFixReturn:
+async def invoice_quick_fix_peppol(report_id: int) -> Quick_Fix_Return:
     return invoice_quick_fix_peppol_v1(report_id)
 
 @app.get("/invoice/quick_fix_schema/v1")
-async def invoice_quick_fix_schema(report_id: int) -> QuickFixReturn:
+async def invoice_quick_fix_schema(report_id: int) -> Quick_Fix_Return:
     return invoice_quick_fix_schema_v1(report_id)
 
 @app.get("/invoice/check_validity/v1")
-async def invoice_check_validity(report_id: int) -> CheckValidReturn:
+async def invoice_check_validity(report_id: int) -> Check_Valid_Return:
     return invoice_check_validity_v1(report_id)
 
 @app.post("/invoice/generate_hash/v1")
@@ -117,7 +117,7 @@ async def invoice_bulk_quick_fix(invoices: List[Invoice]) -> List[Invoice]:
 
 # TODO: check input and return type
 @app.get("/report/bulk_export/v1")
-async def report_bulk_export(report_ids: List[int], report_format: Format) -> List[ReportExport]:
+async def report_bulk_export(report_ids: List[int], report_format: Format) -> List[Report_Export]:
     return report_bulk_export_v1(report_ids, report_format)
 
 

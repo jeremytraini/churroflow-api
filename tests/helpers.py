@@ -81,7 +81,7 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
     else:
         text = texts[0]
     
-    root = etree.fromstring(invoice_text.encode('utf-8'))
+    root = etree.fromstring(invoice_text.encode('utf-8'), parser=None)
 
     for elem in root.getiterator():
         try:
@@ -101,5 +101,3 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
             pass
 
     return etree.tostring(root).decode('utf-8')
-# Used to invalidate invoice
-# To be replaced with Denzel's better function

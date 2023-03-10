@@ -43,18 +43,18 @@ class Report(BaseModel):
     is_valid: bool
     total_num_violations: int
     wellformedness:  Union[Evaluation, None]
-    schemaEvaluation: Union[Evaluation, None]
+    schema_evaluation: Union[Evaluation, None]
     syntax: Union[Evaluation, None]
     peppol: Union[Evaluation, None]
 
-class ReportExport(BaseModel):
+class Report_Export(BaseModel):
     url: str
     invoice_hash: str
 
-class QuickFixReturn(BaseModel):
+class Quick_Fix_Return(BaseModel):
     invoice: Invoice
     report: Report
 
-class CheckValidReturn(BaseModel):
+class Check_Valid_Return(BaseModel):
     is_valid: bool
     invoice_hash: str
