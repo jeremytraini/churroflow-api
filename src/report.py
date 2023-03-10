@@ -71,7 +71,6 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
     )
     
     data = extract_data_from_invoice(invoice)
-
     # TODO: can probably do this outside the function so that it isn't repeated
     # Parse the XSD file
     xsd_doc = etree.parse("src/xsd/maindoc/UBL-Invoice-2.1.xsd", parser=None)
@@ -81,30 +80,26 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
 
     # Validate the XML against the XSD schema
     is_valid = xsd.validate(xml_doc)
-    print(is_valid)
     if not is_valid:
-        print('Not valid! :(')
         evaluation.is_valid = False
-        errors = []
+        error_types = []
         for error in xsd.error_log:
-            errors.append(error)
             evaluation.violations.append(
                 Violation(
-                    rule_id="wellformedness",
+                    rule_id=error.type,
                     is_fatal=True,
                     location=Location(
                         type="line",
-                        line=error.lineno,
-                        column=error.offset
+                        line=error.line,
+                        column=error.column
                     ),
-                    test="",
-                    message=error.msg,
+                    test=error.type_name,
+                    message=error.message,
                     suggestion="suggestion"
                 )
             )
-            evaluation.num_rules_failed += not (error in errors)
-            print(error.message)
-            print()
+            evaluation.num_rules_failed += not (error.type in error_types)
+            error_types.append(error.type)
     
     evaluation.num_violations = len(evaluation.violations)
     
