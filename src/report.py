@@ -130,7 +130,7 @@ def report_get_v1(report_id: int) -> Report:
     )
     return report
 
-def report_list_all_v1(order_by: str) -> List[Report]:
+def report_list_all_v1(order_by: Order_By) -> List[Report]:
     report = Report(
         report_id=0,
         score=0,
@@ -148,7 +148,7 @@ def report_list_all_v1(order_by: str) -> List[Report]:
     reports = [report]
     return reports
 
-def report_list_score_v1(score: int, order_by: str) -> List[Report]:
+def report_list_score_v1(score: int, order_by: Order_By) -> List[Report]:
     report = Report(
         report_id=0,
         score=0,

@@ -3,6 +3,10 @@ from typing import Any, Dict, List, Literal, Union
 
 Server_call_return = Dict[str, Any]
 
+class Order_By(BaseModel):
+    attribute: Literal["score", "date_generated", "invoice_name", "total_num_violations"]
+    is_ascending: bool
+
 class Format(BaseModel):
     format: Literal["HTML", "PDF", "CSV"]
 
