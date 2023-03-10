@@ -128,4 +128,4 @@ dmypy.json
 bin/
 pyvenv.cfg
 lib64
-
+.vscode

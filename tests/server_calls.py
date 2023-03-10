@@ -1,39 +1,57 @@
 import requests
 import json
 from src.config import full_url
+from src.types import *
 
 
-def health_check_v1(): 
+def health_check_v1():
     response = requests.get(full_url + 'health_check/v1')
 
     return json.loads(response.text)
 
+def report_json_report_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
+    response = requests.post(full_url + 'report/json_report/v1', json=payload)
+    
+    return json.loads(response.text)
 
-def report_syntax_v1(name, format, source, data):
+
+def report_visual_report_v1(invoice: Invoice, format: Format) -> Server_call_return:
     payload = {
-        "name": name,
-        "format": format,
-        "source": source,
-        "data": data
+        "invoice": invoice.dict(),
+        "format": format.dict()
     }
+    response = requests.post(full_url + 'report/visual_report/v1', json=payload)
+    
+    return json.loads(response.text)
+
+
+def report_wellformedness_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
+    response = requests.post(full_url + 'report/wellformedness/v1', json=payload)
+    
+    return json.loads(response.text)
+
+
+def report_schema_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
+    response = requests.post(full_url + 'report/schema/v1', json=payload)
+
+    return json.loads(response.text)
+
+
+def report_syntax_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
     response = requests.post(full_url + 'report/syntax/v1', json=payload)
 
     return json.loads(response.text)
 
 
-
-def report_peppol_v1(name, format, source, data):
-    payload = {
-        "name": name,
-        "format": format,
-        "source": source,
-        "data": data
-    }
+def report_peppol_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
     response = requests.post(full_url + 'report/peppol/v1', json=payload)
 
     return json.loads(response.text)
-
-
 
 
 # Sample calls below
@@ -46,7 +64,7 @@ def sample_post(val):
 
     return json.loads(response.text)
 
-def sample_get(val): 
+def sample_get(val):
     payload = {
         "key": val
     }
@@ -54,7 +72,7 @@ def sample_get(val):
 
     return json.loads(response.text)
 
-def sample_put(val): 
+def sample_put(val):
     payload = {
         "key": val
     }
