@@ -130,11 +130,7 @@ def report_get_v1(report_id: int) -> Report:
     )
     return report
 
-# TODO: test order_by parsing
 def report_list_all_v1(order_by: str) -> List[Report]:
-    (order, asc) = order_by.split(" ")
-    print(order)
-    print(asc)
     report = Report(
         report_id=0,
         score=0,
@@ -208,8 +204,6 @@ def report_bulk_export_v1(report_ids, report_format) -> List[Report_Export]:
 def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Evaluation:
     with PySaxonProcessor(license=False) as proc:
         
-        print(xslt_path)
-        
         xsltproc = proc.new_xslt30_processor()
         executable = xsltproc.compile_stylesheet(stylesheet_file=xslt_path)
         
@@ -218,8 +212,6 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Evaluation:
         
         if executable.exception_occurred:
             raise Exception("Executable failed to load! " + executable.error_message)
-        
-        print(len(invoice_text))
         
         tmp = NamedTemporaryFile(mode='w', delete=False)
         tmp.write(invoice_text)

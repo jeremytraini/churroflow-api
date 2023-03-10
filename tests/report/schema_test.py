@@ -100,6 +100,40 @@ def test_schema_tag_order_invalid():
     assert violation.location.line == 5
     assert violation.location.column == 0
 
+def test_schema_date_type_invalid():
+    # Invalidating the date
+    data = invalidate_invoice(VALID_INVOICE_TEXT, "content", "cbc:IssueDate", "", "totallyADate", 1)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
+
+    schema_evaluation = report_schema_v1(invoice)
+    schema_evaluation = Evaluation(**schema_evaluation)
+    assert schema_evaluation.aspect == "schema"
+
+    # We expect exactly 1 rule to fail due to the capitalised tag
+    assert schema_evaluation.num_rules_failed == 1
+
+    # We expect exactly 1 violation due to the capitalised tag
+    assert schema_evaluation.num_violations == 1
+
+    # Thus there should be exactly 1 violation in the violation list
+    assert len(schema_evaluation.violations) == 1
+
+    violation = schema_evaluation.violations[0]
+
+    # Check that the violation is flagged as fatal
+    assert violation.is_fatal
+
+    # Check that the violation has a non-empty message, test and suggestion
+    assert violation.message
+    assert violation.test
+    assert violation.suggestion
+    
+    assert violation.location.type == "line"
+
+    # Check that the location line/column are were the violation is
+    assert violation.location.line == 5
+    assert violation.location.column == 0
+
 def test_schema_tags_revalid():
     # Replacing the tags but making sure they are valid
     data = invalidate_invoice(VALID_INVOICE_TEXT, "tag", "cbc:IssueDate", "", "cbc:CopyIndicator", 1)
