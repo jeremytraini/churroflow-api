@@ -308,7 +308,7 @@ Last update: 2022-11-08-->
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
           <svrl:text>Document MUST not contain empty elements.</svrl:text>
-          <svrl:text>Make sure all attributes are filled in eg. date, ABN details etc.</svrl:text>
+          <svrl:text>Make sure all tags are filled in eg. date, ABN details etc.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
@@ -433,7 +433,7 @@ Last update: 2022-11-08-->
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
           <svrl:text>Only one tax total without tax subtotals MUST be provided when tax currency code is provided.</svrl:text>
-          <svrl:text>count(TaxTotal[not(TaxSubtotal)]) = (if (TaxCurrencyCode) then 1 else 0)</svrl:text>
+          <svrl:text>Please refer to guidelines here: https://docs.peppol.eu/poacc/billing/3.0/rules/PEPPOL-EN16931-R054/</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
