@@ -31,6 +31,16 @@ def remove_part_of_string(string, start, end):
     
     return string[:start] + string[end:]
 
+
+def insert_into_string(string, start, insert):
+    return string[:start] + insert + string[start:]
+
+def replace_part_of_string(string, start, end, replace):
+    return string[:start] + replace + string[end:]
+
+def append_to_string(string, txt):
+    return string + txt
+
 def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index):
     '''
     Invalidating the given invoice by changing either the tag or the content into a new text.
