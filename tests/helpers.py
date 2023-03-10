@@ -1,6 +1,13 @@
 from lxml import etree
 from io import StringIO, BytesIO
 from tests.constants import CAC, CBC
+from tests.server_calls import clear_v1
+from database import reset_db
+
+@pytest.fixture(autouse=True)
+def clear_database():
+    reset_db()
+
 
 def remove_part_of_string(string, start, end):
     '''
@@ -91,3 +98,5 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
             pass
 
     return etree.tostring(root).decode('utf-8')
+
+

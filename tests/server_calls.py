@@ -34,7 +34,13 @@ def report_peppol_v1(name, format, source, data):
     return json.loads(response.text)
 
 
-
+def clear_v1(token):
+    payload = {
+        "token": token
+    }
+    response = requests.delete(full_url + 'clear/v1', json=payload)
+    
+    return json.loads(response.text)
 
 # Sample calls below
 
