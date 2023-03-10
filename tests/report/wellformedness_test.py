@@ -34,7 +34,7 @@ def test_wellformed_case_sensitive_tags_invalid():
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
-    
+
     assert wellformed_evaluation.aspect == "wellformedness"
 
     # We expect exactly 1 rule to fail due to the capitalised tag
@@ -53,7 +53,7 @@ def test_wellformed_case_sensitive_tags_invalid():
     # Check that the violation has a non-empty message and suggestion
     assert violation.message
     assert violation.suggestion
-    
+
     assert violation.location.type == "line"
 
     # Check that the location line/column are were the violation is
@@ -134,7 +134,7 @@ def test_no_closing_tag_invalid():
 def test_wrong_nesting_invalid():
     data = VALID_INVOICE_TEXT
     data = remove_part_of_string(data, 11512, 11530)
-    data = append_to_string(data, """</cac:InvoiceLine>""") 
+    data = append_to_string(data, """</cac:InvoiceLine>""")
     invoice = Invoice(name="My Invoice", source="text", data=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
@@ -159,46 +159,84 @@ def test_wrong_nesting_invalid():
     assert violation.message
     assert violation.suggestion
 
-# def test_no_escape_for_special_char_invalid():
-#     data = VALID_INVOICE_TEXT
-#     data = replace_part_of_string(data, 499, 500, "<")
-#     invoice = Invoice(name="My Invoice", source="text", data=data)
+def test_wellformedness_valid_version_number_error():
+    data = VALID_INVOICE_TEXT
 
-#     wellformed_evaluation = report_wellformedness_v1(invoice)
-#     wellformed_evaluation = Evaluation(**wellformed_evaluation)
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
-#     # We expect exactly 1 rule to fail due to not escaping a special character
-#     assert wellformed_evaluation.num_rules_failed == 1
+    wellformedness_evaluation = report_wellformedness_v1(invoice)
+    wellformedness_evaluation = Evaluation(**wellformedness_evaluation)
+    print(wellformedness_evaluation)
+    assert wellformedness_evaluation.aspect == "wellformedness"
+    assert data[15] == '1' or data[15] == '2'
 
-#     # We expect exactly 1 violation due to the special character
-#     assert wellformed_evaluation.num_violations == 1
+    # We expect exactly 1 rule to fail due to having no closing tag in the corresponding nest
+    assert wellformedness_evaluation.num_rules_failed == 0
 
-#     # Thus there should be exactly 1 violation in the violation list
-#     assert len(wellformed_evaluation.violations) == 1
+    # We expect exactly 1 violation due to the missing closing tag in the nest
+    assert wellformedness_evaluation.num_violations == 0
 
-#     violation = wellformed_evaluation.violations[0]
+    # Thus there should be exactly 1 violation in the violation list
+    assert len(wellformedness_evaluation.violations) == 0
 
-#     # Check that the violation is for the correct rule and is flagged as fatal
-#     assert violation.rule_id == "wellformedness" # need to find correct rule_id
-#     assert violation.is_fatal == True
 
-#     # Check that the violation has a non-empty message and suggestion
-#     assert violation.message
-#     assert violation.suggestion
 
-# def test_escape_special_char_valid():
-#     data = VALID_INVOICE_TEXT
-#     data = replace_part_of_string(data, 499, 503, "&lt;")
-#     invoice = Invoice(name="My Invoice", source="text", data=data)
+def test_wellformedness_invalid_version_number_error():
+    data = VALID_INVOICE_TEXT
+    data = replace_part_of_string(data, 15, 16, '5')
 
-#     wellformed_evaluation = report_wellformedness_v1(invoice)
-#     wellformed_evaluation = Evaluation(**wellformed_evaluation)
+    print(data[15:17])
+    invoice = Invoice(name="My Invoice", source="text", data=data)
 
-#     # We expect exactly 0 rules to fail since the special character was escaped
-#     assert wellformed_evaluation.num_rules_failed == 0
+    wellformedness_evaluation = report_wellformedness_v1(invoice)
+    wellformedness_evaluation = Evaluation(**wellformedness_evaluation)
+    print(wellformedness_evaluation)
+    assert wellformedness_evaluation.aspect == "wellformedness"
+    assert data[15] == '5'
 
-#     # We expect exactly 0 violations
-#     assert wellformed_evaluation.num_violations == 0
+    # We expect exactly 1 rule to fail due to having no closing tag in the corresponding nest
+    assert wellformedness_evaluation.num_rules_failed == 1
 
-#     # Thus there should've be any violation
-#     assert len(wellformed_evaluation.violations) == 0
+    # We expect exactly 1 violation due to the missing closing tag in the nest
+    assert wellformedness_evaluation.num_violations == 1
+
+    # Thus there should be exactly 1 violation in the violation list
+    assert len(wellformedness_evaluation.violations) == 1
+
+    violation = wellformedness_evaluation.violations[0]
+
+    # Check that the violation is for the correct rule and is flagged as fatal
+    assert violation.rule_id == "wellformedness" # need to find correct rule_id
+    assert violation.is_fatal == True
+
+    # Check that the violation has a non-empty message and suggestion
+    assert violation.message
+    assert violation.suggestion
+
+def test_no_escape_for_special_char_invalid():
+    data = VALID_INVOICE_TEXT
+    data = replace_part_of_string(data, 499, 500, "<")
+    invoice = Invoice(name="My Invoice", source="text", data=data)
+
+    wellformed_evaluation = report_wellformedness_v1(invoice)
+    wellformed_evaluation = Evaluation(**wellformed_evaluation)
+
+    # We expect exactly 1 rule to fail due to not escaping a special character
+    assert wellformed_evaluation.num_rules_failed == 1
+
+    # We expect exactly 1 violation due to the special character
+    assert wellformed_evaluation.num_violations == 1
+
+    # Thus there should be exactly 1 violation in the violation list
+    assert len(wellformed_evaluation.violations) == 1
+
+    violation = wellformed_evaluation.violations[0]
+
+    # Check that the violation is for the correct rule and is flagged as fatal
+    assert violation.rule_id == "wellformedness" # need to find correct rule_id
+    assert violation.is_fatal == True
+
+    # Check that the violation has a non-empty message and suggestion
+    assert violation.message
+    assert violation.suggestion
+
