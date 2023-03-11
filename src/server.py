@@ -7,8 +7,9 @@ from src.export import *
 from src.type_structure import *
 from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
 from src.error import AuthenticationError, InputError
+from io import BytesIO
 import uvicorn
 
 app = FastAPI()
@@ -48,7 +49,14 @@ async def export_json_report(report_id: int):
 
 @app.get("/export/pdf_report/v1")
 async def export_pdf_report(report_id: int):
-    return export_pdf_report_v1(report_id)
+    pdf_file = BytesIO(export_pdf_report_v1(report_id))
+
+    # Return the PDF as a streaming response
+    headers = {
+        "Content-Disposition": f"attachment; filename=invoice_validation_report_{report_id}.pdf",
+        "Content-Type": "application/pdf",
+    }
+    return StreamingResponse(pdf_file, headers=headers)
 
 @app.get("/export/html_report/v1", response_class=HTMLResponse)
 async def export_html_report(report_id: int):
@@ -57,7 +65,12 @@ async def export_html_report(report_id: int):
 
 @app.get("/export/csv_report/v1")
 async def export_csv_report(report_id: int):
-    return export_csv_report_v1(report_id)
+    csv_contents = export_csv_report_v1(report_id)
+    
+    response = Response(content=csv_contents, media_type='text/csv')
+    response.headers['Content-Disposition'] = f'attachment; filename="invoice_validation_report_{report_id}.csv"'
+
+    return response
 
 @app.post("/report/wellformedness/v1")
 async def report_wellformedness(invoice: Invoice) -> Evaluation:

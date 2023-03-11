@@ -6,6 +6,9 @@ import json
 from html import escape
 from peewee import DoesNotExist
 from src.server import HTTPException
+from weasyprint import HTML
+from io import BytesIO, StringIO
+import csv
 
 
 def export_json_report_v1(report_id: int):
@@ -17,7 +20,10 @@ def export_json_report_v1(report_id: int):
     return report.to_json()
 
 def export_pdf_report_v1(report_id: int):
-    pass
+    html = export_html_report_v1(report_id)
+    pdf_bytes = HTML(string=html).write_pdf()
+    
+    return pdf_bytes
 
 def copy_element(element, parent):
     new_element = BeautifulSoup(str(element), "lxml").body.contents[0]
@@ -113,8 +119,46 @@ def export_html_report_v1(report_id: int):
 
     return str(soup)
 
-
+def write_violations(writer, violations):
+    for violation in violations:
+        data = [
+            violation["rule_id"],
+            "Fatal" if violation["is_fatal"] == "fatal" else "Warning",
+            violation["message"],
+            violation["test"],
+            violation["xpath"],
+            violation["line"],
+            violation["column"]
+        ]
+        writer.writerow(data)
 
 def export_csv_report_v1(report_id: int):
-    pass
+    try:
+        report = Reports.get_by_id(report_id)
+    except DoesNotExist:
+        raise Exception(f"Report with id {report_id} not found")
+    
+    report = report.to_json()
+    
+    csv_buffer = StringIO()
+    writer = csv.writer(csv_buffer)
+    
+    writer.writerow(["Rule ID", "Severity", "Description", "Test", "XPath", "Line", "Column"])
+    
+    if report["wellformedness_evaluation"]:
+        write_violations(writer, report["wellformedness_evaluation"]["violations"])
+        
+    if report["schema_evaluation"]:
+        write_violations(writer, report["schema_evaluation"]["violations"])
+        
+    if report["syntax_evaluation"]:
+        write_violations(writer, report["syntax_evaluation"]["violations"])
+        
+    if report["peppol_evaluation"]:
+        write_violations(writer, report["peppol_evaluation"]["violations"])
+    
+    csv_contents = csv_buffer.getvalue()
+    csv_buffer.close()
+    
+    return csv_contents
 
