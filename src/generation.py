@@ -62,13 +62,48 @@ def generate_wellformedness_evaluation(invoice_text: str) -> int:
         violation.evaluation = evaluation.id 
         violation.save()
     
-    return evaluation
+    return evaluation.id
 
-from tests.constants import VALID_INVOICE_TEXT
-print(generate_wellformedness_evaluation(VALID_INVOICE_TEXT[:1000]))
 
 def generate_schema_evaluation(invoice_text: str) -> int:
-    pass
+    evaluation = Evaluations(
+        aspect="wellformedness",
+        is_valid=True,
+        num_warnings=0,
+        num_errors=0,
+        num_rules_failed=0
+    )
+
+    # Parse the XSD file
+    xsd_doc = etree.parse("src/xsd/maindoc/UBL-Invoice-2.1.xsd")
+    xsd = etree.XMLSchema(xsd_doc)
+    
+    # Parse the XML data
+    xml_doc = etree.fromstring(invoice_text.encode("utf-8"))
+    
+    violations = []
+    
+    # Validate the XML against the XSD schema
+    if not xsd.validate(xml_doc):
+        evaluation.is_valid = False
+        evaluation.num_errors = 1
+        evaluation.num_rules_failed = 1
+        
+        for error in xsd.error_log:
+            violations.append(Violations(
+                rule_id="wellformedness",
+                is_fatal=True,
+                line=error.lineno,
+                column=error.offset,
+                message=error.msg
+            ))
+    
+    for violation in violations:
+        violation.evaluation = evaluation.id 
+        violation.save()
+    
+    return evaluation.id
+
 
 def generate_syntax_evaluation(invoice_text: str) -> int:
     return generate_xslt_evaluation("syntax", invoice_text)
