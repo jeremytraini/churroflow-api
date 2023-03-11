@@ -46,6 +46,32 @@ def export_json_report_v1(report_id: int) -> Server_call_return:
     
     return json.loads(response.text)
 
+def export_pdf_report_v1(report_id: int):
+    payload = {
+        "report_id": report_id
+    }
+    response = requests.post(full_url + 'export/pdf_report/v1', params=payload)
+    
+    with open(path, 'wb') as s:
+        s.write(data)
+    
+    return response.content
+
+def export_html_report_v1(report_id: int):
+    payload = {
+        "report_id": report_id
+    }
+    response = requests.post(full_url + 'export/html_report/v1', params=payload)
+    
+    return response.content
+
+def export_csv_report_v1(report_id: int):
+    payload = {
+        "report_id": report_id
+    }
+    response = requests.post(full_url + 'export/csv_report/v1', params=payload)
+    
+    return response.content
 
 # Report Endpoints
 

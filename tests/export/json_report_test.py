@@ -62,27 +62,4 @@ def test_json_valid_invoice():
     assert report.peppol_evaluation.num_errors == 0
     assert report.peppol_evaluation.violations == []
 
-# Testing that a single rule fails when there is one error in the invoice
-def test_syntax_single_violation():
-    data = VALID_INVOICE_TEXT
-
-
-# Testing that multiple violations are generated when there are multiple errors in the invoice
-def test_syntax_multiple_violations_same_rule():
-    data = VALID_INVOICE_TEXT
-
-
-def test_syntax_multiple_violations_different_rules():
-    data = VALID_INVOICE_TEXT
-    
-
-# Testing that a warning doesn't invalidate the report
-def test_syntax_warning_doesnt_invalidate_report():
-    data = VALID_INVOICE_TEXT
-    
-    
-# Testing that a fatal error does invalidate the report
-def test_syntax_fatal_error_invalidates_report():
-    data = VALID_INVOICE_TEXT
-    
 
