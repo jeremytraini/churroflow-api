@@ -28,6 +28,19 @@ async def validation_exception_handler(request: Request, exc: Exception):
 async def health_check():
     return health_check_v1()
 
+@app.post("/invoice/upload_text/v1")
+async def invoice_upload_text(name: str, invoice_text: str) -> str:
+    return invoice_upload_text_v1(invoice)
+
+@app.post("/invoice/upload_url/v1")
+async def invoice_upload_url(name: str, invoice_url: str) -> str:
+    return invoice_upload_url_v1(invoice)
+
+@app.post("/invoice/upload_file/v1")
+async def invoice_upload_file(file: UploadFile) -> str:
+    return invoice_upload_file_v1(name=invoice_file.filename, invoice_file=invoice_file.file)
+
+
 @app.post("/report/json_report/v1")
 async def report_json_report(invoice: Invoice) -> Report:
     return report_json_report_v1(invoice)
@@ -79,22 +92,6 @@ async def report_change_name(report_id: int, new_name: str) -> Dict[None, None]:
 @app.delete("/report/delete/v1")
 async def report_delete(report_id: int) -> Dict[None, None]:
     return report_delete_v1(report_id)
-
-@app.get("/invoice/quick_fix_wellformedness/v1")
-async def invoice_quick_fix_wellformedness(report_id: int) -> QuickFixReturn:
-    return invoice_quick_fix_wellformedness_v1(report_id)
-
-@app.get("/invoice/quick_fix_syntax/v1")
-async def invoice_quick_fix_syntax(report_id: int) -> QuickFixReturn:
-    return invoice_quick_fix_syntax_v1(report_id)
-
-@app.get("/invoice/quick_fix_peppol/v1")
-async def invoice_quick_fix_peppol(report_id: int) -> QuickFixReturn:
-    return invoice_quick_fix_peppol_v1(report_id)
-
-@app.get("/invoice/quick_fix_schema/v1")
-async def invoice_quick_fix_schema(report_id: int) -> QuickFixReturn:
-    return invoice_quick_fix_schema_v1(report_id)
 
 @app.get("/invoice/check_validity/v1")
 async def invoice_check_validity(report_id: int) -> CheckValidReturn:

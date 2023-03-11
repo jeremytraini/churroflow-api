@@ -15,3 +15,4 @@ uvicorn==0.20.0
 weasyprint==58.1
 beautifulsoup4==4.11.2
 peewee==3.16.0
+python-multipart==0.0.6
