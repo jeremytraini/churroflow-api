@@ -1,8 +1,7 @@
 from peewee import *
 
 
-db = PostgresqlDatabase('validation', host='localhost', port=5432, user='postgres', password='postgres')
-
+db = PostgresqlDatabase('validation', host='localhost', port=5433, user='postgres', password='postgres')
 
 # Defining database models using Peewee's Model class
 
@@ -15,10 +14,9 @@ class Users(BaseModel):
     password_hash = TextField()
 
 class Evaluations(BaseModel):
-    num_violations = IntegerField()
     num_warnings = IntegerField()
     num_errors = IntegerField()
-
+    num_rules_failed = IntegerField()
 
 class Reports(BaseModel):
     date_generated = DateTimeField()
@@ -26,7 +24,6 @@ class Reports(BaseModel):
     invoice_raw = TextField()
     invoice_hash = TextField()
     is_valid = BooleanField()
-    total_violations = IntegerField()
     total_warnings = IntegerField()
     total_errors = IntegerField()
     wellformedness = ForeignKeyField(Evaluations, backref='wellformedness')
@@ -36,7 +33,7 @@ class Reports(BaseModel):
 
 
 class Violations(BaseModel):
-    evaluation = ForeignKeyField(Evaluations, backref='violations')
+    evaluation = ForeignKeyField(Evaluations, backref='violations', null=True, default=None)
     rule_id = TextField()
     is_fatal = BooleanField()
     message = TextField()
@@ -52,15 +49,20 @@ class Sessions(BaseModel):
     date_created = DateTimeField()
     date_expires = DateTimeField()
 
+tables = [Users, Evaluations, Reports, Violations, Sessions]
 
 # Create the tables in the database
 def create_tables():
     with db:
-        db.create_tables([Users, Evaluations, Reports, Violations])
+        db.create_tables(tables)
+
+def clear_database():
+    with db:
+        db.drop_tables(tables)
+        db.create_tables(tables)
 
 # Connect to the database when this file is imported
 db.connect()
 
 create_tables()
-
-print(db.get_tables())
+clear_database()

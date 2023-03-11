@@ -1,11 +1,4 @@
-from src.type_structure import *
-from lxml import etree
-from typing import Dict
-from saxonche import PySaxonProcessor
-from tempfile import NamedTemporaryFile
 import requests
-from os import unlink
-from src.database import Users, Reports, Violations, Evaluations, db
 from report import report_generate
 
 

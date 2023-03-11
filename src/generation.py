@@ -8,10 +8,64 @@ from os import unlink
 from src.database import Users, Reports, Violations, Evaluations, db
 
 def generate_report(invoice_name: str, invoice_text: str) -> int:
-    pass
+    wellformedness_evaluation_id = generate_wellformedness_evaluation(invoice_text)
+    schema_evaluation_id = generate_schema_evaluation(invoice_text)
+    syntax_evaluation_id = generate_syntax_evaluation(invoice_text)
+    peppol_evaluation_id = generate_peppol_evaluation(invoice_text)
+    
+    report = Reports.create(
+        date_generated="",
+        invoice_name="",
+        invoice_raw="",
+        invoice_hash="",
+        is_valid=True,
+        total_num_violations=0,
+        total_num_warnings=0,
+        wellformedness=wellformedness_evaluation_id,
+        schema=schema_evaluation_id,
+        syntax=syntax_evaluation_id,
+        peppol=peppol_evaluation_id
+    )
+    
+    return report.id
+
 
 def generate_wellformedness_evaluation(invoice_text: str) -> int:
-    pass
+    evaluation = Evaluations(
+        aspect="wellformedness",
+        is_valid=True,
+        num_warnings=0,
+        num_errors=0,
+        num_rules_failed=0
+    )
+    
+    violations = []
+
+    try:
+        etree.fromstring(invoice_text.encode("utf-8"), parser=None)
+    except etree.XMLSyntaxError as error:
+        evaluation.is_valid = False
+        evaluation.num_errors = 1
+        evaluation.num_rules_failed = 1
+        
+        violations.append(Violations(
+            rule_id="wellformedness",
+            is_fatal=True,
+            line=error.lineno,
+            column=error.offset,
+            message=error.msg
+        ))
+    
+    evaluation.save()
+    
+    for violation in violations:
+        violation.evaluation = evaluation.id 
+        violation.save()
+    
+    return evaluation
+
+from tests.constants import VALID_INVOICE_TEXT
+print(generate_wellformedness_evaluation(VALID_INVOICE_TEXT[:1000]))
 
 def generate_schema_evaluation(invoice_text: str) -> int:
     pass
