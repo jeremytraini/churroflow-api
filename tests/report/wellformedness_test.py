@@ -4,7 +4,7 @@ from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import remove_part_of_string, append_to_string, replace_part_of_string
 """
 =====================================
-/report/wellformedness/v1 TESTS - (7 CASES TO BE TESTED)
+/report/wellformedness/v1 TESTS
 =====================================
 """
 # Wellformedness Testing that the report was generated properly and matches input data
