@@ -252,10 +252,10 @@ def test_escape_for_special_char_valid():
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
 
-    # We expect exactly 0 rules to fail due to escaping tyhe special character
+    # We expect exactly 0 rules to fail due to escaping the special character
     assert wellformed_evaluation.num_rules_failed == 0
 
-    # We expect exactly 0 violation due to escaping tyhe special character
+    # We expect exactly 0 violation due to escaping the special character
     assert wellformed_evaluation.num_violations == 0
 
     # Thus there should be exactly 0 violation in the violation list
