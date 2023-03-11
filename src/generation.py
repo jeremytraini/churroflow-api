@@ -2,7 +2,7 @@ from src.type_structure import *
 from lxml import etree
 from typing import Dict
 from saxonche import PySaxonProcessor
-from tempfile import NamedTemporaryFile
+from helpers import create_temp_file
 import requests
 from os import unlink
 from src.database import Users, Reports, Violations, Evaluations, db
@@ -111,16 +111,15 @@ def generate_syntax_evaluation(invoice_text: str) -> int:
 def generate_peppol_evaluation(invoice_text: str) -> int:
     return generate_xslt_evaluation("peppol", invoice_text)
 
-def create_temp_file(invoice_text: str) -> str:
-    tmp = NamedTemporaryFile(mode='w', delete=False)
-    tmp.write(invoice_text)
-    tmp.close()
-    
-    return tmp.name
-
 def generate_xslt_evaluation(aspect, invoice_text) -> int:
     with PySaxonProcessor(license=False) as proc:
         xsltproc = proc.new_xslt30_processor()
+        
+        if aspect == "syntax":
+            xslt_path = "src/validation_artefacts/AUNZ-UBL-validation.xslt"
+        else:
+            xslt_path = "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt"
+        
         executable = xsltproc.compile_stylesheet(stylesheet_file=xslt_path)
         
         if xsltproc.exception_occurred:
@@ -134,7 +133,9 @@ def generate_xslt_evaluation(aspect, invoice_text) -> int:
             raise Exception("Could not generate evaluation due to bad XML!")
         
         violations = []
-        is_valid = True
+        
+        num_warnings = 0
+        num_errors = 0
         rules_failed = set()
         
         output = schematron_output.item_at(0).get_node_value().children[0].children
@@ -145,31 +146,41 @@ def generate_xslt_evaluation(aspect, invoice_text) -> int:
                 rules_failed.add(id_name)
                 is_fatal = item.get_attribute_value("flag") == "fatal"
                 
-                if is_valid and is_fatal:
-                    is_valid = False
+                if is_fatal:
+                    num_errors += 1
+                else:
+                    num_warnings += 1
                 
                 xpath = item.get_attribute_value("location")
                 test = item.get_attribute_value("test")
                 
                 message = ""
+                suggestion = ""
                 if item.children:
                     message = item.children[0].string_value
+                    
+                    if len(item.children) > 1:
+                        suggestion = item.children[1].string_value
                 
-                violations.append({
-                    "rule_id": id_name,
-                    "is_fatal": is_fatal,
-                    "message": message,
-                    "suggestion": "suggestion",
-                    "test": test,
-                    "xpath": xpath
-                })
+                violations.append(Violations(
+                    rule_id=id_name,
+                    is_fatal=is_fatal,
+                    xpath=xpath,
+                    test=test,
+                    message=message,
+                    suggestion=suggestion
+                ))
         
-        result = Evaluation(
+        evaluation = Evaluations.create(
             aspect=aspect,
-            is_valid=is_valid,
-            num_rules_failed=len(rules_failed),
-            num_violations=len(violations),
-            violations=violations
+            is_valid=num_errors > 0,
+            num_warnings=num_warnings,
+            num_errors=num_errors,
+            num_rules_failed=len(rules_failed)
         )
         
-        return result
+        for violation in violations:
+            violation.evaluation = evaluation.id 
+            violation.save()
+        
+        return evaluation.id
