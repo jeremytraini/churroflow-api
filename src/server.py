@@ -3,7 +3,7 @@ from src.config import base_url, port
 from src.health_check import health_check_v1
 from src.report import *
 from src.invoice import *
-from src.export import export_json_report_v1
+from src.export import *
 from src.type_structure import *
 from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile
@@ -46,6 +46,18 @@ async def invoice_upload_file(invoice_file: UploadFile) -> Dict:
 async def export_json_report(report_id: int):
     return export_json_report_v1(report_id)
 
+@app.post("/export/pdf_report/v1")
+async def export_pdf_report(report_id: int):
+    return export_pdf_report_v1(report_id)
+
+@app.post("/export/html_report/v1")
+async def export_html_report(report_id: int):
+    return export_html_report_v1(report_id)
+
+@app.post("/export/csv_report/v1")
+async def export_csv_report(report_id: int):
+    return export_csv_report_v1(report_id)
+
 @app.post("/report/wellformedness/v1")
 async def report_wellformedness(invoice: Invoice) -> Evaluation:
     return report_wellformedness_v1(invoice)
@@ -73,11 +85,6 @@ async def report_list_all(order_by: OrderBy) -> List[Report]:
 @app.get("/report/list_score/v1")
 async def report_list_score(score: int, order_by: OrderBy) -> List[Report]:
     return report_list_score_v1(score, order_by)
-
-# TODO: check format and output types
-@app.get("/report/export/v1")
-async def report_export(report_id: int, report_format: Format) -> ReportExport:
-    return report_export_v1(report_id, report_format)
 
 # TODO: return type
 @app.put("/report/change_name/v1")
