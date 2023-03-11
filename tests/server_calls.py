@@ -24,7 +24,7 @@ def invoice_upload_url_v1(invoice_name: str, invoice_url: str) -> Server_call_re
     
     return json.loads(response.text)
 
-def invoice_upload_file_v1(invoice_name: str, invoice_filename: File()) -> Server_call_return:
+def invoice_upload_file_v1(invoice_name: str, invoice_filename) -> Server_call_return:
     headers = {
         "invoice_name": invoice_name
     }
@@ -36,24 +36,18 @@ def invoice_upload_file_v1(invoice_name: str, invoice_filename: File()) -> Serve
     return json.loads(response.text)
 
 
-# Report Endpoints
+# Export Endpoints
 
-def report_json_report_v1(invoice: Invoice) -> Server_call_return:
-    payload = invoice.dict()
-    response = requests.post(full_url + 'report/json_report/v1', json=payload)
-    
-    return json.loads(response.text)
-
-
-def report_visual_report_v1(invoice: Invoice, format: Format) -> Server_call_return:
+def export_json_report_v1(report_id: int) -> Server_call_return:
     payload = {
-        "invoice": invoice.dict(),
-        "format": format.dict()
+        "report_id": report_id
     }
-    response = requests.post(full_url + 'report/visual_report/v1', json=payload)
+    response = requests.post(full_url + 'export/json_report/v1', json=payload)
     
     return json.loads(response.text)
 
+
+# Report Endpoints
 
 def report_wellformedness_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()

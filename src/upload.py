@@ -1,5 +1,5 @@
 import requests
-from report import report_generate
+from src.generation import generate_report
 
 
 def invoice_upload_text_v1(invoice_name: str, invoice_text: str):
@@ -24,7 +24,7 @@ def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
     }
 
 
-def invoice_upload_file_v1(invoice_name: str, invoice_file: File()):
+def invoice_upload_file_v1(invoice_name: str, invoice_file):
     with open(invoice_file, 'rb') as f:
         invoice_text = f.read()
     

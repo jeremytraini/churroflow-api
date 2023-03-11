@@ -6,32 +6,33 @@ from tempfile import NamedTemporaryFile
 import requests
 from os import unlink
 from src.database import Users, Reports, Violations, Evaluations, db
-from helper_functions import extract_text_from_invoice
+from src.helpers import extract_text_from_invoice
+from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation
 
 
 def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
-    invoice_text = extract_data_from_invoice(invoice)
+    invoice_text = extract_text_from_invoice(invoice)
     evaluation = generate_wellformedness_evaluation(invoice_text)
     
     return evaluation.to_json()
 
 def report_schema_v1(invoice: Invoice) -> Evaluation:
-    invoice_text = extract_data_from_invoice(invoice)
+    invoice_text = extract_text_from_invoice(invoice)
     evaluation = generate_schema_evaluation(invoice_text)
     
-    return evaluation.as_json()
+    return evaluation.to_json()
 
 def report_syntax_v1(invoice: Invoice) -> Evaluation:
-    data = extract_data_from_invoice(invoice)
-    evaluation = generate_xslt_evaluation("syntax", data, "src/validation_artefacts/AUNZ-UBL-validation.xslt")
+    data = extract_text_from_invoice(invoice)
+    evaluation = generate_xslt_evaluation("syntax", data)
     
-    return evaluation.as_json()
+    return evaluation.to_json()
 
 def report_peppol_v1(invoice: Invoice) -> Evaluation:
-    data = extract_data_from_invoice(invoice)
-    evaluation = generate_xslt_evaluation("peppol", data, "src/validation_artefacts/AUNZ-PEPPOL-validation.xslt")
+    data = extract_text_from_invoice(invoice)
+    evaluation = generate_xslt_evaluation("peppol", data)
 
-    return evaluation.as_json()
+    return evaluation.to_json()
 
 def report_get_v1(report_id: int) -> Report:
     report = Report(

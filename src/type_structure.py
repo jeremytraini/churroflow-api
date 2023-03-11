@@ -12,7 +12,8 @@ class Format(BaseModel):
 
 class Invoice(BaseModel):
     name: str
-    text: str
+    source: str
+    data: str
 
 class Location(BaseModel):
     type: Literal["xpath", "line"]
@@ -31,10 +32,10 @@ class Violation(BaseModel):
     suggestion: str
 
 class Evaluation(BaseModel):
-    aspect: Literal["wellformedness", "syntax", "peppol", "schema"]
     is_valid: bool
     num_rules_failed: int
-    num_violations: int
+    num_warnings: int
+    num_errors: int
     violations: List[Violation]
 
 class Report(BaseModel):
@@ -45,7 +46,8 @@ class Report(BaseModel):
     invoice_raw: str
     invoice_hash: str
     is_valid: bool
-    total_num_violations: int
+    total_warnings: int
+    total_errors: int
     wellformedness:  Union[Evaluation, None]
     schema_evaluation: Union[Evaluation, None]
     syntax: Union[Evaluation, None]

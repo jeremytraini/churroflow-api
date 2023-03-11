@@ -14,18 +14,20 @@ class Users(BaseModel):
     password_hash = TextField()
 
 class Evaluations(BaseModel):
+    is_valid = BooleanField()
     num_warnings = IntegerField()
     num_errors = IntegerField()
     num_rules_failed = IntegerField()
     
     def to_json(self):
+        violations = Violations.select().where(Violations.evaluation == self.id)
+        
         return {
-            "aspect": self.aspect,
             "is_valid": self.is_valid,
             "num_warnings": self.num_warnings,
             "num_errors": self.num_errors,
             "num_rules_failed": self.num_rules_failed,
-            "violations": []
+            "violations": [violation.to_json() for violation in violations]
         }
 
 class Reports(BaseModel):
@@ -40,6 +42,21 @@ class Reports(BaseModel):
     schema = ForeignKeyField(Evaluations, backref='schema', null=True, default=None)
     syntax = ForeignKeyField(Evaluations, backref='syntax', null=True, default=None)
     peppol = ForeignKeyField(Evaluations, backref='peppol', null=True, default=None)
+    
+    def to_json(self):
+        return {
+            "date_generated": self.date_generated,
+            "invoice_name": self.invoice_name,
+            "invoice_raw": self.invoice_raw,
+            "invoice_hash": self.invoice_hash,
+            "is_valid": self.is_valid,
+            "total_warnings": self.total_warnings,
+            "total_errors": self.total_errors,
+            "wellformedness": self.wellformedness.to_json(),
+            "schema": self.schema.to_json() if self.schema else None,
+            "syntax": self.syntax.to_json() if self.syntax else None,
+            "peppol": self.peppol.to_json() if self.peppol else None
+        }
 
 
 class Violations(BaseModel):
@@ -47,10 +64,23 @@ class Violations(BaseModel):
     rule_id = TextField()
     is_fatal = BooleanField()
     message = TextField()
+    suggestion = TextField()
     test = TextField(null=True, default=None)
     xpath = TextField(null=True, default=None)
     line = IntegerField(null=True, default=None)
     column = IntegerField(null=True,default=None)
+    
+    def to_json(self):
+        return {
+            "rule_id": self.rule_id,
+            "is_fatal": self.is_fatal,
+            "message": self.message,
+            "suggestion": self.suggestion,
+            "test": self.test,
+            "xpath": self.xpath,
+            "line": self.line,
+            "column": self.column
+        }
 
 
 class Sessions(BaseModel):
@@ -75,4 +105,3 @@ def clear_database():
 db.connect()
 
 create_tables()
-# clear_database()

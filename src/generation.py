@@ -11,7 +11,6 @@ from datetime import datetime
 
 def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
     evaluation = Evaluations(
-        aspect="wellformedness",
         is_valid=True,
         num_warnings=0,
         num_errors=0,
@@ -46,7 +45,6 @@ def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
 
 def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     evaluation = Evaluations(
-        aspect="wellformedness",
         is_valid=True,
         num_warnings=0,
         num_errors=0,
@@ -153,8 +151,7 @@ def generate_xslt_evaluation(aspect, invoice_text) -> Evaluations:
                 ))
         
         evaluation = Evaluations.create(
-            aspect=aspect,
-            is_valid=num_errors > 0,
+            is_valid=num_errors == 0,
             num_warnings=num_warnings,
             num_errors=num_errors,
             num_rules_failed=len(rules_failed)

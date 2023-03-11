@@ -5,7 +5,7 @@ from src.report import *
 from src.upload import *
 from src.invoice import *
 from src.type_structure import *
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from src.error import AuthenticationError, InputError
 import uvicorn
@@ -41,15 +41,9 @@ async def invoice_upload_url(invoice_name: str, invoice_url: str) -> str:
 async def invoice_upload_file(invoice_file: UploadFile) -> str:
     return invoice_upload_file_v1(invoice_name=invoice_file.filename, invoice_file=invoice_file.file)
 
-
-@app.post("/report/json_report/v1")
+@app.post("/export/json_report/v1")
 async def report_json_report(invoice: Invoice) -> Report:
     return report_json_report_v1(invoice)
-
-# TODO: return type
-@app.post("/report/visual_report/v1")
-async def report_visual_report(invoice: Invoice, format: Format):
-    return report_visual_report_v1(invoice, format)
 
 @app.post("/report/wellformedness/v1")
 async def report_wellformedness(invoice: Invoice) -> Evaluation:
