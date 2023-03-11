@@ -7,7 +7,7 @@ from src.export import *
 from src.type_structure import *
 from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from src.error import AuthenticationError, InputError
 import uvicorn
 
@@ -42,19 +42,20 @@ async def invoice_upload_url(invoice_name: str, invoice_url: str) -> Dict:
 async def invoice_upload_file(invoice_file: UploadFile) -> Dict:
     return invoice_upload_file_v1(invoice_name=invoice_file.filename, invoice_file=invoice_file.file)
 
-@app.post("/export/json_report/v1")
+@app.get("/export/json_report/v1")
 async def export_json_report(report_id: int):
     return export_json_report_v1(report_id)
 
-@app.post("/export/pdf_report/v1")
+@app.get("/export/pdf_report/v1")
 async def export_pdf_report(report_id: int):
     return export_pdf_report_v1(report_id)
 
-@app.post("/export/html_report/v1")
+@app.get("/export/html_report/v1", response_class=HTMLResponse)
 async def export_html_report(report_id: int):
-    return export_html_report_v1(report_id)
+    html_content = export_html_report_v1(report_id)
+    return HTMLResponse(content=html_content, status_code=200)
 
-@app.post("/export/csv_report/v1")
+@app.get("/export/csv_report/v1")
 async def export_csv_report(report_id: int):
     return export_csv_report_v1(report_id)
 
