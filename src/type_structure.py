@@ -40,18 +40,17 @@ class Evaluation(BaseModel):
 
 class Report(BaseModel):
     report_id: int
-    score: int
     date_generated: str
     invoice_name: str
-    invoice_raw: str
+    invoice_text: str
     invoice_hash: str
     is_valid: bool
     total_warnings: int
     total_errors: int
-    wellformedness:  Union[Evaluation, None]
+    wellformedness_evaluation:  Union[Evaluation, None]
     schema_evaluation: Union[Evaluation, None]
-    syntax: Union[Evaluation, None]
-    peppol: Union[Evaluation, None]
+    syntax_evaluation: Union[Evaluation, None]
+    peppol_evaluation: Union[Evaluation, None]
 
 class ReportID(BaseModel):
     report_id: int

@@ -11,7 +11,7 @@ def invoice_upload_text_v1(invoice_name: str, invoice_text: str) -> Server_call_
         "invoice_name": invoice_name,
         "invoice_text": invoice_text
     }
-    response = requests.post(full_url + 'invoice/upload_text/v1', json=payload)
+    response = requests.post(full_url + 'invoice/upload_text/v1', params=payload)
     
     return json.loads(response.text)
 
@@ -20,7 +20,7 @@ def invoice_upload_url_v1(invoice_name: str, invoice_url: str) -> Server_call_re
         "invoice_name": invoice_name,
         "invoice_url": invoice_url
     }
-    response = requests.post(full_url + 'invoice/upload_url/v1', json=payload)
+    response = requests.post(full_url + 'invoice/upload_url/v1', params=payload)
     
     return json.loads(response.text)
 
@@ -42,7 +42,7 @@ def export_json_report_v1(report_id: int) -> Server_call_return:
     payload = {
         "report_id": report_id
     }
-    response = requests.post(full_url + 'export/json_report/v1', json=payload)
+    response = requests.post(full_url + 'export/json_report/v1', params=payload)
     
     return json.loads(response.text)
 

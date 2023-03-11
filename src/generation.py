@@ -7,6 +7,7 @@ import requests
 from os import unlink
 from src.database import Users, Reports, Violations, Evaluations, db
 from datetime import datetime
+import hashlib
 
 
 def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
@@ -189,11 +190,13 @@ def generate_report(invoice_name: str, invoice_text: str) -> int:
             
             is_valid = peppol_evaluation.is_valid and syntax_evaluation.is_valid
     
+    invoice_hash = int(hashlib.sha1(invoice_text.encode("utf-8")).hexdigest(), 16) % (10 ** 8)
+    
     report = Reports.create(
         date_generated=datetime.now(),
         invoice_name=invoice_name,
-        invoice_raw="Test",
-        invoice_hash="Test",
+        invoice_text=invoice_text,
+        invoice_hash=invoice_hash,
         is_valid=is_valid,
         total_warnings=total_warnings,
         total_errors=total_errors,

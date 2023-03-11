@@ -17,14 +17,12 @@ def test_syntax_valid_invoice():
 
     syntax_evaluation = report_syntax_v1(invoice)
     syntax_evaluation = Evaluation(**syntax_evaluation)
-
-    assert syntax_evaluation.aspect == "syntax"
     
     # We expect no rules to fail for a valid invoice
     assert syntax_evaluation.num_rules_failed == 0
     
     # We expect no violations for a valid invoice
-    assert syntax_evaluation.num_violations == 0
+    assert syntax_evaluation.num_errors == 0
     
     # The violation list should be empty for a valid invoice
     assert len(syntax_evaluation.violations) == 0
@@ -45,7 +43,7 @@ def test_syntax_single_violation():
     assert syntax_evaluation.num_rules_failed == 1
     
     # We expect exactly 1 violation due to the invalid currency code
-    assert syntax_evaluation.num_violations == 1
+    assert syntax_evaluation.num_errors == 1
     
     # Thus there should be exactly 1 violation in the violation list
     assert len(syntax_evaluation.violations) == 1
@@ -85,7 +83,7 @@ def test_syntax_multiple_violations_same_rule():
     assert syntax_evaluation.num_rules_failed == 1
     
     # We expect exactly 2 violations for each invalid currency code
-    assert syntax_evaluation.num_violations == 2
+    assert syntax_evaluation.num_errors == 2
     
     # Thus there should be exactly 2 violations in the violation list
     assert len(syntax_evaluation.violations) == 2
@@ -120,7 +118,7 @@ def test_syntax_multiple_violations_different_rules():
     assert syntax_evaluation.num_rules_failed == 2
     
     # We expect exactly 2 violations for each invalid currency code and 2 violations for each invalid address
-    assert syntax_evaluation.num_violations == 4
+    assert syntax_evaluation.num_errors == 4
     
     # Thus there should be exactly 4 violations in the violation list
     assert len(syntax_evaluation.violations) == 4

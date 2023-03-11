@@ -33,7 +33,7 @@ class Evaluations(BaseModel):
 class Reports(BaseModel):
     date_generated = DateTimeField()
     invoice_name = TextField()
-    invoice_raw = TextField()
+    invoice_text = TextField()
     invoice_hash = TextField()
     is_valid = BooleanField()
     total_warnings = IntegerField()
@@ -45,17 +45,18 @@ class Reports(BaseModel):
     
     def to_json(self):
         return {
+            "report_id": self.id,
             "date_generated": self.date_generated,
             "invoice_name": self.invoice_name,
-            "invoice_raw": self.invoice_raw,
+            "invoice_text": self.invoice_text,
             "invoice_hash": self.invoice_hash,
             "is_valid": self.is_valid,
             "total_warnings": self.total_warnings,
             "total_errors": self.total_errors,
-            "wellformedness": self.wellformedness.to_json(),
-            "schema": self.schema.to_json() if self.schema else None,
-            "syntax": self.syntax.to_json() if self.syntax else None,
-            "peppol": self.peppol.to_json() if self.peppol else None
+            "wellformedness_evaluation": self.wellformedness.to_json(),
+            "schema_evaluation": self.schema.to_json() if self.schema else None,
+            "syntax_evaluation": self.syntax.to_json() if self.syntax else None,
+            "peppol_evaluation": self.peppol.to_json() if self.peppol else None
         }
 
 

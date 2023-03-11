@@ -1,7 +1,7 @@
 from src.type_structure import *
-from tests.server_calls import export_json_report_v1
+from tests.server_calls import export_json_report_v1, invoice_upload_text_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import remove_part_of_string, invalidate_invoice
+from tests.helpers import remove_part_of_string, invalidate_invoice, clear_database
 
 """
 =====================================
@@ -11,11 +11,10 @@ from tests.helpers import remove_part_of_string, invalidate_invoice
 
 # Testing that the report was generated properly and matches input data
 def test_json_valid_invoice():
-    data = VALID_INVOICE_TEXT
-    
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = Invoice(name="My Invoice", source="text", data=VALID_INVOICE_TEXT)
 
-    report = export_json_report_v1(invoice)
+    report_id = invoice_upload_text_v1(invoice.name, invoice.data)["report_id"]
+    report = export_json_report_v1(report_id)
     report = Report(**report)
 
     # Report id must be an integer
@@ -27,8 +26,8 @@ def test_json_valid_invoice():
     # Checking for the name of the invoice
     assert report.invoice_name == "My Invoice"
 
-    # Checking for raw invoice
-    assert report.invoice_raw == invoice
+    # Checking for invoice text
+    assert report.invoice_text == invoice.data
 
     # Invoice hash must be a string
     assert isinstance(report.invoice_hash, str)
@@ -37,35 +36,31 @@ def test_json_valid_invoice():
     assert report.is_valid
 
     # A valid invoice should have 0 violations
-    assert report.total_num_violations == 0
+    assert report.total_errors == 0
     
     # Check for wellformedness
-    assert report.wellformedness.aspect == "wellformedness"
-    assert report.wellformedness.is_valid == True
-    assert report.wellformedness.num_rules_failed == 0
-    assert report.wellformedness.num_violations == 0
-    assert report.wellformedness.violations == []
+    assert report.wellformedness_evaluation.is_valid == True
+    assert report.wellformedness_evaluation.num_rules_failed == 0
+    assert report.wellformedness_evaluation.num_errors == 0
+    assert report.wellformedness_evaluation.violations == []
 
     # Check for schema
-    assert report.schemaEvaluation.aspect == "schema"
-    assert report.schemaEvaluation.is_valid == True
-    assert report.schemaEvaluation.num_rules_failed == 0
-    assert report.schemaEvaluation.num_violations == 0
-    assert report.schemaEvaluation.violations == []
+    assert report.schema_evaluation.is_valid == True
+    assert report.schema_evaluation.num_rules_failed == 0
+    assert report.schema_evaluation.num_errors == 0
+    assert report.schema_evaluation.violations == []
 
     # Check for syntax
-    assert report.syntax.aspect == "syntax"
-    assert report.syntax.is_valid == True
-    assert report.syntax.num_rules_failed == 0
-    assert report.syntax.num_violations == 0
-    assert report.syntax.violations == []
+    assert report.syntax_evaluation.is_valid == True
+    assert report.syntax_evaluation.num_rules_failed == 0
+    assert report.syntax_evaluation.num_errors == 0
+    assert report.syntax_evaluation.violations == []
 
     # Check for PEPPOL
-    assert report.peppol.aspect == "peppol"
-    assert report.peppol.is_valid == True
-    assert report.peppol.num_rules_failed == 0
-    assert report.peppol.num_violations == 0
-    assert report.peppol.violations == []
+    assert report.peppol_evaluation.is_valid == True
+    assert report.peppol_evaluation.num_rules_failed == 0
+    assert report.peppol_evaluation.num_errors == 0
+    assert report.peppol_evaluation.violations == []
 
 # Testing that a single rule fails when there is one error in the invoice
 def test_syntax_single_violation():

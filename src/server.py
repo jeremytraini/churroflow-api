@@ -2,8 +2,8 @@ import signal
 from src.config import base_url, port
 from src.health_check import health_check_v1
 from src.report import *
-from src.upload import *
 from src.invoice import *
+from src.export import export_json_report_v1
 from src.type_structure import *
 from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile
@@ -31,20 +31,20 @@ async def health_check():
     return health_check_v1()
 
 @app.post("/invoice/upload_text/v1")
-async def invoice_upload_text(invoice_name: str, invoice_text: str) -> str:
-    return invoice_upload_text_v1(invoice_name=name, invoice_text=invoice_text)
+async def invoice_upload_text(invoice_name: str, invoice_text: str) -> Dict:
+    return invoice_upload_text_v1(invoice_name=invoice_name, invoice_text=invoice_text)
 
 @app.post("/invoice/upload_url/v1")
-async def invoice_upload_url(invoice_name: str, invoice_url: str) -> str:
+async def invoice_upload_url(invoice_name: str, invoice_url: str) -> Dict:
     return invoice_upload_url_v1(invoice_name=invoice_name, invoice_url=invoice_url)
 
 @app.post("/invoice/upload_file/v1")
-async def invoice_upload_file(invoice_file: UploadFile) -> str:
+async def invoice_upload_file(invoice_file: UploadFile) -> Dict:
     return invoice_upload_file_v1(invoice_name=invoice_file.filename, invoice_file=invoice_file.file)
 
 @app.post("/export/json_report/v1")
-async def report_json_report(invoice: Invoice) -> Report:
-    return report_json_report_v1(invoice)
+async def export_json_report(report_id: int):
+    return export_json_report_v1(report_id)
 
 @app.post("/report/wellformedness/v1")
 async def report_wellformedness(invoice: Invoice) -> Evaluation:

@@ -44,10 +44,10 @@ def report_get_v1(report_id: int) -> Report:
         invoice_hash="",
         is_valid=True,
         total_num_violations=0,
-        wellformedness=None,
+        wellformedness_evaluation=None,
         schema_evaluation=None,
-        syntax=None,
-        peppol=None
+        syntax_evaluation=None,
+        peppol_evaluation=None
     )
     return report
 
@@ -61,10 +61,10 @@ def report_list_all_v1(order_by: OrderBy) -> List[Report]:
         invoice_hash="",
         is_valid=True,
         total_num_violations=0,
-        wellformedness=None,
+        wellformedness_evaluation=None,
         schema_evaluation=None,
-        syntax=None,
-        peppol=None
+        syntax_evaluation=None,
+        peppol_evaluation=None
     )
     reports = [report]
     return reports
@@ -89,10 +89,10 @@ def report_bulk_generate_v1(invoices: List[Invoice]) -> List[Report]:
         invoice_hash="",
         is_valid=True,
         total_num_violations=0,
-        wellformedness=None,
+        wellformedness_evaluation=None,
         schema_evaluation=None,
-        syntax=None,
-        peppol=None
+        syntax_evaluation=None,
+        peppol_evaluation=None
     )
     reports = [report]
     return reports
