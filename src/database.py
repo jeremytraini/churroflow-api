@@ -17,6 +17,16 @@ class Evaluations(BaseModel):
     num_warnings = IntegerField()
     num_errors = IntegerField()
     num_rules_failed = IntegerField()
+    
+    def to_json(self):
+        return {
+            "aspect": self.aspect,
+            "is_valid": self.is_valid,
+            "num_warnings": self.num_warnings,
+            "num_errors": self.num_errors,
+            "num_rules_failed": self.num_rules_failed,
+            "violations": []
+        }
 
 class Reports(BaseModel):
     date_generated = DateTimeField()

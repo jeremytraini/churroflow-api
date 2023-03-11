@@ -209,6 +209,3 @@ def generate_report(invoice_name: str, invoice_text: str) -> int:
     print(report.id)
     
     return report.id
-
-# from tests.constants import VALID_INVOICE_TEXT
-# generate_report("My Invoice", VALID_INVOICE_TEXT[:1000])

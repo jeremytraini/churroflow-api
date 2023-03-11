@@ -30,16 +30,16 @@ async def health_check():
     return health_check_v1()
 
 @app.post("/invoice/upload_text/v1")
-async def invoice_upload_text(name: str, invoice_text: str) -> str:
-    return invoice_upload_text_v1(invoice)
+async def invoice_upload_text(invoice_name: str, invoice_text: str) -> str:
+    return invoice_upload_text_v1(invoice_name=name, invoice_text=invoice_text)
 
 @app.post("/invoice/upload_url/v1")
-async def invoice_upload_url(name: str, invoice_url: str) -> str:
-    return invoice_upload_url_v1(invoice)
+async def invoice_upload_url(invoice_name: str, invoice_url: str) -> str:
+    return invoice_upload_url_v1(invoice_name=invoice_name, invoice_url=invoice_url)
 
 @app.post("/invoice/upload_file/v1")
-async def invoice_upload_file(file: UploadFile) -> str:
-    return invoice_upload_file_v1(name=invoice_file.filename, invoice_file=invoice_file.file)
+async def invoice_upload_file(invoice_file: UploadFile) -> str:
+    return invoice_upload_file_v1(invoice_name=invoice_file.filename, invoice_file=invoice_file.file)
 
 
 @app.post("/report/json_report/v1")
