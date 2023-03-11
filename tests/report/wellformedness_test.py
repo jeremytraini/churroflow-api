@@ -4,7 +4,7 @@ from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import remove_part_of_string, append_to_string, replace_part_of_string
 """
 =====================================
-/report/wellformedness/v1 TESTS - (7 CASES TO BE TESTED)
+/report/wellformedness/v1 TESTS
 =====================================
 """
 # Wellformedness Testing that the report was generated properly and matches input data
@@ -34,7 +34,7 @@ def test_wellformed_case_sensitive_tags_invalid():
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
-    
+
     assert wellformed_evaluation.aspect == "wellformedness"
 
     # We expect exactly 1 rule to fail due to the capitalised tag
@@ -53,7 +53,7 @@ def test_wellformed_case_sensitive_tags_invalid():
     # Check that the violation has a non-empty message and suggestion
     assert violation.message
     assert violation.suggestion
-    
+
     assert violation.location.type == "line"
 
     # Check that the location line/column are were the violation is
@@ -134,7 +134,7 @@ def test_no_closing_tag_invalid():
 def test_wrong_nesting_invalid():
     data = VALID_INVOICE_TEXT
     data = remove_part_of_string(data, 11512, 11530)
-    data = append_to_string(data, """</cac:InvoiceLine>""") 
+    data = append_to_string(data, """</cac:InvoiceLine>""")
     invoice = Invoice(name="My Invoice", source="text", data=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)

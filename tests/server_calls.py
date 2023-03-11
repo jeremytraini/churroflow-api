@@ -12,7 +12,7 @@ def health_check_v1():
 def report_json_report_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()
     response = requests.post(full_url + 'report/json_report/v1', json=payload)
-    
+
     return json.loads(response.text)
 
 
@@ -22,14 +22,14 @@ def report_visual_report_v1(invoice: Invoice, format: Format) -> Server_call_ret
         "format": format.dict()
     }
     response = requests.post(full_url + 'report/visual_report/v1', json=payload)
-    
+
     return json.loads(response.text)
 
 
 def report_wellformedness_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()
     response = requests.post(full_url + 'report/wellformedness/v1', json=payload)
-    
+
     return json.loads(response.text)
 
 
@@ -54,6 +54,12 @@ def report_peppol_v1(invoice: Invoice) -> Server_call_return:
     return json.loads(response.text)
 
 
+
+def user_authentication_v1(invoice: Invoice) -> Server_call_return:
+    payload = invoice.dict()
+    response = requests.post(full_url + 'user_authentication/v1', json=payload)
+
+    return json.loads(response.text)
 # Sample calls below
 
 def sample_post(val):
