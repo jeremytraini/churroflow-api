@@ -2,6 +2,7 @@ import signal
 from src.config import base_url, port
 from src.health_check import health_check_v1
 from src.report import *
+from src.upload import *
 from src.invoice import *
 from src.type_structure import *
 from fastapi import FastAPI, Request, HTTPException

@@ -12,8 +12,7 @@ class Format(BaseModel):
 
 class Invoice(BaseModel):
     name: str
-    source: Literal["url", "file_upload", "raw_data", "text"]
-    data: str
+    text: str
 
 class Location(BaseModel):
     type: Literal["xpath", "line"]
@@ -52,13 +51,12 @@ class Report(BaseModel):
     syntax: Union[Evaluation, None]
     peppol: Union[Evaluation, None]
 
+class ReportID(BaseModel):
+    report_id: int
+
 class ReportExport(BaseModel):
     url: str
     invoice_hash: str
-
-class QuickFixReturn(BaseModel):
-    invoice: Invoice
-    report: Report
 
 class CheckValidReturn(BaseModel):
     is_valid: bool
