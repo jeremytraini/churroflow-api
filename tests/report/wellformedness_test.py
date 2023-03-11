@@ -4,7 +4,7 @@ from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import remove_part_of_string, append_to_string, replace_part_of_string
 """
 =====================================
-/report/wellformedness/v1 TESTS - (7 CASES TO BE TESTED)
+/report/wellformedness/v1 TESTS
 =====================================
 """
 # Wellformedness Testing that the report was generated properly and matches input data
@@ -215,7 +215,7 @@ def test_wellformedness_invalid_version_number_error():
 
 def test_no_escape_for_special_char_invalid():
     data = VALID_INVOICE_TEXT
-    data = replace_part_of_string(data, 499, 500, "<")
+    data = replace_part_of_string(data, 694, 695, "<")
     invoice = Invoice(name="My Invoice", source="text", data=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
@@ -239,4 +239,24 @@ def test_no_escape_for_special_char_invalid():
     # Check that the violation has a non-empty message and suggestion
     assert violation.message
     assert violation.suggestion
+    
+    # Check that the location line/column are were the violation is
+    assert violation.location.line == 11
+    assert violation.location.column == 25
 
+def test_escape_for_special_char_valid():
+    data = VALID_INVOICE_TEXT
+    data = replace_part_of_string(data, 694, 695, "&lt;")
+    invoice = Invoice(name="My Invoice", source="text", data=data)
+
+    wellformed_evaluation = report_wellformedness_v1(invoice)
+    wellformed_evaluation = Evaluation(**wellformed_evaluation)
+
+    # We expect exactly 0 rules to fail due to escaping the special character
+    assert wellformed_evaluation.num_rules_failed == 0
+
+    # We expect exactly 0 violation due to escaping the special character
+    assert wellformed_evaluation.num_violations == 0
+
+    # Thus there should be exactly 0 violation in the violation list
+    assert len(wellformed_evaluation.violations) == 0

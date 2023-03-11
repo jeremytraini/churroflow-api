@@ -16,7 +16,7 @@ def report_json_report_v1(invoice: Invoice) -> Report:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -43,19 +43,20 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
         evaluation.is_valid = False
         evaluation.num_rules_failed = 1
         evaluation.num_violations = 1
-        violation = Violation(
-            rule_id="wellformedness",
-            is_fatal=True,
-            location=Location(
-                type="line",
-                line=error.lineno,
-                column=error.offset
-            ),
-            test="",
-            message=error.msg,
-            suggestion="suggestion"
+        evaluation.violations.append(
+            Violation(
+                rule_id="wellformedness",
+                is_fatal=True,
+                location=Location(
+                    type="line",
+                    line=error.lineno,
+                    column=error.offset
+                ),
+                test="",
+                message=error.msg,
+                suggestion="suggestion"
+            )
         )
-        evaluation.violations.append(violation)
 
     return evaluation
 
@@ -70,7 +71,6 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
     )
     
     data = extract_data_from_invoice(invoice)
-
     # TODO: can probably do this outside the function so that it isn't repeated
     # Parse the XSD file
     xsd_doc = etree.parse("src/xsd/maindoc/UBL-Invoice-2.1.xsd", parser=None)
@@ -80,30 +80,26 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
 
     # Validate the XML against the XSD schema
     is_valid = xsd.validate(xml_doc)
-    print(is_valid)
     if not is_valid:
-        print('Not valid! :(')
         evaluation.is_valid = False
-        errors = []
+        error_types = []
         for error in xsd.error_log:
-            errors.append(error)
             evaluation.violations.append(
                 Violation(
-                    rule_id="wellformedness",
+                    rule_id=error.type,
                     is_fatal=True,
                     location=Location(
                         type="line",
-                        line=error.lineno,
-                        column=error.offset
+                        line=error.line,
+                        column=error.column
                     ),
-                    test="",
-                    message=error.msg,
+                    test=error.type_name,
+                    message=error.message,
                     suggestion="suggestion"
                 )
             )
-            evaluation.num_rules_failed += not (error in errors)
-            print(error.message)
-            print()
+            evaluation.num_rules_failed += not (error.type in error_types)
+            error_types.append(error.type)
     
     evaluation.num_violations = len(evaluation.violations)
     
@@ -128,17 +124,13 @@ def report_get_v1(report_id: int) -> Report:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
     return report
 
-# TODO: test order_by parsing
-def report_list_all_v1(order_by: str) -> List[Report]:
-    (order, asc) = order_by.split(" ")
-    print(order)
-    print(asc)
+def report_list_all_v1(order_by: OrderBy) -> List[Report]:
     report = Report(
         report_id=0,
         score=0,
@@ -149,14 +141,14 @@ def report_list_all_v1(order_by: str) -> List[Report]:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
     reports = [report]
     return reports
 
-def report_list_score_v1(score: int, order_by: str) -> List[Report]:
+def report_list_score_v1(score: int, order_by: OrderBy) -> List[Report]:
     report = Report(
         report_id=0,
         score=0,
@@ -167,7 +159,7 @@ def report_list_score_v1(score: int, order_by: str) -> List[Report]:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -195,7 +187,7 @@ def report_bulk_generate_v1(invoices: List[Invoice]) -> List[Report]:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -212,8 +204,6 @@ def report_bulk_export_v1(report_ids, report_format) -> List[ReportExport]:
 def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Evaluation:
     with PySaxonProcessor(license=False) as proc:
         
-        print(xslt_path)
-        
         xsltproc = proc.new_xslt30_processor()
         executable = xsltproc.compile_stylesheet(stylesheet_file=xslt_path)
         
@@ -222,8 +212,6 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Evaluation:
         
         if executable.exception_occurred:
             raise Exception("Executable failed to load! " + executable.error_message)
-        
-        print(len(invoice_text))
         
         tmp = NamedTemporaryFile(mode='w', delete=False)
         tmp.write(invoice_text)
