@@ -1,4 +1,4 @@
-from src.types import *
+from src.type_structure import *
 from tests.server_calls import report_peppol_v1
 from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import invalidate_invoice, remove_part_of_string

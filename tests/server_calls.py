@@ -1,7 +1,7 @@
 import requests
 import json
 from src.config import full_url
-from src.types import *
+from src.type_structure import *
 
 
 def health_check_v1():

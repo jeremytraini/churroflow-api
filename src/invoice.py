@@ -1,6 +1,6 @@
 from typing import Dict
 
-from src.types import *
+from src.type_structure import *
 from src.report import report_get_v1
 
 def invoice_quick_fix_wellformedness_v1(report_id: int) -> QuickFixReturn:

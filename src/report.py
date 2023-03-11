@@ -1,4 +1,4 @@
-from src.types import *
+from src.type_structure import *
 from lxml import etree
 from typing import Dict
 from saxonche import PySaxonProcessor

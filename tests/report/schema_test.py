@@ -1,4 +1,4 @@
-from src.types import Invoice, Evaluation
+from src.type_structure import Invoice, Evaluation
 from tests.server_calls import report_schema_v1
 from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import *
