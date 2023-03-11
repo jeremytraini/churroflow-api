@@ -65,10 +65,8 @@ def test_peppol_single_volation():
     assert abn_violation.test
     assert abn_violation.suggestion
     
-    assert abn_violation.location.type == "xpath"
-    
     # Check that the location xpath is not empty
-    assert abn_violation.location.xpath
+    assert abn_violation.xpath
 
 
 # Testing that multiple violations are generated when there are multiple errors in the invoice
@@ -100,7 +98,7 @@ def test_peppol_multiple_violations_same_rule():
     assert abn_violation1.rule_id == abn_violation2.rule_id == "PEPPOL-COMMON-R050"
     
     # Locations should be different for each violation
-    assert abn_violation1.location != abn_violation2.location
+    assert abn_violation1.xpath != abn_violation2.xpath
 
 
 def test_peppol_multiple_violations_different_rules():
@@ -140,8 +138,8 @@ def test_peppol_multiple_violations_different_rules():
     assert address_violation1.rule_id == address_violation2.rule_id == "PEPPOL-EN16931-F001"
     
     # Locations should be different for each violation
-    assert abn_violation1.location != abn_violation2.location
-    assert address_violation1.location != address_violation2.location
+    assert abn_violation1.xpath != abn_violation2.xpath
+    assert address_violation1.xpath != address_violation2.xpath
 
 
 # Testing that a warning doesn't invalidate the report

@@ -54,11 +54,9 @@ def test_wellformed_case_sensitive_tags_invalid():
     assert violation.message
     assert violation.suggestion
 
-    assert violation.location.type == "line"
-
     # Check that the location line/column are were the violation is
-    assert violation.location.line == 45
-    assert violation.location.column == 44
+    assert violation.line == 45
+    assert violation.column == 44
 
 def test_wellformed_case_sensitive_tags_valid():
     # Replacing both tags so that they still match

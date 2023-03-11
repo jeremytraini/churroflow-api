@@ -64,10 +64,8 @@ def test_syntax_single_violation():
     assert code_violation.test
     assert code_violation.suggestion
     
-    assert code_violation.location.type == "xpath"
-    
     # Check that the location xpath is not empty
-    assert code_violation.location.xpath
+    assert code_violation.xpath
 
 
 # Testing that multiple violations are generated when there are multiple errors in the invoice
@@ -99,7 +97,7 @@ def test_syntax_multiple_violations_same_rule():
     assert code_violation1.rule_id == code_violation2.rule_id == "BR-CL-03"
     
     # Locations should be different for each violation
-    assert code_violation1.location != code_violation2.location
+    assert code_violation1.xpath != code_violation2.xpath
 
 
 def test_syntax_multiple_violations_different_rules():
@@ -139,8 +137,8 @@ def test_syntax_multiple_violations_different_rules():
     assert id_code_violation1.rule_id == id_code_violation2.rule_id == "BR-CL-03"
     
     # Locations should be different for each violation
-    assert code_violation1.location != code_violation2.location
-    assert id_code_violation1.location != id_code_violation2.location
+    assert code_violation1.xpath != code_violation2.xpath
+    assert id_code_violation1.xpath != id_code_violation2.xpath
 
 
 # Testing that a warning doesn't invalidate the report

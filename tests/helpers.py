@@ -2,11 +2,11 @@ from lxml import etree
 from io import StringIO, BytesIO
 from tests.constants import CAC, CBC
 from tests.server_calls import clear_v1
-from database import reset_db
+from pytest import fixture
 
-@pytest.fixture(autouse=True)
+@fixture(autouse=True)
 def clear_database():
-    reset_db()
+    clear_v1()
 
 
 def remove_part_of_string(string, start, end):

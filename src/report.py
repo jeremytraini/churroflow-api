@@ -31,7 +31,6 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
     evaluation = Evaluation(
         aspect="wellformedness",
         is_valid=True,
-        num_rules_fired=0,
         num_rules_failed=0,
         num_violations=0,
         violations=[]
@@ -48,11 +47,8 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
         violation = Violation(
             rule_id="wellformedness",
             is_fatal=True,
-            location=Location(
-                type="line",
-                line=error.lineno,
-                column=error.offset
-            ),
+            line=error.lineno,
+            column=error.offset,
             test="",
             message=error.msg,
             suggestion="suggestion"
@@ -65,7 +61,6 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
     evaluation = Evaluation(
         aspect="schema",
         is_valid=True,
-        num_rules_fired=0,
         num_rules_failed=0,
         num_violations=0,
         violations=[]
@@ -92,11 +87,8 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
                 Violation(
                     rule_id="wellformedness",
                     is_fatal=True,
-                    location=Location(
-                        type="line",
-                        line=error.lineno,
-                        column=error.offset
-                    ),
+                    line=error.lineno,
+                    column=error.offset,
                     test="",
                     message=error.msg,
                     suggestion="suggestion"
@@ -164,11 +156,8 @@ def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
         violation = Violation(
             rule_id="wellformedness",
             is_fatal=True,
-            location=Location(
-                type="line",
-                line=error.lineno,
-                column=error.offset
-            ),
+            line=error.lineno,
+            column=error.offset,
             test="",
             message=error.msg,
             suggestion="suggestion"
@@ -209,11 +198,8 @@ def report_schema_v1(invoice: Invoice) -> Evaluation:
                 Violation(
                     rule_id="wellformedness",
                     is_fatal=True,
-                    location=Location(
-                        type="line",
-                        line=error.lineno,
-                        column=error.offset
-                    ),
+                    line=error.lineno,
+                    column=error.offset,
                     test="",
                     message=error.msg,
                     suggestion="suggestion"
@@ -369,7 +355,7 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Evaluation:
                 if is_valid and is_fatal:
                     is_valid = False
                 
-                location = item.get_attribute_value("location")
+                xpath = item.get_attribute_value("location")
                 test = item.get_attribute_value("test")
                 
                 message = ""
@@ -380,8 +366,9 @@ def generate_xslt_evaluation(aspect, invoice_text, xslt_path) -> Evaluation:
                     "rule_id": id_name,
                     "is_fatal": is_fatal,
                     "message": message,
+                    "suggestion": "suggestion",
                     "test": test,
-                    "xpath": location
+                    "xpath": xpath
                 })
         
         result = Evaluation(
