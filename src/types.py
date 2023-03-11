@@ -51,14 +51,14 @@ class Report(BaseModel):
     syntax: Union[Evaluation, None]
     peppol: Union[Evaluation, None]
 
-class Report_Export(BaseModel):
+class ReportExport(BaseModel):
     url: str
     invoice_hash: str
 
-class Quick_Fix_Return(BaseModel):
+class QuickFixReturn(BaseModel):
     invoice: Invoice
     report: Report
 
-class Check_Valid_Return(BaseModel):
+class CheckValidReturn(BaseModel):
     is_valid: bool
     invoice_hash: str

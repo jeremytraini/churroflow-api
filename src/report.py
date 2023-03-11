@@ -166,8 +166,8 @@ def report_list_score_v1(score: int, order_by: Order_By) -> List[Report]:
     reports = [report]
     return reports
 
-def report_export_v1(report_id, report_format) -> Report_Export:
-    export = Report_Export(url="", invoice_hash="")
+def report_export_v1(report_id, report_format) -> ReportExport:
+    export = ReportExport(url="", invoice_hash="")
     return export
 
 def report_change_name_v1(report_id: int, new_name: str) -> Dict[None, None]:
@@ -194,8 +194,8 @@ def report_bulk_generate_v1(invoices: List[Invoice]) -> List[Report]:
     reports = [report]
     return reports
 
-def report_bulk_export_v1(report_ids, report_format) -> List[Report_Export]:
-    export = Report_Export(url="", invoice_hash="")
+def report_bulk_export_v1(report_ids, report_format) -> List[ReportExport]:
+    export = ReportExport(url="", invoice_hash="")
     exports = [export]
     return exports
 
