@@ -85,9 +85,9 @@ def health_check_v1():
     return json.loads(response.text)
 
 
-def clear_v1(token):
+def clear_v1():
     payload = {
-        "token": token
+        
     }
     response = requests.delete(full_url + 'clear/v1', json=payload)
     

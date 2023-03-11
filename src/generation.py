@@ -20,7 +20,7 @@ def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
     violations = []
 
     try:
-        etree.fromstring(invoice_text.encode("utf-8"), parser=None)
+        etree.fromstring(invoice_text.encode("utf-8"))
     except etree.XMLSyntaxError as error:
         evaluation.is_valid = False
         evaluation.num_errors = 1
@@ -63,16 +63,17 @@ def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     # Validate the XML against the XSD schema
     if not xsd.validate(xml_doc):
         evaluation.is_valid = False
-        evaluation.num_errors = 1
-        evaluation.num_rules_failed = 1
         
         for error in xsd.error_log:
+            evaluation.num_errors += 1
+            evaluation.num_rules_failed += 1
+            
             violations.append(Violations(
                 rule_id="wellformedness",
                 is_fatal=True,
-                line=error.lineno,
-                column=error.offset,
-                message=error.msg
+                line=error.line,
+                column=error.column,
+                message=error.message
             ))
     
     evaluation.save()

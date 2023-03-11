@@ -5,6 +5,7 @@ from src.report import *
 from src.upload import *
 from src.invoice import *
 from src.type_structure import *
+from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from src.error import AuthenticationError, InputError
@@ -111,23 +112,10 @@ async def report_bulk_export(report_ids: List[int], report_format: Format) -> Li
     return report_bulk_export_v1(report_ids, report_format)
 
 
-# Samples below
+@app.delete("/clear/v1")
+async def clear():
+    return clear_v1()
 
-@app.post("/test/post/v1")
-async def test_post(val: str):
-    return val
-
-@app.get("/test/get/v1")
-def test_get(val: str):
-    return val
-
-@app.put("/test/put/v1")
-async def test_put(val: str):
-    return val
-
-@app.delete("/test/delete/v1")
-async def test_delete(val: str):
-    return val
 
 # ENDPOINTS ABOVE
 

@@ -63,8 +63,8 @@ class Violations(BaseModel):
     evaluation = ForeignKeyField(Evaluations, backref='violations', null=True, default=None)
     rule_id = TextField()
     is_fatal = BooleanField()
-    message = TextField()
-    suggestion = TextField()
+    message = TextField(null=True, default=None)
+    suggestion = TextField(null=True, default=None)
     test = TextField(null=True, default=None)
     xpath = TextField(null=True, default=None)
     line = IntegerField(null=True, default=None)
@@ -96,7 +96,7 @@ def create_tables():
     with db:
         db.create_tables(tables)
 
-def clear_database():
+def clear_v1():
     with db:
         db.drop_tables(tables)
         db.create_tables(tables)

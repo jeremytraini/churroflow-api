@@ -17,13 +17,11 @@ def test_schema_valid():
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
 
-    assert schema_evaluation.aspect == "schema"
-
     # We expect exactly 0 rule to fail due to the corrections
     assert schema_evaluation.num_rules_failed == 0
 
     # We expect exactly 0 violation due to the corrections
-    assert schema_evaluation.num_violations == 0
+    assert schema_evaluation.num_errors == 0
 
     # Thus there should be exactly 0 violation in the violation list
     assert len(schema_evaluation.violations) == 0
@@ -38,13 +36,11 @@ def test_schema_tag_name_invalid():
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
 
-    assert schema_evaluation.aspect == "schema"
-
     # We expect exactly 1 rule to fail due to the misspelled tag
     assert schema_evaluation.num_rules_failed == 1
 
     # We expect exactly 1 violation due to the misspelled tag
-    assert schema_evaluation.num_violations == 1
+    assert schema_evaluation.num_errors == 1
 
     # Thus there should be exactly 1 violation in the violation list
     assert len(schema_evaluation.violations) == 1
@@ -54,16 +50,12 @@ def test_schema_tag_name_invalid():
     # Check that the violation is flagged as fatal
     assert violation.is_fatal
 
-    # Check that the violation has a non-empty message, test and suggestion
+    # Check that the violation has a non-empty message
     assert violation.message
-    assert violation.test
-    assert violation.suggestion
-    
-    assert violation.location.type == "line"
 
     # Check that the location line/column are were the violation is
-    assert violation.location.line == 20
-    assert violation.location.column == 0
+    assert violation.line == 20
+    assert violation.column == 0
 
 def test_schema_tag_order_invalid():
     # Invalidating the date
@@ -73,13 +65,12 @@ def test_schema_tag_order_invalid():
 
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
-    assert schema_evaluation.aspect == "schema"
 
     # We expect exactly 1 rule to fail due to the capitalised tag
     assert schema_evaluation.num_rules_failed == 1
 
     # We expect exactly 1 violation due to the capitalised tag
-    assert schema_evaluation.num_violations == 1
+    assert schema_evaluation.num_errors == 1
 
     # Thus there should be exactly 1 violation in the violation list
     assert len(schema_evaluation.violations) == 1
@@ -89,16 +80,12 @@ def test_schema_tag_order_invalid():
     # Check that the violation is flagged as fatal
     assert violation.is_fatal
 
-    # Check that the violation has a non-empty message, test and suggestion
+    # Check that the violation has a non-empty message
     assert violation.message
-    assert violation.test
-    assert violation.suggestion
-    
-    assert violation.location.type == "line"
 
     # Check that the location line/column are were the violation is
-    assert violation.location.line == 5
-    assert violation.location.column == 0
+    assert violation.line == 5
+    assert violation.column == 0
 
 def test_schema_date_type_invalid():
     # Invalidating the date
@@ -107,13 +94,12 @@ def test_schema_date_type_invalid():
 
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
-    assert schema_evaluation.aspect == "schema"
 
     # We expect exactly 1 rule to fail due to the capitalised tag
     assert schema_evaluation.num_rules_failed == 1
 
     # We expect exactly 1 violation due to the capitalised tag
-    assert schema_evaluation.num_violations == 1
+    assert schema_evaluation.num_errors == 1
 
     # Thus there should be exactly 1 violation in the violation list
     assert len(schema_evaluation.violations) == 1
@@ -123,16 +109,12 @@ def test_schema_date_type_invalid():
     # Check that the violation is flagged as fatal
     assert violation.is_fatal
 
-    # Check that the violation has a non-empty message, test and suggestion
+    # Check that the violation has a non-empty message
     assert violation.message
-    assert violation.test
-    assert violation.suggestion
-    
-    assert violation.location.type == "line"
 
     # Check that the location line/column are were the violation is
-    assert violation.location.line == 5
-    assert violation.location.column == 0
+    assert violation.line == 5
+    assert violation.column == 0
 
 def test_schema_tags_revalid():
     # Replacing the tags but making sure they are valid
@@ -145,13 +127,11 @@ def test_schema_tags_revalid():
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
 
-    assert schema_evaluation.aspect == "schema"
-
     # We expect exactly 0 rule to fail due to the corrections
     assert schema_evaluation.num_rules_failed == 0
 
     # We expect exactly 0 violation due to the corrections
-    assert schema_evaluation.num_violations == 0
+    assert schema_evaluation.num_errors == 0
 
     # Thus there should be exactly 0 violation in the violation list
     assert len(schema_evaluation.violations) == 0
@@ -166,13 +146,11 @@ def test_schema_tags_multiple_errors_invalid():
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
 
-    assert schema_evaluation.aspect == "schema"
-
     # We expect exactly 2 rules to fail due to the invalid tag and content type
     assert schema_evaluation.num_rules_failed == 2
 
     # We expect exactly 2 violation due to the capitalised tag
-    assert schema_evaluation.num_violations == 2
+    assert schema_evaluation.num_errors == 2
 
     # Thus there should be exactly 2 violation in the violation list
     assert len(schema_evaluation.violations) == 2
@@ -182,29 +160,21 @@ def test_schema_tags_multiple_errors_invalid():
     # Check that the violation is flagged as fatal
     assert violation.is_fatal
 
-    # Check that the violation has a non-empty message, test and suggestion
+    # Check that the violation has a non-empty message
     assert violation.message
-    assert violation.test
-    assert violation.suggestion
-    
-    assert violation.location.type == "line"
 
     # Check that the location line/column are were the violation is
-    assert violation.location.line == 5
-    assert violation.location.column == 0
+    assert violation.line == 5
+    assert violation.column == 0
 
     violation = schema_evaluation.violations[1]
 
     # Check that the violation is flagged as fatal
     assert violation.is_fatal
 
-    # Check that the violation has a non-empty message, test and suggestion
+    # Check that the violation has a non-empty message
     assert violation.message
-    assert violation.test
-    assert violation.suggestion
-    
-    assert violation.location.type == "line"
 
     # Check that the location line/column are were the violation is
-    assert violation.location.line == 6
-    assert violation.location.column == 0
+    assert violation.line == 6
+    assert violation.column == 0

@@ -27,9 +27,9 @@ class Violation(BaseModel):
     xpath: Union[str, None]
     line: Union[int, None]
     column: Union[int, None]
-    test: str
-    message: str
-    suggestion: str
+    test: Union[str, None]
+    message: Union[str, None]
+    suggestion: Union[str, None]
 
 class Evaluation(BaseModel):
     is_valid: bool
