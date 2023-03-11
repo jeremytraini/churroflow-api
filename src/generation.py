@@ -2,35 +2,14 @@ from src.type_structure import *
 from lxml import etree
 from typing import Dict
 from saxonche import PySaxonProcessor
-from helpers import create_temp_file
+from src.helpers import create_temp_file
 import requests
 from os import unlink
 from src.database import Users, Reports, Violations, Evaluations, db
-
-def generate_report(invoice_name: str, invoice_text: str) -> int:
-    wellformedness_evaluation_id = generate_wellformedness_evaluation(invoice_text)
-    schema_evaluation_id = generate_schema_evaluation(invoice_text)
-    syntax_evaluation_id = generate_syntax_evaluation(invoice_text)
-    peppol_evaluation_id = generate_peppol_evaluation(invoice_text)
-    
-    report = Reports.create(
-        date_generated="",
-        invoice_name="",
-        invoice_raw="",
-        invoice_hash="",
-        is_valid=True,
-        total_num_violations=0,
-        total_num_warnings=0,
-        wellformedness=wellformedness_evaluation_id,
-        schema=schema_evaluation_id,
-        syntax=syntax_evaluation_id,
-        peppol=peppol_evaluation_id
-    )
-    
-    return report.id
+from datetime import datetime
 
 
-def generate_wellformedness_evaluation(invoice_text: str) -> int:
+def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
     evaluation = Evaluations(
         aspect="wellformedness",
         is_valid=True,
@@ -62,10 +41,10 @@ def generate_wellformedness_evaluation(invoice_text: str) -> int:
         violation.evaluation = evaluation.id 
         violation.save()
     
-    return evaluation.id
+    return evaluation
 
 
-def generate_schema_evaluation(invoice_text: str) -> int:
+def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     evaluation = Evaluations(
         aspect="wellformedness",
         is_valid=True,
@@ -98,20 +77,22 @@ def generate_schema_evaluation(invoice_text: str) -> int:
                 message=error.msg
             ))
     
+    evaluation.save()
+    
     for violation in violations:
         violation.evaluation = evaluation.id 
         violation.save()
     
-    return evaluation.id
+    return evaluation
 
 
-def generate_syntax_evaluation(invoice_text: str) -> int:
+def generate_syntax_evaluation(invoice_text: str) -> Evaluations:
     return generate_xslt_evaluation("syntax", invoice_text)
 
-def generate_peppol_evaluation(invoice_text: str) -> int:
+def generate_peppol_evaluation(invoice_text: str) -> Evaluations:
     return generate_xslt_evaluation("peppol", invoice_text)
 
-def generate_xslt_evaluation(aspect, invoice_text) -> int:
+def generate_xslt_evaluation(aspect, invoice_text) -> Evaluations:
     with PySaxonProcessor(license=False) as proc:
         xsltproc = proc.new_xslt30_processor()
         
@@ -183,4 +164,51 @@ def generate_xslt_evaluation(aspect, invoice_text) -> int:
             violation.evaluation = evaluation.id 
             violation.save()
         
-        return evaluation.id
+        return evaluation
+
+def generate_report(invoice_name: str, invoice_text: str) -> int:
+    wellformedness_evaluation = None
+    schema_evaluation = None
+    syntax_evaluation = None
+    peppol_evaluation = None
+    
+    wellformedness_evaluation = generate_wellformedness_evaluation(invoice_text)
+    total_errors = wellformedness_evaluation.num_errors
+    is_valid = wellformedness_evaluation.is_valid
+    total_warnings = 0
+    
+    if wellformedness_evaluation.is_valid:
+        schema_evaluation = generate_schema_evaluation(invoice_text)
+        total_errors = schema_evaluation.num_errors
+        is_valid = schema_evaluation.is_valid
+        
+        if schema_evaluation.is_valid:
+            syntax_evaluation = generate_syntax_evaluation(invoice_text)
+            peppol_evaluation = generate_peppol_evaluation(invoice_text)
+            
+            total_warnings = syntax_evaluation.num_warnings + peppol_evaluation.num_warnings
+            total_errors = syntax_evaluation.num_errors + peppol_evaluation.num_errors
+            
+            is_valid = peppol_evaluation.is_valid and syntax_evaluation.is_valid
+    
+    report = Reports.create(
+        date_generated=datetime.now(),
+        invoice_name=invoice_name,
+        invoice_raw="Test",
+        invoice_hash="Test",
+        is_valid=is_valid,
+        total_warnings=total_warnings,
+        total_errors=total_errors,
+        wellformedness=wellformedness_evaluation.id if wellformedness_evaluation else None,
+        schema=schema_evaluation.id if schema_evaluation else None,
+        syntax=syntax_evaluation.id if syntax_evaluation else None,
+        peppol=peppol_evaluation.id if peppol_evaluation else None
+    )
+    
+    print(report)
+    print(report.id)
+    
+    return report.id
+
+# from tests.constants import VALID_INVOICE_TEXT
+# generate_report("My Invoice", VALID_INVOICE_TEXT[:1000])

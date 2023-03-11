@@ -27,9 +27,9 @@ class Reports(BaseModel):
     total_warnings = IntegerField()
     total_errors = IntegerField()
     wellformedness = ForeignKeyField(Evaluations, backref='wellformedness')
-    schema = ForeignKeyField(Evaluations, backref='schema')
-    syntax = ForeignKeyField(Evaluations, backref='syntax')
-    peppol = ForeignKeyField(Evaluations, backref='peppol')
+    schema = ForeignKeyField(Evaluations, backref='schema', null=True, default=None)
+    syntax = ForeignKeyField(Evaluations, backref='syntax', null=True, default=None)
+    peppol = ForeignKeyField(Evaluations, backref='peppol', null=True, default=None)
 
 
 class Violations(BaseModel):
@@ -65,4 +65,4 @@ def clear_database():
 db.connect()
 
 create_tables()
-clear_database()
+# clear_database()
