@@ -58,11 +58,11 @@ async def report_get(report_id: int) -> Report:
     return report_get_v1(report_id)
 
 @app.get("/report/list_all/v1")
-async def report_list_all(order_by: Order_By) -> List[Report]:
+async def report_list_all(order_by: OrderBy) -> List[Report]:
     return report_list_all_v1(order_by)
 
 @app.get("/report/list_score/v1")
-async def report_list_score(score: int, order_by: Order_By) -> List[Report]:
+async def report_list_score(score: int, order_by: OrderBy) -> List[Report]:
     return report_list_score_v1(score, order_by)
 
 # TODO: check format and output types

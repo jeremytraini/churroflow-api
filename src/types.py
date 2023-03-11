@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Literal, Union
 
 Server_call_return = Dict[str, Any]
 
-class Order_By(BaseModel):
+class OrderBy(BaseModel):
     attribute: Literal["score", "date_generated", "invoice_name", "total_num_violations"]
     is_ascending: bool
 
