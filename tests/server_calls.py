@@ -9,6 +9,23 @@ def health_check_v1():
 
     return json.loads(response.text)
 
+def auth_register_v1():
+    response = requests.get(full_url + 'auth_register/v1')
+
+    return json.loads(response.text)
+
+
+def auth_login_v1():
+    response = requests.get(full_url + 'auth_login/v1')
+
+    return json.loads(response.text)
+
+
+def auth_logout_v1():
+    response = requests.get(full_url + 'auth_logout/v1')
+
+    return json.loads(response.text)
+
 def report_json_report_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()
     response = requests.post(full_url + 'report/json_report/v1', json=payload)
@@ -54,12 +71,6 @@ def report_peppol_v1(invoice: Invoice) -> Server_call_return:
     return json.loads(response.text)
 
 
-
-def user_authentication_v1(invoice: Invoice) -> Server_call_return:
-    payload = invoice.dict()
-    response = requests.post(full_url + 'user_authentication/v1', json=payload)
-
-    return json.loads(response.text)
 # Sample calls below
 
 def sample_post(val):

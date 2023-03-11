@@ -28,9 +28,17 @@ async def validation_exception_handler(request: Request, exc: Exception):
 async def health_check():
     return health_check_v1()
 
-@app.post("/report/authentication/v1")
-async def user_authentication(invoice: Invoice) -> Evaluation:
-    return user_authentication_v1(invoice)
+@app.get("/auth_login/v1")
+async def auth_login():
+    return auth_login_v1()
+
+@app.get("/auth_logout/v1")
+async def auth_login():
+    return auth_login_v1()
+
+@app.get("/auth_register/v1")
+async def auth_login():
+    return auth_login_v1()
 
 @app.post("/report/json_report/v1")
 async def report_json_report(invoice: Invoice) -> Report:

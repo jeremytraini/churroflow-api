@@ -20,7 +20,9 @@ class Location(BaseModel):
 class Violation(BaseModel):
     rule_id: str
     is_fatal: bool
-    location: Location
+    xpath: Union[str, None]
+    line: Union[int, None]
+    column: Union[int, None]
     test: str
     message: str
     suggestion: str
@@ -28,7 +30,6 @@ class Violation(BaseModel):
 class Evaluation(BaseModel):
     aspect: Literal["wellformedness", "syntax", "peppol", "schema"]
     is_valid: bool
-    num_rules_fired: int
     num_rules_failed: int
     num_violations: int
     violations: List[Violation]
