@@ -17,7 +17,7 @@ def test_peppol_valid_invoice():
     
     peppol_evaluation = report_peppol_v1(invoice)
     peppol_evaluation = Evaluation(**peppol_evaluation)
-    print(peppol_evaluation)
+    
     assert peppol_evaluation.aspect == "peppol"
     
     # We expect no rules to fail for a valid invoice
@@ -36,7 +36,6 @@ def test_peppol_single_volation():
     # Invalidating the ABN, changing the content of the ABN
     data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN', 1)
     
-    print(data)
     invoice = Invoice(name="My Invoice", source="text", data=data)
     
     peppol_evaluation = report_peppol_v1(invoice)

@@ -3,6 +3,10 @@ from typing import Any, Dict, List, Literal, Union
 
 Server_call_return = Dict[str, Any]
 
+class OrderBy(BaseModel):
+    attribute: Literal["score", "date_generated", "invoice_name", "total_num_violations"]
+    is_ascending: bool
+
 class Format(BaseModel):
     format: Literal["HTML", "PDF", "CSV"]
 
@@ -44,7 +48,7 @@ class Report(BaseModel):
     is_valid: bool
     total_num_violations: int
     wellformedness:  Union[Evaluation, None]
-    schemaEvaluation: Union[Evaluation, None]
+    schema_evaluation: Union[Evaluation, None]
     syntax: Union[Evaluation, None]
     peppol: Union[Evaluation, None]
 

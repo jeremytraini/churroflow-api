@@ -15,7 +15,7 @@ def invoice_quick_fix_wellformedness_v1(report_id: int) -> QuickFixReturn:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -37,7 +37,7 @@ def invoice_quick_fix_syntax_v1(report_id: int) -> QuickFixReturn:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -59,7 +59,7 @@ def invoice_quick_fix_peppol_v1(report_id: int) -> QuickFixReturn:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
@@ -81,7 +81,7 @@ def invoice_quick_fix_schema_v1(report_id: int) -> QuickFixReturn:
         is_valid=True,
         total_num_violations=0,
         wellformedness=None,
-        schemaEvaluation=None,
+        schema_evaluation=None,
         syntax=None,
         peppol=None
     )
