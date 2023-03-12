@@ -1,6 +1,5 @@
 from typing import Dict
 from src.type_structure import *
-from src.report import report_get_v1
 from src.database import Users, Reports, Violations, Evaluations, db
 import requests
 from src.generation import generate_report
@@ -32,7 +31,7 @@ def invoice_upload_file_v1(invoice_name: str, invoice_file):
     with open(invoice_file, 'rb') as f:
         invoice_text = f.read()
     
-    report_id = generate_report(invoice_name, invoice_text)
+    report_id = generate_report(invoice_name, invoice_text.decode("utf-8"))
     
     return {
         "report_id": report_id
@@ -53,3 +52,12 @@ def invoice_bulk_quick_fix_v1(invoices: List[Invoice]) -> List[Invoice]:
     invoice = Invoice(name="invoice", source="text", data="")
     invoice_list = [invoice]
     return invoice_list
+
+def invoice_file_upload_bulk_v1(invoices: List[Invoice]) -> List[int]:
+    report_id_list = []
+    report_id = 1
+    for invoice in invoices:
+        report_id_list.append(report_id)
+        report_id += 1
+     
+    return report_id_list

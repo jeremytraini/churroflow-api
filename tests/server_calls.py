@@ -35,6 +35,13 @@ def invoice_upload_file_v1(invoice_name: str, invoice_filename) -> Server_call_r
     
     return json.loads(response.text)
 
+def invoice_file_upload_bulk_v1(invoices: List[Invoice]) -> Server_call_return:
+    payload = {
+        "invoices": [invoice.dict() for invoice in invoices]
+    }
+    response = requests.post(full_url + 'invoice/file_upload_bulk/v1', json=payload)
+    
+    return json.loads(response.text)
 
 # Export Endpoints
 
@@ -134,6 +141,17 @@ def report_check_validity_v1(report_id: int) -> Server_call_return:
     response = requests.get(full_url + 'report/check_validity/v1', params=payload)
 
     return json.loads(response.text)
+
+
+def report_bulk_export_v1(report_ids: List[int], report_format: Format) -> Server_call_return:
+    payload = {
+        "report_ids": report_ids,
+        "report_format": report_format.format
+    }
+    response = requests.get(full_url + 'report/bulk_export/v1', json=payload)
+
+    return json.loads(response.text)
+
 
 
 # Other Endpoints
