@@ -167,11 +167,7 @@ def report_bulk_export_v1(report_ids, report_format) -> List:
     print("Exporting reports")
     if report_format == "json":
         return [export_json_report_v1(report_id) for report_id in report_ids]
-    elif report_format == "pdf":
-        return [export_pdf_report_v1(report_id) for report_id in report_ids]
     elif report_format == "html":
         return [export_html_report_v1(report_id) for report_id in report_ids]
-    elif report_format == "csv":
-        return [export_csv_report_v1(report_id) for report_id in report_ids]
     else:
         raise Exception("Unknown report format")
