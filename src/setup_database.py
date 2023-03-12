@@ -1,16 +1,17 @@
 import psycopg2
+import os
 
-# Connect to PostgreSQL as default user 'postgres'
-try:
-    connection = psycopg2.connect(
-    dbname="postgres",
-    user="postgres",
-    password="postgres",
-    host="localhost",
-    port="5432"
+conn = psycopg2.connect(
+    host=os.environ['POSTGRES_HOST'],
+    port=os.environ['POSTGRES_PORT'],
+    user=os.environ['POSTGRES_USER'],
+    password=os.environ['POSTGRES_PASSWORD'],
+    database=os.environ['POSTGRES_DB']
 )
-    with connection.cursor() as cursor:
-        cursor.execute("CREATE DATABASE validation")
-finally:
-    if connection:
-        connection.close()
+
+cur = conn.cursor()
+cur.execute('SELECT * FROM Reports')
+rows = cur.fetchall()
+print(rows)
+
+conn.close()
