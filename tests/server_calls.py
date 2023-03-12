@@ -33,11 +33,8 @@ def auth_logout_v1():
 # Invoice Endpoints
 
 def invoice_upload_text_v1(invoice_name: str, invoice_text: str) -> Server_call_return:
-    payload = {
-        "invoice_name": invoice_name,
-        "invoice_text": invoice_text
-    }
-    response = requests.post(full_url + 'invoice/upload_text/v1', params=payload)
+    payload = Invoice(name=invoice_name, source="text", data=invoice_text).dict()
+    response = requests.post(full_url + 'invoice/upload_text/v1', json=payload)
     
     return json.loads(response.text)
 

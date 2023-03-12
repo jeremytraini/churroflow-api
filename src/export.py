@@ -5,7 +5,6 @@ from copy import copy, deepcopy
 import json
 from html import escape
 from peewee import DoesNotExist
-from src.server import HTTPException
 from weasyprint import HTML
 from io import BytesIO, StringIO
 import csv
