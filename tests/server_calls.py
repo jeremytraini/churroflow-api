@@ -52,9 +52,6 @@ def export_pdf_report_v1(report_id: int):
     }
     response = requests.get(full_url + 'export/pdf_report/v1', params=payload)
     
-    with open(path, 'wb') as s:
-        s.write(data)
-    
     return response.content
 
 def export_html_report_v1(report_id: int):

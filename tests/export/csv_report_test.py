@@ -14,6 +14,6 @@ def test_csv_valid_invoice():
     invoice = Invoice(name="My Invoice", source="text", data=VALID_INVOICE_TEXT)
 
     report_id = invoice_upload_text_v1(invoice.name, invoice.data)["report_id"]
-    report_bytes = export_pdf_report_v1(report_id)
+    report_bytes = export_csv_report_v1(report_id)
     
     assert report_bytes
