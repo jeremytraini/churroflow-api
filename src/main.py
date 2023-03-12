@@ -32,8 +32,8 @@ async def health_check():
     return health_check_v1()
 
 @app.post("/invoice/upload_text/v1")
-async def invoice_upload_text(invoice_name: str, invoice_text: str) -> Dict:
-    return invoice_upload_text_v1(invoice_name=invoice_name, invoice_text=invoice_text)
+async def invoice_upload_text(invoice: Invoice) -> Dict:
+    return invoice_upload_text_v1(invoice_name=invoice.name, invoice_text=invoice.data)
 
 @app.post("/invoice/upload_url/v1")
 async def invoice_upload_url(invoice_name: str, invoice_url: str) -> Dict:
