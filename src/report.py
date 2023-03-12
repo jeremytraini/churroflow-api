@@ -55,8 +55,12 @@ def report_list_all_v1() -> List[int]:
     return [report.id for report in Reports.select()]
 
 def report_list_by_v1(order_by: OrderBy) -> List[int]:
+    if order_by.is_ascending:
+        order = getattr(Reports, order_by.table).asc()
+    else:
+        order = getattr(Reports, order_by.table).desc()
     
-    return reports
+    return [report.id for report in Reports.select().order_by(order)]
 
 def report_change_name_v1(report_id: int, new_name: str) -> Dict[None, None]:
     return {}
