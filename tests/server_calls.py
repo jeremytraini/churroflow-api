@@ -114,7 +114,7 @@ def report_delete_v1(report_id: int) -> Server_call_return:
     payload = {
         "report_id": report_id
     }
-    response = requests.delete(full_url + 'report/delete/v1', json=payload)
+    response = requests.delete(full_url + 'report/delete/v1', params=payload)
 
     return json.loads(response.text)
 
