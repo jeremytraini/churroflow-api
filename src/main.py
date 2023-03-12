@@ -140,5 +140,5 @@ async def clear():
 
 # ENDPOINTS ABOVE
 
-# if __name__ == "__main__":
-#     uvicorn.run(app, host=base_url, port=port)
+if __name__ == "__main__":
+    uvicorn.run(app, host=base_url, port=port)
