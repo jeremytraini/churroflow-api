@@ -100,7 +100,7 @@ def report_peppol_v1(invoice: Invoice) -> Server_call_return:
     return json.loads(response.text)
 
 def report_list_all_v1() -> Server_call_return:
-    response = requests.get(full_url + 'report/list_all/v1', json=payload)
+    response = requests.get(full_url + 'report/list_all/v1')
 
     return json.loads(response.text)
 

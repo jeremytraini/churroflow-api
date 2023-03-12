@@ -51,27 +51,12 @@ def report_get_v1(report_id: int) -> Report:
     )
     return report
 
-def report_list_all_v1(order_by: OrderBy) -> List[Report]:
-    report = Report(
-        report_id=0,
-        score=0,
-        date_generated="",
-        invoice_name="",
-        invoice_raw="",
-        invoice_hash="",
-        is_valid=True,
-        total_num_violations=0,
-        wellformedness_evaluation=None,
-        schema_evaluation=None,
-        syntax_evaluation=None,
-        peppol_evaluation=None
-    )
-    reports = [report]
-    return reports
+def report_list_all_v1() -> List[int]:
+    return [report.id for report in Reports.select()]
 
-def report_export_v1(report_id, report_format) -> ReportExport:
-    export = ReportExport(url="", invoice_hash="")
-    return export
+def report_list_by_v1(order_by: OrderBy) -> List[int]:
+    
+    return reports
 
 def report_change_name_v1(report_id: int, new_name: str) -> Dict[None, None]:
     return {}
