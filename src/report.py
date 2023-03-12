@@ -63,6 +63,14 @@ def report_list_by_v1(order_by: OrderBy) -> List[int]:
     return [report.id for report in Reports.select().order_by(order)]
 
 def report_change_name_v1(report_id: int, new_name: str) -> Dict[None, None]:
+    try:
+        report = Reports.get_by_id(report_id)
+    except DoesNotExist:
+        raise Exception(f"Report with id {report_id} not found")
+    
+    report.invoice_name = new_name
+    report.save()
+    
     return {}
 
 def report_delete_v1(report_id: int) -> Dict[None, None]:
