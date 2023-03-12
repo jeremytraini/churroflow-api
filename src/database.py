@@ -1,7 +1,7 @@
 from peewee import *
 
 
-db = PostgresqlDatabase('validation', host='localhost', port=5433, user='postgres', password='postgres')
+db = PostgresqlDatabase('validation', host='localhost', port=5432, user='postgres', password='postgres')
 
 # Defining database models using Peewee's Model class
 

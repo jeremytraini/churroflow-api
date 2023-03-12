@@ -10,6 +10,7 @@ jobs:
         image: postgres
         env:
           POSTGRES_DATABASE: validation
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
@@ -37,7 +38,8 @@ jobs:
     #     POSTGRES_PORT: 5432
     - name: Run tests
       env:
-        DATABASE_URL: postgres://postgres:password@localhost/validation
+        POSTGRES_HOST: postgres
+        POSTGRES_PORT: 5432
       run: |
         psql
         
@@ -49,9 +51,6 @@ jobs:
         kill $serverPID
         cat $SERVER_LOG
         sleep 3
-      env:
-        POSTGRES_HOST: postgres
-        POSTGRES_PORT: 5432
     - name: Generate coverage report
       run: |
         coverage report
