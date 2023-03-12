@@ -31,7 +31,7 @@ def test_bulk_export_valid():
     
     report_ids = invoice_file_upload_bulk_v1(invoices)
     
-    exports = report_bulk_export_v1(report_ids, Format(format="HTML"))
+    exports = report_bulk_export_v1(report_ids, Format(format="HTML")) # type: ignore
     
     # Checking that the number of exports returned is the same as the number of invoices inputted
     assert len(exports) == len(report_ids) == len(invoices)
