@@ -7,9 +7,6 @@ class OrderBy(BaseModel):
     table: Literal["date_generated", "invoice_name", "total_errors", "total_warnings"]
     is_ascending: bool
 
-class Format(BaseModel):
-    format: Literal["HTML", "PDF", "CSV"]
-
 class Invoice(BaseModel):
     name: str
     source: str

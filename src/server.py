@@ -120,9 +120,8 @@ async def invoice_generate_hash(invoice: Invoice) -> str:
 async def invoice_file_upload_bulk(invoices: List[Invoice]) -> List[int]:
     return invoice_file_upload_bulk_v1(invoices)
 
-# TODO: check input and return type
-@app.get("/report/bulk_export/v1")
-async def report_bulk_export(report_ids: List[int], report_format: Format) -> List[ReportExport]:
+@app.post("/report/bulk_export/v1")
+async def report_bulk_export(report_ids: List[int], report_format: str) -> List[str]:
     return report_bulk_export_v1(report_ids, report_format)
 
 
