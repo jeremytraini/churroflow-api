@@ -6,7 +6,7 @@ from src.invoice import *
 from src.export import *
 from src.type_structure import *
 from src.database import clear_v1
-from fastapi import FastAPI, Request, HTTPException, UploadFile
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
 from src.error import AuthenticationError, InputError
 from io import BytesIO
@@ -44,8 +44,9 @@ async def invoice_upload_url(invoice_name: str, invoice_url: str) -> Dict:
     return invoice_upload_url_v1(invoice_name=invoice_name, invoice_url=invoice_url)
 
 @app.post("/invoice/upload_file/v1")
-async def invoice_upload_file(invoice_file: UploadFile) -> Dict:
-    return invoice_upload_file_v1(invoice_name=invoice_file.filename, invoice_file=invoice_file.file) # type: ignore
+async def invoice_upload_file(file: UploadFile = File(...)) -> Dict:
+    file_data = await file.read()
+    return invoice_upload_file_v1(invoice_name=file.filename, invoice_file=file_data) # type: ignore
 
 @app.get("/export/json_report/v1")
 async def export_json_report(report_id: int):

@@ -28,10 +28,7 @@ def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
 
 
 def invoice_upload_file_v1(invoice_name: str, invoice_file):
-    with open(invoice_file, 'rb') as f:
-        invoice_text = f.read()
-    
-    report_id = generate_report(invoice_name, invoice_text.decode("utf-8"))
+    report_id = generate_report(invoice_name, invoice_file.decode("utf-8"))
     
     return {
         "report_id": report_id
