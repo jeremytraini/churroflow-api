@@ -32,7 +32,7 @@ class Evaluations(BaseModel):
     num_rules_failed = IntegerField()
     
     def to_json(self):
-        violations = Violations.select().where(Violations.evaluation == self.id)
+        violations = Violations.select().where(Violations.evaluation == self.id) # type: ignore
         
         return {
             "is_valid": self.is_valid,
@@ -57,7 +57,7 @@ class Reports(BaseModel):
     
     def to_json(self):
         return {
-            "report_id": self.id,
+            "report_id": self.id, # type: ignore
             "date_generated": self.date_generated,
             "invoice_name": self.invoice_name,
             "invoice_text": self.invoice_text,

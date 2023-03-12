@@ -1,5 +1,6 @@
 from tempfile import NamedTemporaryFile
 from src.type_structure import *
+import requests
 
 def create_temp_file(invoice_text: str) -> str:
     tmp = NamedTemporaryFile(mode='w', delete=False)

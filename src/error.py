@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi.exceptions import HTTPException
 
 class AuthenticationError(HTTPException):
     status_code = 403
@@ -7,3 +7,11 @@ class AuthenticationError(HTTPException):
 class InputError(HTTPException):
     status_code = 400
     detail = 'The input you have provided is invalid'
+
+class AccessError(HTTPException):
+    code = 403
+    message = 'No message specified'
+
+class AuthError(HTTPException):
+    code = 401
+    message = 'No message specified'

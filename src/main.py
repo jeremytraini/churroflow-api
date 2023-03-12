@@ -4,9 +4,10 @@ from src.health_check import health_check_v1
 from src.report import *
 from src.invoice import *
 from src.export import *
+from src.authentication import *
 from src.type_structure import *
 from src.database import clear_v1
-from fastapi import FastAPI, Request, HTTPException, UploadFile
+from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
 from src.error import AuthenticationError, InputError
 from io import BytesIO
@@ -27,9 +28,21 @@ async def validation_exception_handler(request: Request, exc: Exception):
 
 # ENDPOINTS BELOW
 
+@app.get("/")
+async def welcome():
+    return "Welcome to the Churros Validation API!"
+
 @app.get("/health_check/v1")
 async def health_check():
     return health_check_v1()
+
+@app.get("/auth_login/v1")
+async def auth_login(email: str, password: str):
+    return auth_login_v1(email, password)
+
+@app.get("/auth_register/v1")
+async def auth_register(email: str, password: str):
+    return auth_register_v1(email, password)
 
 @app.post("/invoice/upload_text/v1")
 async def invoice_upload_text(invoice: Invoice) -> Dict:
@@ -40,8 +53,9 @@ async def invoice_upload_url(invoice_name: str, invoice_url: str) -> Dict:
     return invoice_upload_url_v1(invoice_name=invoice_name, invoice_url=invoice_url)
 
 @app.post("/invoice/upload_file/v1")
-async def invoice_upload_file(invoice_file: UploadFile) -> Dict:
-    return invoice_upload_file_v1(invoice_name=invoice_file.filename, invoice_file=invoice_file.file)
+async def invoice_upload_file(file: UploadFile = File(...)) -> Dict:
+    file_data = await file.read()
+    return invoice_upload_file_v1(invoice_name=file.filename, invoice_file=file_data) # type: ignore
 
 @app.get("/export/json_report/v1")
 async def export_json_report(report_id: int):
@@ -49,7 +63,7 @@ async def export_json_report(report_id: int):
 
 @app.get("/export/pdf_report/v1")
 async def export_pdf_report(report_id: int):
-    pdf_file = BytesIO(export_pdf_report_v1(report_id))
+    pdf_file = BytesIO(export_pdf_report_v1(report_id)) # type: ignore
 
     # Return the PDF as a streaming response
     headers = {
@@ -88,29 +102,23 @@ async def report_syntax(invoice: Invoice) -> Evaluation:
 async def report_peppol(invoice: Invoice) -> Evaluation:
     return report_peppol_v1(invoice)
 
-@app.get("/report/get/v1")
-async def report_get(report_id: int) -> Report:
-    return report_get_v1(report_id)
-
 @app.get("/report/list_all/v1")
-async def report_list_all(order_by: OrderBy) -> List[Report]:
-    return report_list_all_v1(order_by)
+async def report_list_all() -> List[int]:
+    return report_list_all_v1()
 
-@app.get("/report/list_score/v1")
-async def report_list_score(score: int, order_by: OrderBy) -> List[Report]:
-    return report_list_score_v1(score, order_by)
+@app.get("/report/list_by/v1")
+async def report_list_by(order_by: OrderBy) -> List[int]:
+    return report_list_by_v1(order_by)
 
-# TODO: return type
 @app.put("/report/change_name/v1")
 async def report_change_name(report_id: int, new_name: str) -> Dict[None, None]:
     return report_change_name_v1(report_id, new_name)
 
-# TODO: return type
 @app.delete("/report/delete/v1")
 async def report_delete(report_id: int) -> Dict[None, None]:
     return report_delete_v1(report_id)
 
-@app.get("/invoice/check_validity/v1")
+@app.get("/report/check_validity/v1")
 async def invoice_check_validity(report_id: int) -> CheckValidReturn:
     return invoice_check_validity_v1(report_id)
 
@@ -118,18 +126,12 @@ async def invoice_check_validity(report_id: int) -> CheckValidReturn:
 async def invoice_generate_hash(invoice: Invoice) -> str:
     return invoice_generate_hash_v1(invoice)
 
-# TODO: check return type
-@app.post("/report/bulk_generate/v1")
-async def report_bulk_generate(invoices: List[Invoice]) -> List[Report]:
-    return report_bulk_generate_v1(invoices)
+@app.post("/invoice/file_upload_bulk/v1")
+async def invoice_file_upload_bulk(invoices: List[Invoice]) -> List[int]:
+    return invoice_file_upload_bulk_v1(invoices)
 
-@app.get("/invoice/bulk_quick_fix/v1")
-async def invoice_bulk_quick_fix(invoices: List[Invoice]) -> List[Invoice]:
-    return invoice_bulk_quick_fix_v1(invoices)
-
-# TODO: check input and return type
-@app.get("/report/bulk_export/v1")
-async def report_bulk_export(report_ids: List[int], report_format: Format) -> List[ReportExport]:
+@app.post("/report/bulk_export/v1")
+async def report_bulk_export(report_ids: List[int], report_format: str) -> List:
     return report_bulk_export_v1(report_ids, report_format)
 
 

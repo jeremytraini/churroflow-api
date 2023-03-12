@@ -3,6 +3,32 @@ import json
 from src.config import full_url
 from src.type_structure import *
 
+# Authentication endpoints
+
+def auth_register_v1(email: str, password: str) -> Server_call_return:
+    payload = {
+        "email": email,
+        "password": password
+    }
+    response = requests.get(full_url + 'auth_register/v1', params=payload)
+
+    return json.loads(response.text)
+
+
+def auth_login_v1(email: str, password: str) -> Server_call_return:
+    payload = {
+        "email": email,
+        "password": password
+    }
+    response = requests.get(full_url + 'auth_login/v1', params=payload)
+
+    return json.loads(response.text)
+
+
+def auth_logout_v1():
+    response = requests.get(full_url + 'auth_logout/v1')
+
+    return json.loads(response.text)
 
 # Invoice Endpoints
 
@@ -29,9 +55,14 @@ def invoice_upload_file_v1(invoice_name: str, invoice_filename) -> Server_call_r
     files = {"file": (invoice_filename, open(invoice_filename, 'rb'))}
 
     response = requests.post(full_url + 'invoice/upload_file/v1', files=files, headers=headers)
-    
+
     return json.loads(response.text)
 
+def invoice_file_upload_bulk_v1(invoices: List[Invoice]) -> Server_call_return:
+    payload = [invoice.dict() for invoice in invoices]
+    response = requests.post(full_url + 'invoice/file_upload_bulk/v1', json=payload)
+    
+    return json.loads(response.text)
 
 # Export Endpoints
 
@@ -40,7 +71,7 @@ def export_json_report_v1(report_id: int) -> Server_call_return:
         "report_id": report_id
     }
     response = requests.get(full_url + 'export/json_report/v1', params=payload)
-    
+
     return json.loads(response.text)
 
 def export_pdf_report_v1(report_id: int):
@@ -72,7 +103,7 @@ def export_csv_report_v1(report_id: int):
 def report_wellformedness_v1(invoice: Invoice) -> Server_call_return:
     payload = invoice.dict()
     response = requests.post(full_url + 'report/wellformedness/v1', json=payload)
-    
+
     return json.loads(response.text)
 
 
@@ -96,6 +127,49 @@ def report_peppol_v1(invoice: Invoice) -> Server_call_return:
 
     return json.loads(response.text)
 
+def report_list_all_v1() -> Server_call_return:
+    response = requests.get(full_url + 'report/list_all/v1')
+
+    return json.loads(response.text)
+
+def report_list_by_v1(order_by: OrderBy) -> Server_call_return:
+    payload = order_by.dict()
+    response = requests.get(full_url + 'report/list_by/v1', json=payload)
+
+    return json.loads(response.text)
+
+def report_delete_v1(report_id: int) -> Server_call_return:
+    payload = {
+        "report_id": report_id
+    }
+    response = requests.delete(full_url + 'report/delete/v1', params=payload)
+
+    return json.loads(response.text)
+
+def report_change_name_v1(report_id: int, new_name: str) -> Server_call_return:
+    payload = {
+        "report_id": report_id,
+        "new_name": new_name
+    }
+    response = requests.put(full_url + 'report/change_name/v1', params=payload)
+
+    return json.loads(response.text)
+
+def report_check_validity_v1(report_id: int) -> Server_call_return:
+    payload = {
+        "report_id": report_id
+    }
+    response = requests.get(full_url + 'report/check_validity/v1', params=payload)
+
+    return json.loads(response.text)
+
+def report_bulk_export_v1(report_ids: List[int], report_format: str) -> Server_call_return:
+    payload = {
+        "report_ids": report_ids,
+        "report_format": report_format
+    }
+    response = requests.get(full_url + 'report/bulk_export/v1', json=payload)
+    return json.loads(response.text)
 
 # Other Endpoints
 
@@ -106,10 +180,7 @@ def health_check_v1():
 
 
 def clear_v1():
-    payload = {
-        
-    }
-    response = requests.delete(full_url + 'clear/v1', json=payload)
+    response = requests.delete(full_url + 'clear/v1')
     
     return json.loads(response.text)
 
