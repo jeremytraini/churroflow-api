@@ -1,4 +1,4 @@
-from src.types import *
+from src.type_structure import *
 from tests.server_calls import report_syntax_v1
 from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import remove_part_of_string, invalidate_invoice
@@ -17,18 +17,12 @@ def test_syntax_valid_invoice():
 
     syntax_evaluation = report_syntax_v1(invoice)
     syntax_evaluation = Evaluation(**syntax_evaluation)
-
-    assert syntax_evaluation.aspect == "syntax"
-    
-    # We expect many rules to be fired for any invoice
-    # This depends on the number of rules in the rule set but should be at least 1
-    assert syntax_evaluation.num_rules_fired > 0
     
     # We expect no rules to fail for a valid invoice
     assert syntax_evaluation.num_rules_failed == 0
     
     # We expect no violations for a valid invoice
-    assert syntax_evaluation.num_violations == 0
+    assert syntax_evaluation.num_errors == 0
     
     # The violation list should be empty for a valid invoice
     assert len(syntax_evaluation.violations) == 0
@@ -49,7 +43,7 @@ def test_syntax_single_violation():
     assert syntax_evaluation.num_rules_failed == 1
     
     # We expect exactly 1 violation due to the invalid currency code
-    assert syntax_evaluation.num_violations == 1
+    assert syntax_evaluation.num_errors == 1
     
     # Thus there should be exactly 1 violation in the violation list
     assert len(syntax_evaluation.violations) == 1
@@ -68,10 +62,8 @@ def test_syntax_single_violation():
     assert code_violation.test
     assert code_violation.suggestion
     
-    assert code_violation.location.type == "xpath"
-    
     # Check that the location xpath is not empty
-    assert code_violation.location.xpath
+    assert code_violation.xpath
 
 
 # Testing that multiple violations are generated when there are multiple errors in the invoice
@@ -91,7 +83,7 @@ def test_syntax_multiple_violations_same_rule():
     assert syntax_evaluation.num_rules_failed == 1
     
     # We expect exactly 2 violations for each invalid currency code
-    assert syntax_evaluation.num_violations == 2
+    assert syntax_evaluation.num_errors == 2
     
     # Thus there should be exactly 2 violations in the violation list
     assert len(syntax_evaluation.violations) == 2
@@ -103,7 +95,7 @@ def test_syntax_multiple_violations_same_rule():
     assert code_violation1.rule_id == code_violation2.rule_id == "BR-CL-03"
     
     # Locations should be different for each violation
-    assert code_violation1.location != code_violation2.location
+    assert code_violation1.xpath != code_violation2.xpath
 
 
 def test_syntax_multiple_violations_different_rules():
@@ -126,7 +118,7 @@ def test_syntax_multiple_violations_different_rules():
     assert syntax_evaluation.num_rules_failed == 2
     
     # We expect exactly 2 violations for each invalid currency code and 2 violations for each invalid address
-    assert syntax_evaluation.num_violations == 4
+    assert syntax_evaluation.num_errors == 4
     
     # Thus there should be exactly 4 violations in the violation list
     assert len(syntax_evaluation.violations) == 4
@@ -143,8 +135,8 @@ def test_syntax_multiple_violations_different_rules():
     assert id_code_violation1.rule_id == id_code_violation2.rule_id == "BR-CL-03"
     
     # Locations should be different for each violation
-    assert code_violation1.location != code_violation2.location
-    assert id_code_violation1.location != id_code_violation2.location
+    assert code_violation1.xpath != code_violation2.xpath
+    assert id_code_violation1.xpath != id_code_violation2.xpath
 
 
 # Testing that a warning doesn't invalidate the report
