@@ -5,6 +5,8 @@ In order to run the server, we must
 - be running a Postgres database server with a database named "validation"
 - be inside a python3 virtual environment
 - install the necessary modules inside this virtual environment
+- set the appropriate envrionment variables for the database
+- run the server
 
 ## Instructions below
 
@@ -38,6 +40,17 @@ To install the required modules in the previously setup virtual environment, run
 source env/bin/activate && pip3 install -r requirements.txt
 ```
 This will start the virtual environment then pip install the needed modules
+
+### Setting environment variables for database
+So that the server knows what database to connect to, run
+```bash
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5433
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=postgres
+export POSTGRES_DB=validation
+```
+Note: ensure these match the settings on the Postgres server you are running. The port may be 5432 and the password is whatever you set it to be when setting up the database.
 
 ### Run the server
 Finally, to run the server, simply execute in the main repo folder:
