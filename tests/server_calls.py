@@ -3,26 +3,7 @@ import json
 from src.config import full_url
 from src.type_structure import *
 
-
-# Invoice Endpoints
-
-def invoice_upload_text_v1(invoice_name: str, invoice_text: str) -> Server_call_return:
-    payload = {
-        "invoice_name": invoice_name,
-        "invoice_text": invoice_text
-    }
-    response = requests.post(full_url + 'invoice/upload_text/v1', params=payload)
-    
-    return json.loads(response.text)
-
-def invoice_upload_url_v1(invoice_name: str, invoice_url: str) -> Server_call_return:
-    payload = {
-        "invoice_name": invoice_name,
-        "invoice_url": invoice_url
-    }
-    response = requests.post(full_url + 'invoice/upload_url/v1', params=payload)
-    
-    return json.loads(response.text)
+# Authentication endpoints
 
 def auth_register_v1(email: str, password: str, first_name: str, last_name: str):
     payload = {
@@ -49,6 +30,26 @@ def auth_login_v1(email: str, password: str):
 def auth_logout_v1():
     response = requests.get(full_url + 'auth_logout/v1')
 
+    return json.loads(response.text)
+
+# Invoice Endpoints
+
+def invoice_upload_text_v1(invoice_name: str, invoice_text: str) -> Server_call_return:
+    payload = {
+        "invoice_name": invoice_name,
+        "invoice_text": invoice_text
+    }
+    response = requests.post(full_url + 'invoice/upload_text/v1', params=payload)
+    
+    return json.loads(response.text)
+
+def invoice_upload_url_v1(invoice_name: str, invoice_url: str) -> Server_call_return:
+    payload = {
+        "invoice_name": invoice_name,
+        "invoice_url": invoice_url
+    }
+    response = requests.post(full_url + 'invoice/upload_url/v1', params=payload)
+    
     return json.loads(response.text)
 
 def invoice_upload_file_v1(invoice_name: str, invoice_filename) -> Server_call_return:

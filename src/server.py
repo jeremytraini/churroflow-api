@@ -4,6 +4,7 @@ from src.health_check import health_check_v1
 from src.report import *
 from src.invoice import *
 from src.export import *
+from src.authentication import *
 from src.type_structure import *
 from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile
@@ -32,16 +33,16 @@ async def health_check():
     return health_check_v1()
 
 @app.get("/auth_login/v1")
-async def auth_login():
-    return auth_login_v1()
+async def auth_login(email: str, password: str):
+    return auth_login_v1(email, password)
 
 @app.get("/auth_logout/v1")
-async def auth_logout():
-    return auth_login_v1()
+async def auth_logout(token: str):
+    return auth_logout_v1(token)
 
 @app.get("/auth_register/v1")
-async def auth_register():
-    return auth_login_v1()
+async def auth_register(email: str, password: str, name_first: str, name_last: str):
+    return auth_register_v1(email, password, name_first, name_last)
 
 @app.post("/invoice/upload_text/v1")
 async def invoice_upload_text(invoice_name: str, invoice_text: str) -> Dict:
@@ -107,10 +108,6 @@ async def report_get(report_id: int) -> Report:
 @app.get("/report/list_all/v1")
 async def report_list_all(order_by: OrderBy) -> List[Report]:
     return report_list_all_v1(order_by)
-
-@app.get("/report/list_score/v1")
-async def report_list_score(score: int, order_by: OrderBy) -> List[Report]:
-    return report_list_score_v1(score, order_by)
 
 # TODO: return type
 @app.put("/report/change_name/v1")
