@@ -4,11 +4,8 @@ from typing import Any, Dict, List, Literal, Union
 Server_call_return = Dict[str, Any]
 
 class OrderBy(BaseModel):
-    attribute: Literal["score", "date_generated", "invoice_name", "total_num_violations"]
+    table: Literal["date_generated", "invoice_name", "total_errors", "total_warnings"]
     is_ascending: bool
-
-class Format(BaseModel):
-    format: Literal["HTML", "PDF", "CSV"]
 
 class Invoice(BaseModel):
     name: str
@@ -61,4 +58,3 @@ class ReportExport(BaseModel):
 
 class CheckValidReturn(BaseModel):
     is_valid: bool
-    invoice_hash: str

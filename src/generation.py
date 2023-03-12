@@ -195,7 +195,4 @@ def generate_report(invoice_name: str, invoice_text: str) -> int:
         peppol=peppol_evaluation.id if peppol_evaluation else None
     )
     
-    print(report)
-    print(report.id)
-    
     return report.id
