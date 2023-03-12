@@ -93,19 +93,17 @@ async def report_get(report_id: int) -> Report:
     return report_get_v1(report_id)
 
 @app.get("/report/list_all/v1")
-async def report_list_all(order_by: OrderBy) -> List[Report]:
-    return report_list_all_v1(order_by)
+async def report_list_all() -> List[int]:
+    return report_list_all_v1()
 
-@app.get("/report/list_score/v1")
-async def report_list_score(score: int, order_by: OrderBy) -> List[Report]:
-    return report_list_score_v1(score, order_by)
+@app.get("/report/list_by/v1")
+async def report_list_by(order_by: OrderBy) -> List[int]:
+    return report_list_by_v1(order_by)
 
-# TODO: return type
 @app.put("/report/change_name/v1")
 async def report_change_name(report_id: int, new_name: str) -> Dict[None, None]:
     return report_change_name_v1(report_id, new_name)
 
-# TODO: return type
 @app.delete("/report/delete/v1")
 async def report_delete(report_id: int) -> Dict[None, None]:
     return report_delete_v1(report_id)

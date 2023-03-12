@@ -99,6 +99,34 @@ def report_peppol_v1(invoice: Invoice) -> Server_call_return:
 
     return json.loads(response.text)
 
+def report_list_all_v1() -> Server_call_return:
+    response = requests.get(full_url + 'report/list_all/v1', json=payload)
+
+    return json.loads(response.text)
+
+def report_list_by_v1(order_by: OrderBy) -> Server_call_return:
+    payload = order_by.dict()
+    response = requests.get(full_url + 'report/list_by/v1', json=payload)
+
+    return json.loads(response.text)
+
+def report_delete_v1(report_id: int) -> Server_call_return:
+    payload = {
+        "report_id": report_id
+    }
+    response = requests.delete(full_url + 'report/delete/v1', json=payload)
+
+    return json.loads(response.text)
+
+def report_change_name_v1(report_id: int, new_name: str) -> Server_call_return:
+    payload = {
+        "report_id": report_id,
+        "new_name": new_name
+    }
+    response = requests.post(full_url + 'report/delete/v1', json=payload)
+
+    return json.loads(response.text)
+
 
 # Other Endpoints
 
