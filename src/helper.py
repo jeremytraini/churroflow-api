@@ -1,4 +1,3 @@
-from src.data_store import data_store
 import secrets
 import sys
 from PIL import Image

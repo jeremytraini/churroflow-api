@@ -5,24 +5,22 @@ from src.type_structure import *
 
 # Authentication endpoints
 
-def auth_register_v1(email: str, password: str, first_name: str, last_name: str):
-    payload = {
-        "email": email,
-        "password": password,
-        "first_name": first_name,
-        "last_name": last_name
-    }
-    response = requests.get(full_url + 'auth_register/v1', json=payload)
-
-    return json.loads(response.text)
-
-
-def auth_login_v1(email: str, password: str):
+def auth_register_v1(email: str, password: str) -> Server_call_return:
     payload = {
         "email": email,
         "password": password
     }
-    response = requests.get(full_url + 'auth_login/v1', json=payload)
+    response = requests.get(full_url + 'auth_register/v1', params=payload)
+
+    return json.loads(response.text)
+
+
+def auth_login_v1(email: str, password: str) -> Server_call_return:
+    payload = {
+        "email": email,
+        "password": password
+    }
+    response = requests.get(full_url + 'auth_login/v1', params=payload)
 
     return json.loads(response.text)
 
@@ -127,6 +125,11 @@ def report_peppol_v1(invoice: Invoice) -> Server_call_return:
 
     return json.loads(response.text)
 
+def report_list_all_v1(order_by: OrderBy) -> Server_call_return:
+    payload = order_by.dict()
+    response = requests.get(full_url + 'report/peppol/v1', json=payload)
+
+    return json.loads(response.text)
 
 # Other Endpoints
 
@@ -137,10 +140,7 @@ def health_check_v1():
 
 
 def clear_v1():
-    payload = {
-        
-    }
-    response = requests.delete(full_url + 'clear/v1', json=payload)
+    response = requests.delete(full_url + 'clear/v1')
     
     return json.loads(response.text)
 

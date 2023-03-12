@@ -36,13 +36,9 @@ async def health_check():
 async def auth_login(email: str, password: str):
     return auth_login_v1(email, password)
 
-@app.get("/auth_logout/v1")
-async def auth_logout(token: str):
-    return auth_logout_v1(token)
-
 @app.get("/auth_register/v1")
-async def auth_register(email: str, password: str, name_first: str, name_last: str):
-    return auth_register_v1(email, password, name_first, name_last)
+async def auth_register(email: str, password: str):
+    return auth_register_v1(email, password)
 
 @app.post("/invoice/upload_text/v1")
 async def invoice_upload_text(invoice_name: str, invoice_text: str) -> Dict:
