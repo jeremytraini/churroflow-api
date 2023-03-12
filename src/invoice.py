@@ -39,9 +39,12 @@ def invoice_upload_file_v1(invoice_name: str, invoice_file):
     }
 
 def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
-    report = Reports.query.filter_by(id=report_id).one()
+    try:
+        report = Reports.get_by_id(report_id)
+    except DoesNotExist:
+        raise Exception(f"Report with id {report_id} not found")
     
-    return CheckValidReturn(is_valid=report.is_valid, invoice_hash=report.invoice_hash)
+    return CheckValidReturn(is_valid=report.is_valid)
 
 def invoice_generate_hash_v1(invoice: Invoice) -> str:
     return "hash"

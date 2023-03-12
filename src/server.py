@@ -108,7 +108,7 @@ async def report_change_name(report_id: int, new_name: str) -> Dict[None, None]:
 async def report_delete(report_id: int) -> Dict[None, None]:
     return report_delete_v1(report_id)
 
-@app.get("/invoice/check_validity/v1")
+@app.get("/report/check_validity/v1")
 async def invoice_check_validity(report_id: int) -> CheckValidReturn:
     return invoice_check_validity_v1(report_id)
 

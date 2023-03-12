@@ -61,4 +61,3 @@ class ReportExport(BaseModel):
 
 class CheckValidReturn(BaseModel):
     is_valid: bool
-    invoice_hash: str
