@@ -29,11 +29,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Connect to PostgreSQL
-        run: |
-          python3 -m src.setup_database
-        env:
-          POSTGRES_HOST: postgres
-          POSTGRES_PORT: 5432
+      run: |
+        python3 -m src.setup_database
+      env:
+        POSTGRES_HOST: postgres
+        POSTGRES_PORT: 5432
     - name: Run tests
       env:
         DATABASE_URL: postgres://postgres:password@localhost/validation
