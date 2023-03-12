@@ -1,7 +1,11 @@
 from peewee import *
+import os
 
-
-db = PostgresqlDatabase('validation', host='localhost', port=5432, user='postgres', password='postgres')
+db = PostgresqlDatabase(os.environ['POSTGRES_DB'],
+                        host=os.environ['POSTGRES_HOST'],
+                        port=os.environ['POSTGRES_PORT'],
+                        user=os.environ['POSTGRES_USER'],
+                        password=os.environ['POSTGRES_PASSWORD'])
 
 # Defining database models using Peewee's Model class
 
