@@ -1,4 +1,4 @@
-from src.types import *
+from src.type_structure import *
 from tests.server_calls import report_peppol_v1
 from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import invalidate_invoice, remove_part_of_string
@@ -18,23 +18,18 @@ def test_peppol_valid_invoice():
     peppol_evaluation = report_peppol_v1(invoice)
     peppol_evaluation = Evaluation(**peppol_evaluation)
     
-    assert peppol_evaluation.aspect == "peppol"
-    
-    # We expect many rules to be fired for any invoice
-    # This depends on the number of rules in the rule set but should be at least 1
-    assert peppol_evaluation.num_rules_fired > 0
-    
     # We expect no rules to fail for a valid invoice
     assert peppol_evaluation.num_rules_failed == 0
     
-    # We expect no violations for a valid invoice
-    assert peppol_evaluation.num_violations == 0
+    # We expect no errors for a valid invoice
+    assert peppol_evaluation.num_errors == 0
     
     # The violation list should be empty for a valid invoice
     assert len(peppol_evaluation.violations) == 0
+    assert peppol_evaluation.is_valid == True
 
 # Testing that a single rule fails when there is one error in the invoice
-def test_peppol_single_volation():
+def test_peppol_single_violation():
     data = VALID_INVOICE_TEXT
     
     # Invalidating the ABN, changing the content of the ABN
@@ -48,8 +43,9 @@ def test_peppol_single_volation():
     # We expect exactly 1 rule to fail due to the invalid ABN
     assert peppol_evaluation.num_rules_failed == 1
     
-    # We expect exactly 1 violation due to the invalid ABN
-    assert peppol_evaluation.num_violations == 1
+    # We expect exactly 1 warning due to the invalid ABN
+    assert peppol_evaluation.num_warnings == 1
+    assert peppol_evaluation.num_errors == 0
     
     # Thus there should be exactly 1 violation in the violation list
     assert len(peppol_evaluation.violations) == 1
@@ -68,10 +64,8 @@ def test_peppol_single_volation():
     assert abn_violation.test
     assert abn_violation.suggestion
     
-    assert abn_violation.location.type == "xpath"
-    
     # Check that the location xpath is not empty
-    assert abn_violation.location.xpath
+    assert abn_violation.xpath
 
 
 # Testing that multiple violations are generated when there are multiple errors in the invoice
@@ -91,7 +85,7 @@ def test_peppol_multiple_violations_same_rule():
     assert peppol_evaluation.num_rules_failed == 1
     
     # We expect exactly 2 violations for each invalid ABN
-    assert peppol_evaluation.num_violations == 2
+    assert peppol_evaluation.num_warnings == 2
     
     # Thus there should be exactly 2 violations in the violation list
     assert len(peppol_evaluation.violations) == 2
@@ -103,7 +97,7 @@ def test_peppol_multiple_violations_same_rule():
     assert abn_violation1.rule_id == abn_violation2.rule_id == "PEPPOL-COMMON-R050"
     
     # Locations should be different for each violation
-    assert abn_violation1.location != abn_violation2.location
+    assert abn_violation1.xpath != abn_violation2.xpath
 
 
 def test_peppol_multiple_violations_different_rules():
@@ -126,7 +120,8 @@ def test_peppol_multiple_violations_different_rules():
     assert peppol_evaluation.num_rules_failed == 2
     
     # We expect exactly 2 violations for each invalid ABN and 2 violations for each invalid address
-    assert peppol_evaluation.num_violations == 4
+    assert peppol_evaluation.num_warnings == 2
+    assert peppol_evaluation.num_errors == 2
     
     # Thus there should be exactly 4 violations in the violation list
     assert len(peppol_evaluation.violations) == 4
@@ -143,8 +138,8 @@ def test_peppol_multiple_violations_different_rules():
     assert address_violation1.rule_id == address_violation2.rule_id == "PEPPOL-EN16931-F001"
     
     # Locations should be different for each violation
-    assert abn_violation1.location != abn_violation2.location
-    assert address_violation1.location != address_violation2.location
+    assert abn_violation1.xpath != abn_violation2.xpath
+    assert address_violation1.xpath != address_violation2.xpath
 
 
 # Testing that a warning doesn't invalidate the report

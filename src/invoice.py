@@ -1,98 +1,46 @@
 from typing import Dict
-
-from src.types import *
+from src.type_structure import *
 from src.report import report_get_v1
+from src.database import Users, Reports, Violations, Evaluations, db
+import requests
+from src.generation import generate_report
 
-def invoice_quick_fix_wellformedness_v1(report_id: int) -> QuickFixReturn:
-    invoice = Invoice(name="My Invoice", source="text", data="data")
-    report = Report(
-        report_id=0,
-        score=0,
-        date_generated="",
-        invoice_name="",
-        invoice_raw="",
-        invoice_hash="",
-        is_valid=True,
-        total_num_violations=0,
-        wellformedness=None,
-        schema_evaluation=None,
-        syntax=None,
-        peppol=None
-    )
-    quick_fix = QuickFixReturn (
-        invoice=invoice,
-        report=report
-    )
-    return quick_fix
 
-def invoice_quick_fix_syntax_v1(report_id: int) -> QuickFixReturn:
-    invoice = Invoice(name="My Invoice", source="text", data="data")
-    report = Report(
-        report_id=0,
-        score=0,
-        date_generated="",
-        invoice_name="",
-        invoice_raw="",
-        invoice_hash="",
-        is_valid=True,
-        total_num_violations=0,
-        wellformedness=None,
-        schema_evaluation=None,
-        syntax=None,
-        peppol=None
-    )
-    quick_fix = QuickFixReturn (
-        invoice=invoice,
-        report=report
-    )
-    return quick_fix
+def invoice_upload_text_v1(invoice_name: str, invoice_text: str):
+    report_id = generate_report(invoice_name, invoice_text)
+    
+    return {
+        "report_id": report_id
+    }
 
-def invoice_quick_fix_peppol_v1(report_id: int) -> QuickFixReturn:
-    invoice = Invoice(name="My Invoice", source="text", data="data")
-    report = Report(
-        report_id=0,
-        score=0,
-        date_generated="",
-        invoice_name="",
-        invoice_raw="",
-        invoice_hash="",
-        is_valid=True,
-        total_num_violations=0,
-        wellformedness=None,
-        schema_evaluation=None,
-        syntax=None,
-        peppol=None
-    )
-    quick_fix = QuickFixReturn (
-        invoice=invoice,
-        report=report
-    )
-    return quick_fix
 
-def invoice_quick_fix_schema_v1(report_id: int) -> QuickFixReturn:
-    invoice = Invoice(name="My Invoice", source="text", data="data")
-    report = Report(
-        report_id=0,
-        score=0,
-        date_generated="",
-        invoice_name="",
-        invoice_raw="",
-        invoice_hash="",
-        is_valid=True,
-        total_num_violations=0,
-        wellformedness=None,
-        schema_evaluation=None,
-        syntax=None,
-        peppol=None
-    )
-    quick_fix = QuickFixReturn (
-        invoice=invoice,
-        report=report
-    )
-    return quick_fix
+def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
+    response = requests.get(invoice_url)
+    if response.status_code != 200:
+        raise Exception("Could not retrieve invoice from url")
+    
+    invoice_text = response.text
+
+    report_id = generate_report(invoice_name, invoice_text)
+    
+    return {
+        "report_id": report_id
+    }
+
+
+def invoice_upload_file_v1(invoice_name: str, invoice_file):
+    with open(invoice_file, 'rb') as f:
+        invoice_text = f.read()
+    
+    report_id = generate_report(invoice_name, invoice_text)
+    
+    return {
+        "report_id": report_id
+    }
 
 def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
-    report = report_get_v1(report_id)
+    report = Reports.query.filter_by(id=report_id).one()
+    
     return CheckValidReturn(is_valid=report.is_valid, invoice_hash=report.invoice_hash)
 
 def invoice_generate_hash_v1(invoice: Invoice) -> str:

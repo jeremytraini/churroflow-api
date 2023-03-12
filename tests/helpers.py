@@ -1,6 +1,13 @@
 from lxml import etree
 from io import StringIO, BytesIO
 from tests.constants import CAC, CBC
+from tests.server_calls import clear_v1
+from pytest import fixture
+
+@fixture(autouse=True)
+def clear_database():
+    clear_v1()
+
 
 def remove_part_of_string(string, start, end):
     '''

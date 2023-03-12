@@ -12,7 +12,7 @@ class Format(BaseModel):
 
 class Invoice(BaseModel):
     name: str
-    source: Literal["url", "file_upload", "raw_data", "text"]
+    source: str
     data: str
 
 class Location(BaseModel):
@@ -24,40 +24,40 @@ class Location(BaseModel):
 class Violation(BaseModel):
     rule_id: str
     is_fatal: bool
-    location: Location
-    test: str
-    message: str
-    suggestion: str
+    xpath: Union[str, None]
+    line: Union[int, None]
+    column: Union[int, None]
+    test: Union[str, None]
+    message: Union[str, None]
+    suggestion: Union[str, None]
 
 class Evaluation(BaseModel):
-    aspect: Literal["wellformedness", "syntax", "peppol", "schema"]
     is_valid: bool
-    num_rules_fired: int
     num_rules_failed: int
-    num_violations: int
+    num_warnings: int
+    num_errors: int
     violations: List[Violation]
 
 class Report(BaseModel):
     report_id: int
-    score: int
     date_generated: str
     invoice_name: str
-    invoice_raw: str
+    invoice_text: str
     invoice_hash: str
     is_valid: bool
-    total_num_violations: int
-    wellformedness:  Union[Evaluation, None]
+    total_warnings: int
+    total_errors: int
+    wellformedness_evaluation:  Union[Evaluation, None]
     schema_evaluation: Union[Evaluation, None]
-    syntax: Union[Evaluation, None]
-    peppol: Union[Evaluation, None]
+    syntax_evaluation: Union[Evaluation, None]
+    peppol_evaluation: Union[Evaluation, None]
+
+class ReportID(BaseModel):
+    report_id: int
 
 class ReportExport(BaseModel):
     url: str
     invoice_hash: str
-
-class QuickFixReturn(BaseModel):
-    invoice: Invoice
-    report: Report
 
 class CheckValidReturn(BaseModel):
     is_valid: bool
