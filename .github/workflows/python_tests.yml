@@ -44,8 +44,8 @@ jobs:
         POSTGRES_PASSWORD: postgres
         POSTGRES_DB: validation
       run: |
-        python3 src.setup_database
-        
+        python3 -m src.setup_database
+
         SERVER_LOG=$(mktemp)
         coverage run -m src.server >& $SERVER_LOG &
         serverPID=$!
