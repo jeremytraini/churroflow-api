@@ -27,6 +27,10 @@ async def validation_exception_handler(request: Request, exc: Exception):
 
 # ENDPOINTS BELOW
 
+@app.get("/")
+async def welcome():
+    return "Welcome to the Churros Validation API!"
+
 @app.get("/health_check/v1")
 async def health_check():
     return health_check_v1()
@@ -112,7 +116,6 @@ async def invoice_check_validity(report_id: int) -> CheckValidReturn:
 async def invoice_generate_hash(invoice: Invoice) -> str:
     return invoice_generate_hash_v1(invoice)
 
-# TODO: check return type
 @app.post("/invoice/file_upload_bulk/v1")
 async def invoice_file_upload_bulk(invoices: List[Invoice]) -> List[int]:
     return invoice_file_upload_bulk_v1(invoices)

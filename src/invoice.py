@@ -48,16 +48,5 @@ def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
 def invoice_generate_hash_v1(invoice: Invoice) -> str:
     return "hash"
 
-def invoice_bulk_quick_fix_v1(invoices: List[Invoice]) -> List[Invoice]:
-    invoice = Invoice(name="invoice", source="text", data="")
-    invoice_list = [invoice]
-    return invoice_list
-
 def invoice_file_upload_bulk_v1(invoices: List[Invoice]) -> List[int]:
-    report_id_list = []
-    report_id = 1
-    for invoice in invoices:
-        report_id_list.append(report_id)
-        report_id += 1
-     
-    return report_id_list
+    return [generate_report(invoice.name, invoice.data) for invoice in invoices]
