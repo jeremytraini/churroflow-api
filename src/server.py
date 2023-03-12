@@ -4,6 +4,7 @@ from src.health_check import health_check_v1
 from src.report import *
 from src.invoice import *
 from src.export import *
+from src.authentication import *
 from src.type_structure import *
 from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File
@@ -34,6 +35,14 @@ async def welcome():
 @app.get("/health_check/v1")
 async def health_check():
     return health_check_v1()
+
+@app.get("/auth_login/v1")
+async def auth_login(email: str, password: str):
+    return auth_login_v1(email, password)
+
+@app.get("/auth_register/v1")
+async def auth_register(email: str, password: str):
+    return auth_register_v1(email, password)
 
 @app.post("/invoice/upload_text/v1")
 async def invoice_upload_text(invoice_name: str, invoice_text: str) -> Dict:

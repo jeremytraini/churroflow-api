@@ -28,7 +28,7 @@ def remove_part_of_string(string, start, end):
     remove_part_of_string(VALID_INVOICE_TEXT, 2061, 2062)
     remove_part_of_string(VALID_INVOICE_TEXT, 3508, 3509)
     '''
-    
+
     return string[:start] + string[end:]
 
 
@@ -52,7 +52,7 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
         choice (str) - Choice whether the user wants to replace the tag or the content
         tag_name (str) - The tag that we want to change
         attrib_name(str) - The attribute name that we want to change, only used if the choice is 'attrib'
-        text (str) - The replacement text for either the tag or the content 
+        text (str) - The replacement text for either the tag or the content
         index (int) - Which tag to be replaced
 
     Exceptions:
@@ -60,7 +60,7 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
 
     Return Value:
         None
-    
+
     Sample Calls:
     invalidate_invoice(data, 'tag', 'cbc:CustomizationID', '', 'cbc:TEST1', 1)
 
@@ -79,7 +79,7 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
         tag_name = CAC + tags[1]
     elif tags[0] == 'cbc':
         tag_name = CBC + tags[1]
-    
+
     # Get the text
     if texts[0] == 'cac':
         text = CAC + texts[1]
