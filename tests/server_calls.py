@@ -36,9 +36,7 @@ def invoice_upload_file_v1(invoice_name: str, invoice_filename) -> Server_call_r
     return json.loads(response.text)
 
 def invoice_file_upload_bulk_v1(invoices: List[Invoice]) -> Server_call_return:
-    payload = {
-        "invoices": [invoice.dict() for invoice in invoices]
-    }
+    payload = [invoice.dict() for invoice in invoices]
     response = requests.post(full_url + 'invoice/file_upload_bulk/v1', json=payload)
     
     return json.loads(response.text)

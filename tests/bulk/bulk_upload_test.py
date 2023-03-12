@@ -27,7 +27,7 @@ def test_bulk_upload_valid():
 
     invoice_wellformedness = Invoice(name="My Invoice", source="text", data=data)
     
-    invoices = [invoice_valid]
+    invoices = [invoice_valid, invoice_schema, invoice_peppol, invoice_syntax, invoice_wellformedness]
     
     report_ids = invoice_file_upload_bulk_v1(invoices)
     
