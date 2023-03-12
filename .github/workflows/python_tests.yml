@@ -5,6 +5,20 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_DB: validation
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -16,7 +30,19 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    # - name: Connect to PostgreSQL
+    #   run: |
+    #     python3 -m src.setup_database
+    #   env:
+    #     POSTGRES_HOST: localhost
+    #     POSTGRES_PORT: 5432
     - name: Run tests
+      env:
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: validation
       run: |
         SERVER_LOG=$(mktemp)
         coverage run -m src.server >& $SERVER_LOG &
@@ -29,9 +55,3 @@ jobs:
     - name: Generate coverage report
       run: |
         coverage report
-    # - name: Run pylint
-    #   run: |
-    #     find . -type f -name "*.py" | egrep -v ".git/*" | xargs pylint
-    # - name: Run mypy
-    #   run: |
-    #     find . -type f -name "*.py" | egrep -v ".git/*" | xargs mypy

@@ -1,6 +1,13 @@
 from lxml import etree
 from io import StringIO, BytesIO
 from tests.constants import CAC, CBC
+from tests.server_calls import clear_v1
+from pytest import fixture
+
+@fixture(autouse=True)
+def clear_database():
+    clear_v1()
+
 
 def remove_part_of_string(string, start, end):
     '''
@@ -80,8 +87,8 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
         text = CBC + texts[1]
     else:
         text = texts[0]
-
-    root = etree.fromstring(invoice_text.encode('utf-8'))
+    
+    root = etree.fromstring(invoice_text.encode('utf-8'), parser=None)
 
     for elem in root.getiterator():
         try:
@@ -101,8 +108,3 @@ def invalidate_invoice(invoice_text, choice, tag_name, attrib_name, text, index)
             pass
 
     return etree.tostring(root).decode('utf-8')
-# Used to invalidate invoice
-# To be replaced with Denzel's better function
-
-
-# def INPUT_ERROR():
