@@ -140,15 +140,13 @@ def report_check_validity_v1(report_id: int) -> Server_call_return:
 
     return json.loads(response.text)
 
-
 def report_bulk_export_v1(report_ids: List[int], report_format: str) -> Server_call_return:
-    params = {
+    payload = {
+        "report_ids": report_ids,
         "report_format": report_format
     }
-    response = requests.post(full_url + 'report/bulk_export/v1', json=report_ids, params=params)
-
-    return response.json()
-
+    response = requests.get(full_url + 'report/bulk_export/v1', json=payload)
+    return json.loads(response.text)
 
 # Other Endpoints
 

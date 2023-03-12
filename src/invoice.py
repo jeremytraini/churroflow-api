@@ -1,6 +1,6 @@
 from typing import Dict
 from src.type_structure import *
-from src.database import Users, Reports, Violations, Evaluations, db
+from src.database import Reports, DoesNotExist
 import requests
 from src.generation import generate_report
 

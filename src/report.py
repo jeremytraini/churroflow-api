@@ -79,3 +79,9 @@ def report_bulk_generate_v1(invoices: List[Invoice]) -> List[Report]:
     )
     reports = [report]
     return reports
+
+def report_bulk_export_v1(report_ids, report_format) -> List[ReportExport]:
+    export = ReportExport(url="", invoice_hash="")
+    exports = [export for _ in report_ids]
+    return exports
+
