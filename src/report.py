@@ -74,6 +74,13 @@ def report_change_name_v1(report_id: int, new_name: str) -> Dict[None, None]:
     return {}
 
 def report_delete_v1(report_id: int) -> Dict[None, None]:
+    try:
+        report = Reports.get_by_id(report_id)
+    except DoesNotExist:
+        raise Exception(f"Report with id {report_id} not found")
+    
+    report.delete_instance()
+    
     return {}
 
 def report_bulk_generate_v1(invoices: List[Invoice]) -> List[Report]:
