@@ -123,7 +123,7 @@ def report_change_name_v1(report_id: int, new_name: str) -> Server_call_return:
         "report_id": report_id,
         "new_name": new_name
     }
-    response = requests.post(full_url + 'report/delete/v1', json=payload)
+    response = requests.put(full_url + 'report/change_name/v1', params=payload)
 
     return json.loads(response.text)
 
