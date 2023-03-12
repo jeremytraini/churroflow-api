@@ -9,14 +9,24 @@ def health_check_v1():
 
     return json.loads(response.text)
 
-def auth_register_v1():
-    response = requests.get(full_url + 'auth_register/v1')
+def auth_register_v1(email: str, password: str, first_name: str, last_name: str):
+    payload = {
+        "email": email,
+        "password": password,
+        "first_name": first_name,
+        "last_name": last_name
+    }
+    response = requests.get(full_url + 'auth_register/v1', json=payload)
 
     return json.loads(response.text)
 
 
-def auth_login_v1():
-    response = requests.get(full_url + 'auth_login/v1')
+def auth_login_v1(email: str, password: str):
+    payload = {
+        "email": email,
+        "password": password
+    }
+    response = requests.get(full_url + 'auth_login/v1', json=payload)
 
     return json.loads(response.text)
 

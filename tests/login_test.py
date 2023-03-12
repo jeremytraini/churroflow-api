@@ -15,7 +15,7 @@ AUTH_LOGIN_V1 TESTS
 
 # Succesful login
 def test_login_success():
-    clear()
+    # clear()
     loginDict = {}
     # Register and login functions should return same id for same user
     reg_return_value = auth_register_v1("test@test.com", "password", "bob", "brown")
@@ -23,11 +23,13 @@ def test_login_success():
     assert reg_return_value["token"] != login_return_value["token"]
 
 def test_login_multiple_success():
+    reg_return_value_1 = auth_register_v1("test@test.com", "password", "bob", "jenkins")["token"]
     # First user registered and logged in
-    assert auth_register_v1("test@test.com", "password", "bob", "jenkins")["token"]
+    assert reg_return_value_1
 
+    reg_return_value_2 = auth_register_v1("test@test.com", "password", "bob", "brown")["token"]
     # Second user registered and logged in
-    assert auth_register_v1("test@test.com", "password", "bob", "brown")["token"]
+    assert reg_return_value_2
 
     # Unique id between both users
     assert reg_return_value_1 != reg_return_value_2
