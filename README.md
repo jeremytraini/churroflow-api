@@ -1,4 +1,4 @@
-# se2021-23t1-einvoicing-api-template
+# SENG2021 23T1 CHURROS E-Invoicing Validation API
 
 
 In order to run the server, we must
