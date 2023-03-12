@@ -127,6 +127,14 @@ def report_change_name_v1(report_id: int, new_name: str) -> Server_call_return:
 
     return json.loads(response.text)
 
+def report_check_validity_v1(report_id: int) -> Server_call_return:
+    payload = {
+        "report_id": report_id
+    }
+    response = requests.get(full_url + 'report/check_validity/v1', params=payload)
+
+    return json.loads(response.text)
+
 
 # Other Endpoints
 
