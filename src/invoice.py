@@ -50,3 +50,8 @@ def invoice_bulk_quick_fix_v1(invoices: List[Invoice]) -> List[Invoice]:
     invoice = Invoice(name="invoice", source="text", data="")
     invoice_list = [invoice]
     return invoice_list
+
+def invoice_file_upload_bulk_v1(invoices: List[Invoice]) -> List[int]:
+    report_id = 1
+    report_id_list = [report_id]
+    return report_id_list

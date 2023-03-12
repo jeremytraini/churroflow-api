@@ -119,9 +119,9 @@ async def invoice_generate_hash(invoice: Invoice) -> str:
     return invoice_generate_hash_v1(invoice)
 
 # TODO: check return type
-@app.post("/report/bulk_generate/v1")
-async def report_bulk_generate(invoices: List[Invoice]) -> List[Report]:
-    return report_bulk_generate_v1(invoices)
+@app.post("/invoice/file_upload_bulk/v1")
+async def invoice_file_upload_bulk(invoices: List[Invoice]) -> List[int]:
+    return invoice_file_upload_bulk_v1(invoices)
 
 @app.get("/invoice/bulk_quick_fix/v1")
 async def invoice_bulk_quick_fix(invoices: List[Invoice]) -> List[Invoice]:
