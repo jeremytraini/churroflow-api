@@ -1,12 +1,20 @@
 from peewee import *
 import os
 
-db = PostgresqlDatabase(os.environ['POSTGRES_DB'],
-                        host=os.environ['POSTGRES_HOST'],
-                        port=os.environ['POSTGRES_PORT'],
-                        user=os.environ['POSTGRES_USER'],
-                        password=os.environ['POSTGRES_PASSWORD'])
-
+db = None
+if 'RDS_DB_NAME' in os.environ:
+    db = PostgresqlDatabase(os.environ['RDS_DB_NAME'],
+                            host=os.environ['RDS_HOSTNAME'],
+                            port=os.environ['RDS_PORT'],
+                            user=os.environ['RDS_USERNAME'],
+                            password=os.environ['RDS_PASSWORD'])
+else:
+    db = PostgresqlDatabase(os.environ['POSTGRES_DB'],
+                            host=os.environ['POSTGRES_HOST'],
+                            port=os.environ['POSTGRES_PORT'],
+                            user=os.environ['POSTGRES_USER'],
+                            password=os.environ['POSTGRES_PASSWORD'])
+    
 # Defining database models using Peewee's Model class
 
 class BaseModel(Model):
