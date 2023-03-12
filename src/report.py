@@ -5,6 +5,7 @@ from os import unlink
 from src.database import Users, Reports, Violations, Evaluations, db
 from src.helpers import extract_text_from_invoice
 from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation
+from peewee import DoesNotExist
 
 
 def report_wellformedness_v1(invoice: Invoice) -> Evaluation:
