@@ -41,7 +41,7 @@ async def invoice_upload_url(invoice_name: str, invoice_url: str) -> Dict:
 
 @app.post("/invoice/upload_file/v1")
 async def invoice_upload_file(invoice_file: UploadFile) -> Dict:
-    return invoice_upload_file_v1(invoice_name=invoice_file.filename, invoice_file=invoice_file.file)
+    return invoice_upload_file_v1(invoice_name=invoice_file.filename, invoice_file=invoice_file.file) # type: ignore
 
 @app.get("/export/json_report/v1")
 async def export_json_report(report_id: int):
@@ -49,7 +49,7 @@ async def export_json_report(report_id: int):
 
 @app.get("/export/pdf_report/v1")
 async def export_pdf_report(report_id: int):
-    pdf_file = BytesIO(export_pdf_report_v1(report_id))
+    pdf_file = BytesIO(export_pdf_report_v1(report_id)) # type: ignore
 
     # Return the PDF as a streaming response
     headers = {
@@ -88,17 +88,9 @@ async def report_syntax(invoice: Invoice) -> Evaluation:
 async def report_peppol(invoice: Invoice) -> Evaluation:
     return report_peppol_v1(invoice)
 
-@app.get("/report/get/v1")
-async def report_get(report_id: int) -> Report:
-    return report_get_v1(report_id)
-
 @app.get("/report/list_all/v1")
 async def report_list_all(order_by: OrderBy) -> List[Report]:
     return report_list_all_v1(order_by)
-
-@app.get("/report/list_score/v1")
-async def report_list_score(score: int, order_by: OrderBy) -> List[Report]:
-    return report_list_score_v1(score, order_by)
 
 # TODO: return type
 @app.put("/report/change_name/v1")
@@ -122,10 +114,6 @@ async def invoice_generate_hash(invoice: Invoice) -> str:
 @app.post("/invoice/file_upload_bulk/v1")
 async def invoice_file_upload_bulk(invoices: List[Invoice]) -> List[int]:
     return invoice_file_upload_bulk_v1(invoices)
-
-@app.get("/invoice/bulk_quick_fix/v1")
-async def invoice_bulk_quick_fix(invoices: List[Invoice]) -> List[Invoice]:
-    return invoice_bulk_quick_fix_v1(invoices)
 
 # TODO: check input and return type
 @app.get("/report/bulk_export/v1")
