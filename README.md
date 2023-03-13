@@ -1,6 +1,5 @@
 # SENG2021 23T1 CHURROS E-Invoicing Validation API
 
-
 In order to run the server, we must
 - be running a Postgres database server with a database named "validation"
 - be inside a python3 virtual environment
@@ -55,7 +54,7 @@ Note: ensure these match the settings on the Postgres server you are running. Th
 ### Run the server
 Finally, to run the server, simply execute in the main repo folder:
 ```bash
-python3 -m src.server
+python3 -m src.main
 ```
 
 ### Run tests
@@ -63,3 +62,6 @@ To run the tests, first run the server, then run
 ```bash
 pytest
 ```
+
+## Deployment Link
+http://churros.eba-pyyazat7.ap-southeast-2.elasticbeanstalk.com/docs

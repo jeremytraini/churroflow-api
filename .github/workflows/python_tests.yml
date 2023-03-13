@@ -55,3 +55,7 @@ jobs:
     - name: Generate coverage report
       run: |
         coverage report
+
+    - name: Run pylint
+      run: |
+        find src -type f -name "*.py" | egrep -v ".git/*" | xargs pylint
