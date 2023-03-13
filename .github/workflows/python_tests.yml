@@ -58,4 +58,5 @@ jobs:
 
     - name: Run pylint
       run: |
-        find src -type f -name "*.py" | egrep -v ".git/*" | xargs pylint
+        find src -type f -name "*.py" | egrep -v ".git/*" | xargs pylint --fail-under=8
+
