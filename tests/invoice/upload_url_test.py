@@ -11,8 +11,8 @@ from tests.helpers import invalidate_invoice, remove_part_of_string
 
 
 def test_upload_url_valid_invoice():
-    invoice = Invoice(name="My Invoice", source="url", data="https://raw.githubusercontent.com/A-NZ-PEPPOL/A-NZ-PEPPOL-BIS-3.0/master/Message%20examples/AU%20Invoice.xml")
-    response = invoice_upload_url_v1(invoice.name, invoice.data)
+    invoice = RemoteInvoice(name="My Invoice", url="https://raw.githubusercontent.com/A-NZ-PEPPOL/A-NZ-PEPPOL-BIS-3.0/master/Message%20examples/AU%20Invoice.xml")
+    response = invoice_upload_url_v1(invoice.name, invoice.url)
     
     assert response['report_id'] >= 0
 

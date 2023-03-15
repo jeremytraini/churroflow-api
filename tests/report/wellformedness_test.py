@@ -11,7 +11,7 @@ from tests.helpers import remove_part_of_string, append_to_string, replace_part_
 def test_wellformedness_valid_invoice():
     data = VALID_INVOICE_TEXT
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -30,7 +30,7 @@ def test_wellformedness_case_sensitive_tags_invalid():
     # Invalidating the tags so that only one of the tags is capitalised
     data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -60,7 +60,7 @@ def test_wellformedness_case_sensitive_tags_valid():
     data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
     data = replace_part_of_string(data, 2045, 2047, "id")
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -76,7 +76,7 @@ def test_wellformedness_case_sensitive_tags_valid():
 def test_wellformedness_two_root_elements_invalid():
     data = VALID_INVOICE_TEXT
     data = append_to_string(data, """<root><h>Second root at the end</h></root>""")
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -101,7 +101,7 @@ def test_wellformedness_two_root_elements_invalid():
 def test_wellformedness_no_closing_tag_invalid():
     data = VALID_INVOICE_TEXT
     data = remove_part_of_string(data, 11530, 11540)
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -128,7 +128,7 @@ def test_wellformedness_wrong_nesting_invalid():
     data = VALID_INVOICE_TEXT
     data = remove_part_of_string(data, 11512, 11530)
     data = append_to_string(data, """</cac:InvoiceLine>""")
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -154,7 +154,7 @@ def test_wellformedness_wrong_nesting_invalid():
 def test_wellformedness_valid_version_number_error():
     data = VALID_INVOICE_TEXT
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformedness_evaluation = report_wellformedness_v1(invoice)
     wellformedness_evaluation = Evaluation(**wellformedness_evaluation)
@@ -176,7 +176,7 @@ def test_wellformedness_invalid_version_number_error():
     data = VALID_INVOICE_TEXT
     data = replace_part_of_string(data, 15, 16, '5')
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformedness_evaluation = report_wellformedness_v1(invoice)
     wellformedness_evaluation = Evaluation(**wellformedness_evaluation)
@@ -204,7 +204,7 @@ def test_wellformedness_invalid_version_number_error():
 def test_wellformedness_no_escape_for_special_char_invalid():
     data = VALID_INVOICE_TEXT
     data = replace_part_of_string(data, 694, 695, "<")
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)
@@ -234,7 +234,7 @@ def test_wellformedness_no_escape_for_special_char_invalid():
 def test_wellformedness_escape_for_special_char_valid():
     data = VALID_INVOICE_TEXT
     data = replace_part_of_string(data, 694, 695, "&lt;")
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     wellformed_evaluation = report_wellformedness_v1(invoice)
     wellformed_evaluation = Evaluation(**wellformed_evaluation)

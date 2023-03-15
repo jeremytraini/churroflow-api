@@ -10,6 +10,6 @@ from tests.helpers import invalidate_invoice, remove_part_of_string
 """
 
 def test_upload_file_valid_invoice():
-    response = invoice_upload_file_v1("My Invoice", "src/AUInvoice.xml")
+    response = invoice_upload_file_v1("tests/example_files/AUInvoice.xml")
     
     assert response['report_id'] >= 0

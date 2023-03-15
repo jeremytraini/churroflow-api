@@ -13,9 +13,9 @@ from tests.helpers import remove_part_of_string, invalidate_invoice, clear_datab
 def test_json_valid_invoice():
     data = VALID_INVOICE_TEXT
     
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
-    report_id = invoice_upload_text_v1(invoice.name, invoice.data)["report_id"]
+    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     report = export_json_report_v1(report_id)
     report = Report(**report)
 
@@ -70,14 +70,14 @@ def test_json_unique_id():
     data = VALID_INVOICE_TEXT
 
     # Creating 2 invoices
-    invoice1 = Invoice(name="Invoice01", source="text", data=data)
-    invoice2 = Invoice(name="Invoice02", source="text", data=data)
+    invoice1 = TextInvoice(name="Invoice01", source="text", text=data)
+    invoice2 = TextInvoice(name="Invoice02", source="text", text=data)
 
     # Creating 2 reports
-    report_id1 = invoice_upload_text_v1(invoice1.name, invoice1.data)["report_id"]
+    report_id1 = invoice_upload_text_v1(invoice1.name, invoice1.text)["report_id"]
     report1 = export_json_report_v1(report_id1)
     report1 = Report(**report1)
-    report_id2 = invoice_upload_text_v1(invoice2.name, invoice2.data)["report_id"]
+    report_id2 = invoice_upload_text_v1(invoice2.name, invoice2.text)["report_id"]
     report2 = export_json_report_v1(report_id2)
     report2 = Report(**report2)
 
@@ -98,9 +98,9 @@ def test_json_single_violation():
     # Invalidating the currency code
     data = invalidate_invoice(data, "attrib", "cbc:Amount", "currencyID", "TEST", 1)
     
-    invoice = Invoice(name="Invoice Test", source="text", data=data)
+    invoice = TextInvoice(name="Invoice Test", source="text", text=data)
 
-    report_id = invoice_upload_text_v1(invoice.name, invoice.data)["report_id"]
+    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     report = export_json_report_v1(report_id)
     report = Report(**report)
 
@@ -150,9 +150,9 @@ def test_json_multiple_violations_same_rule():
     data = invalidate_invoice(data, "content", "cbc:EndpointID", "", "Not an ABN 1", 1)
     data = invalidate_invoice(data, "content", "cbc:EndpointID", "", "Not an ABN 2", 2)
     
-    invoice = Invoice(name="Invoice Test", source="text", data=data)
+    invoice = TextInvoice(name="Invoice Test", source="text", text=data)
 
-    report_id = invoice_upload_text_v1(invoice.name, invoice.data)["report_id"]
+    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     report = export_json_report_v1(report_id)
     report = Report(**report)
 
@@ -202,9 +202,9 @@ def test_json_multiple_violations_different_rules():
     data = invalidate_invoice(data, 'content', 'cbc:IdentificationCode', '', 'TEST', 1)
     data = invalidate_invoice(data, 'content', 'cbc:IdentificationCode', '', 'TEST', 2)
     
-    invoice = Invoice(name="Invoice Test", source="text", data=data)
+    invoice = TextInvoice(name="Invoice Test", source="text", text=data)
 
-    report_id = invoice_upload_text_v1(invoice.name, invoice.data)["report_id"]
+    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     report = export_json_report_v1(report_id)
     report = Report(**report)
 
@@ -250,9 +250,9 @@ def test_json_invalid_wellformedness():
     # Removing a closing tag
     data = remove_part_of_string(data, 11530, 11540)
     
-    invoice = Invoice(name="Invoice Test", source="text", data=data)
+    invoice = TextInvoice(name="Invoice Test", source="text", text=data)
 
-    report_id = invoice_upload_text_v1(invoice.name, invoice.data)["report_id"]
+    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     report = export_json_report_v1(report_id)
     report = Report(**report)
 
