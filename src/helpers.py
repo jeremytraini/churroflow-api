@@ -1,6 +1,5 @@
 from tempfile import NamedTemporaryFile
 from src.type_structure import *
-import requests
 
 def create_temp_file(invoice_text: str) -> str:
     tmp = NamedTemporaryFile(mode='w', delete=False)
@@ -9,16 +8,17 @@ def create_temp_file(invoice_text: str) -> str:
     
     return tmp.name
 
-def extract_text_from_invoice(invoice: Invoice) -> str:
-    if invoice.source == "url":
-        response = requests.get(invoice.data)
-        if response.status_code != 200:
-            raise Exception("Could not retrieve file from url")
+def string_in_range(min_len:int, max_len:int, input_str:str) -> bool:
+    '''
+    This function checks if a string is within the ranges of min and max length.
 
-        data = response.text
-    elif invoice.source == "text":
-        data = invoice.data
-    else:
-        raise Exception("Invalid source, please enter url or text")
+    Arguments:
+        min_len (int)   - Minimum length of string
+        max_len (int)   - Maximum length of string
+        input_str (str) - Input string to check length
 
-    return data
+    Return Value:
+        Returns boolean to whether string is within range or not
+    '''
+
+    return len(input_str) >= min_len and len(input_str) <= max_len
