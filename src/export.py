@@ -1,13 +1,12 @@
 from src.type_structure import *
 from src.database import Reports
 from bs4 import BeautifulSoup
-from copy import copy, deepcopy
-import json
 from html import escape
 from peewee import DoesNotExist
 from weasyprint import HTML
-from io import BytesIO, StringIO
+from io import StringIO, BytesIO
 import csv
+from zipfile import ZipFile, ZIP_DEFLATED
 
 
 def export_json_report_v1(report_id: int):
@@ -16,9 +15,9 @@ def export_json_report_v1(report_id: int):
     except DoesNotExist:
         raise Exception(f"Report with id {report_id} not found")
     
-    return report.to_json()
+    return Report(**report.to_json())
 
-def export_pdf_report_v1(report_id: int):
+def export_pdf_report_v1(report_id: int) -> bytes:
     html = export_html_report_v1(report_id)
     pdf_bytes = HTML(string=html).write_pdf()
     
@@ -161,12 +160,18 @@ def export_csv_report_v1(report_id: int):
     
     return csv_contents
 
-def report_bulk_export_v1(report_ids, report_format) -> List:
-    report_format = report_format.lower()
-    print("Exporting reports")
-    if report_format == "json":
-        return [export_json_report_v1(report_id) for report_id in report_ids]
-    elif report_format == "html":
-        return [export_html_report_v1(report_id) for report_id in report_ids]
-    else:
-        raise Exception("Unknown report format")
+def report_bulk_export_json_v1(report_ids) -> List:
+    return {
+        "reports": [export_json_report_v1(report_id) for report_id in report_ids]
+    }
+
+def report_bulk_export_pdf_v1(report_ids) -> BytesIO:
+    reports = BytesIO()
+    
+    with ZipFile(reports, 'w', ZIP_DEFLATED) as f:
+        for report_id in report_ids:
+            f.writestr(f"invoice_validation_report_{report_id}.pdf", export_pdf_report_v1(report_id))
+    
+    reports.seek(0)
+    
+    return reports

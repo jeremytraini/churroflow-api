@@ -1,4 +1,3 @@
-from typing import Dict
 from src.type_structure import *
 from src.database import Reports, DoesNotExist
 import requests
@@ -6,10 +5,8 @@ from src.generation import generate_report
 
 
 def invoice_upload_text_v1(invoice_name: str, invoice_text: str):
-    report_id = generate_report(invoice_name, invoice_text)
-    
     return {
-        "report_id": report_id
+        "report_id": generate_report(invoice_name, invoice_text)
     }
 
 
@@ -27,11 +24,9 @@ def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
     }
 
 
-def invoice_upload_file_v1(invoice_name: str, invoice_file):
-    report_id = generate_report(invoice_name, invoice_file.decode("utf-8"))
-    
+def invoice_upload_file_v1(invoice_name: str, invoice_text: str):
     return {
-        "report_id": report_id
+        "report_id": generate_report(invoice_name, invoice_text)
     }
 
 def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
@@ -42,8 +37,8 @@ def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
     
     return CheckValidReturn(is_valid=report.is_valid)
 
-def invoice_generate_hash_v1(invoice: Invoice) -> str:
-    return "hash"
+def invoice_generate_hash_v1(invoice: TextInvoice) -> str:
+    return {}
 
-def invoice_file_upload_bulk_v1(invoices: List[Invoice]) -> List[int]:
-    return [generate_report(invoice.name, invoice.data) for invoice in invoices]
+def invoice_upload_bulk_text_v1(invoices: List[TextInvoice]) -> ReportIDs:
+    return ReportIDs(report_ids=[generate_report(invoice.name, invoice.text) for invoice in invoices])

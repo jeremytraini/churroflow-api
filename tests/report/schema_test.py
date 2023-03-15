@@ -1,4 +1,4 @@
-from src.type_structure import Invoice, Evaluation
+from src.type_structure import *
 from tests.server_calls import report_schema_v1
 from tests.constants import VALID_INVOICE_TEXT
 from tests.helpers import *
@@ -12,7 +12,7 @@ def test_schema_valid():
     # Replacing the tags but making sure they are valid
     data = VALID_INVOICE_TEXT
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
@@ -31,7 +31,7 @@ def test_schema_tag_name_invalid():
     data = invalidate_invoice(VALID_INVOICE_TEXT, "tag", "cac:BillingReference", "", "cac:BillingReferencee", 1)
     data = invalidate_invoice(data, "tag", "cac:BillingReference", "", "cac:BillingReferencee", 1)
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
@@ -61,7 +61,7 @@ def test_schema_tag_order_invalid():
     # Invalidating the date
     data = invalidate_invoice(VALID_INVOICE_TEXT, "tag", "cbc:IssueDate", "", "cbc:DueDate", 1)
     data = invalidate_invoice(data, "tag", "cbc:DueDate", "", "cbc:IssueDate", 2)
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
@@ -90,7 +90,7 @@ def test_schema_tag_order_invalid():
 def test_schema_date_type_invalid():
     # Invalidating the date
     data = invalidate_invoice(VALID_INVOICE_TEXT, "content", "cbc:IssueDate", "", "totallyADate", 1)
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
@@ -122,7 +122,7 @@ def test_schema_tags_revalid():
     data = invalidate_invoice(data, "content", "cbc:CopyIndicator", "", "true", 1)
     data = invalidate_invoice(data, "tag", "cbc:DueDate", "", "cbc:IssueDate", 1)
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)
@@ -141,7 +141,7 @@ def test_schema_tags_multiple_errors_invalid():
     # Also expects the following tag to be different
     data = invalidate_invoice(VALID_INVOICE_TEXT, "tag", "cbc:IssueDate", "", "cbc:CopyIndicator", 1)
 
-    invoice = Invoice(name="My Invoice", source="text", data=data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
 
     schema_evaluation = report_schema_v1(invoice)
     schema_evaluation = Evaluation(**schema_evaluation)

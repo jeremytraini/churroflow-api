@@ -5,15 +5,15 @@ from tests.helpers import invalidate_invoice, remove_part_of_string, clear_datab
 
 """
 =====================================
-/report/list_all/v1 TESTS
+/report/list_all/v2 TESTS
 =====================================
 """
 
 def test_list_all_one_report():
-    invoice = Invoice(name="My Invoice", source="text", data=VALID_INVOICE_TEXT)
-    invoice_upload_text_v1(invoice.name, invoice.data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
+    invoice_upload_text_v1(invoice.name, invoice.text)
 
-    report_ids = report_list_all_v1()
+    report_ids = report_list_all_v1()["report_ids"]
     report = export_json_report_v1(report_ids[0])
     report = Report(**report)
 
@@ -23,12 +23,12 @@ def test_list_all_one_report():
     
     
 def test_list_all_many_reports():
-    invoice = Invoice(name="My Invoice", source="text", data=VALID_INVOICE_TEXT)
-    invoice_upload_text_v1(invoice.name, invoice.data)
-    invoice_upload_text_v1(invoice.name, invoice.data)
-    invoice_upload_text_v1(invoice.name, invoice.data)
+    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
+    invoice_upload_text_v1(invoice.name, invoice.text)
+    invoice_upload_text_v1(invoice.name, invoice.text)
+    invoice_upload_text_v1(invoice.name, invoice.text)
 
-    report_ids = report_list_all_v1()
+    report_ids = report_list_all_v1()["report_ids"]
     
     assert len(report_ids) == 3
     
