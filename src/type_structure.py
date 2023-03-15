@@ -7,10 +7,13 @@ class OrderBy(BaseModel):
     table: Literal["date_generated", "invoice_name", "total_errors", "total_warnings"]
     is_ascending: bool
 
-class Invoice(BaseModel):
+class TextInvoice(BaseModel):
     name: str
-    source: str
-    data: str
+    text: str
+    
+class RemoteInvoice(BaseModel):
+    name: str
+    url: str
 
 class Location(BaseModel):
     type: Literal["xpath", "line"]
@@ -39,7 +42,6 @@ class Report(BaseModel):
     report_id: int
     date_generated: str
     invoice_name: str
-    invoice_text: str
     invoice_hash: str
     is_valid: bool
     total_warnings: int
@@ -49,8 +51,14 @@ class Report(BaseModel):
     syntax_evaluation: Union[Evaluation, None]
     peppol_evaluation: Union[Evaluation, None]
 
+class ReportList(BaseModel):
+    reports: List[Report]
+
 class ReportID(BaseModel):
     report_id: int
+    
+class ReportIDs(BaseModel):
+    report_ids: List[int]
 
 class ReportExport(BaseModel):
     url: str
