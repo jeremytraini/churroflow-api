@@ -1,5 +1,5 @@
 port = 8000
 
-base_url = f"0.0.0.0"
+base_url = f"localhost"
 
 full_url = f"http://{base_url}:{port}/"
