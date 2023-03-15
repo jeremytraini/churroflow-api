@@ -1,5 +1,6 @@
 from peewee import *
 import os
+from src.constants import ADMIN_TOKEN
 
 db = None
 if 'RDS_DB_NAME' in os.environ:
@@ -58,7 +59,7 @@ class Reports(BaseModel):
     def to_json(self):
         return {
             "report_id": self.id, # type: ignore
-            "date_generated": self.date_generated,
+            "date_generated": str(self.date_generated),
             "invoice_name": self.invoice_name,
             "invoice_text": self.invoice_text,
             "invoice_hash": self.invoice_hash,
@@ -109,7 +110,10 @@ def create_tables():
     with db:
         db.create_tables(tables)
 
-def clear_v1():
+def clear_v1(token: str):
+    if not token == ADMIN_TOKEN:
+        raise Exception("Only admins can clear the database")
+    
     with db:
         db.drop_tables(tables)
         db.create_tables(tables)

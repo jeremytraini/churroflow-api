@@ -1,5 +1,5 @@
 from src.database import Users, IntegrityError, DoesNotExist
-from src.helper import string_in_range
+from src.helpers import string_in_range
 from src.error import InputError
 from src.type_structure import *
 import hashlib
