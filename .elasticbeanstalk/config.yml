@@ -2,6 +2,9 @@ branch-defaults:
   main:
     environment: null
     group_suffix: null
+  ricardo/deployment-new:
+    environment: null
+    group_suffix: null
 environment-defaults:
   churros:
     branch: null
