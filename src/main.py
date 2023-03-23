@@ -62,7 +62,7 @@ async def health_check():
 @app.post("/invoice/upload_file/v1", tags=["invoice"])
 async def invoice_upload_file(file: UploadFile = File(...)) -> ReportID:
     invoice_text = await file.read()
-    return invoice_upload_file_v1(invoice_name=file.filename, invoice_text=invoice_text.decode("utf-8"))
+    return invoice_upload_file_v1(invoice_name=file.filename, invoice_text=invoice_text.decode("utf-8")) #type: ignore
 
 @app.post("/invoice/bulk_upload_file/v1", tags=["invoice"])
 async def invoice_bulk_upload_file(files: List[UploadFile] = File(...)) -> ReportIDs:
@@ -70,7 +70,7 @@ async def invoice_bulk_upload_file(files: List[UploadFile] = File(...)) -> Repor
     
     for file in files:
         invoice_text = await file.read()
-        invoice = TextInvoice(name=file.filename, text=invoice_text.decode("utf-8"))
+        invoice = TextInvoice(name=file.filename, text=invoice_text.decode("utf-8")) #type: ignore
         invoices.append(invoice)
     
     return invoice_upload_bulk_text_v1(invoices)
@@ -173,16 +173,25 @@ async def report_change_name(token: str, report_id: int, new_name: str) -> Dict[
 async def report_delete(token: str, report_id: int) -> Dict[None, None]:
     return report_delete_v1(token, report_id)
 
+# TODO: check if we should still keep this
+# @app.get("/auth_login/v2", include_in_schema=False)
+# async def auth_login(email: str, password: str):
+#     return auth_login_v1(email, password)
+
+# @app.get("/auth_register/v2", include_in_schema=False)
+# async def auth_register(email: str, password: str):
+#     return auth_register_v1(email, password)
+
 @app.get("/auth_login/v2", include_in_schema=False)
-async def auth_login(email: str, password: str):
-    return auth_login_v1(email, password)
+async def auth_login(email: str, password: str) -> AuthReturnV2:
+    return auth_login_v2(email, password)
 
 @app.get("/auth_register/v2", include_in_schema=False)
-async def auth_register(email: str, password: str):
-    return auth_register_v1(email, password)
+async def auth_register(email: str, password: str) -> AuthReturnV2:
+    return auth_register_v2(email, password)
 
 @app.post("/invoice/generate_hash/v2", include_in_schema=False)
-async def invoice_generate_hash(invoice_text: str) -> str:
+async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
     return invoice_generate_hash_v1(invoice_text)
 
 @app.delete("/clear/v1", include_in_schema=False)

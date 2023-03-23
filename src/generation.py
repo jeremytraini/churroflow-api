@@ -60,7 +60,7 @@ def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     
     # Validate the XML against the XSD schema
     if not XSD_SCHEMA.validate(xml_doc):
-        evaluation.is_valid = False
+        evaluation.is_valid = False #type: ignore
         
         for error in XSD_SCHEMA.error_log:
             evaluation.num_errors += 1
@@ -77,7 +77,7 @@ def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     evaluation.save()
     
     for violation in violations:
-        violation.evaluation = evaluation.id 
+        violation.evaluation = evaluation.id #type: ignore
         violation.save()
     
     return evaluation

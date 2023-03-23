@@ -26,10 +26,10 @@ def report_peppol_v1(invoice_text: str) -> Evaluation:
 
     return Evaluation(**evaluation.to_json())
 
-def report_list_all_v1() -> List[int]:
+def report_list_all_v1() -> ReportIDs:
     return ReportIDs(report_ids=[report.id for report in Reports.select()])
 
-def report_list_by_v1(order_by: OrderBy) -> List[int]:
+def report_list_by_v1(order_by: OrderBy) -> ReportIDs:
     if order_by.is_ascending:
         order = getattr(Reports, order_by.table).asc()
     else:

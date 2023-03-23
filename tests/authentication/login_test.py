@@ -13,15 +13,15 @@ def test_login_success():
     reg_return_value = auth_register_v2("test@test.com", "password")
     login_return_value = auth_login_v2("test@test.com", "password")
     print(login_return_value)
-    assert reg_return_value["auth_user_id"] == login_return_value["auth_user_id"]
+    assert reg_return_value["token"] == login_return_value["token"]
 
 def test_login_multiple_success():
     clear_v1()
-    reg_return_value_1 = auth_register_v2("test@test.com", "password")["auth_user_id"]
+    reg_return_value_1 = auth_register_v2("test@test.com", "password")["token"]
     # First user registered and logged in
     assert reg_return_value_1
 
-    reg_return_value_2 = auth_register_v2("test1@test.com", "password")["auth_user_id"]
+    reg_return_value_2 = auth_register_v2("test1@test.com", "password")["token"]
     # Second user registered and logged in
     assert reg_return_value_2
 

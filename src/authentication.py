@@ -9,7 +9,7 @@ import re
 Auth login and register functions.
 '''
 
-def auth_login_v1(email, password):
+def auth_login_v1(email, password) -> AuthReturnV1:
     '''
     This function uses user-inputted login data to log a user into the system.
 
@@ -37,10 +37,10 @@ def auth_login_v1(email, password):
 
     # data_store.start_token_session(data_store.encode_user_jwt(user_id))
 
-    return {'auth_user_id' : user.id}
+    return AuthReturnV1(auth_user_id=user.id)
 
 
-def auth_register_v1(email, password):
+def auth_register_v1(email, password) -> AuthReturnV1:
     '''
     This function registers a user into the system by getting their details.
 
@@ -81,6 +81,14 @@ def auth_register_v1(email, password):
         raise InputError(status_code=400, detail="Invalid input: Email " + email + " is already taken.")
     
     # Return id once register is successful
-    return {
-        'auth_user_id': user.id,
-    }
+    return AuthReturnV1(auth_user_id=user.id)
+
+
+def auth_login_v2(email, password) -> AuthReturnV2:
+    token = hashlib.sha256(auth_login_v1(email, password).auth_user_id.to_bytes(8, 'big')).hexdigest()
+    return AuthReturnV2(token=token)
+
+
+def auth_register_v2(email, password) -> AuthReturnV2:
+    token = hashlib.sha256(auth_register_v1(email, password).auth_user_id.to_bytes(8, 'big')).hexdigest()
+    return AuthReturnV2(token=token)

@@ -66,3 +66,9 @@ class ReportExport(BaseModel):
 
 class CheckValidReturn(BaseModel):
     is_valid: bool
+
+class AuthReturnV1(BaseModel):
+    auth_user_id: int
+
+class AuthReturnV2(BaseModel):
+    token: str

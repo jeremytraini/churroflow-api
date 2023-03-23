@@ -160,10 +160,8 @@ def export_csv_report_v1(report_id: int):
     
     return csv_contents
 
-def report_bulk_export_json_v1(report_ids) -> List:
-    return {
-        "reports": [export_json_report_v1(report_id) for report_id in report_ids]
-    }
+def report_bulk_export_json_v1(report_ids) -> ReportList:
+    return ReportList(reports=[export_json_report_v1(report_id) for report_id in report_ids])
 
 def report_bulk_export_pdf_v1(report_ids) -> BytesIO:
     reports = BytesIO()

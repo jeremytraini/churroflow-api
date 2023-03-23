@@ -4,10 +4,8 @@ import requests
 from src.generation import generate_report
 
 
-def invoice_upload_text_v1(invoice_name: str, invoice_text: str):
-    return {
-        "report_id": generate_report(invoice_name, invoice_text)
-    }
+def invoice_upload_text_v1(invoice_name: str, invoice_text: str) -> ReportID:
+    return ReportID(report_id=generate_report(invoice_name, invoice_text))
 
 
 def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
@@ -16,18 +14,12 @@ def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
         raise Exception("Could not retrieve invoice from url")
     
     invoice_text = response.text
-
-    report_id = generate_report(invoice_name, invoice_text)
     
-    return {
-        "report_id": report_id
-    }
+    return ReportID(report_id=generate_report(invoice_name, invoice_text))
 
 
-def invoice_upload_file_v1(invoice_name: str, invoice_text: str):
-    return {
-        "report_id": generate_report(invoice_name, invoice_text)
-    }
+def invoice_upload_file_v1(invoice_name: str, invoice_text: str) -> ReportID:
+    return ReportID(report_id=generate_report(invoice_name, invoice_text))
 
 def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
     try:
@@ -38,7 +30,7 @@ def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
     return CheckValidReturn(is_valid=report.is_valid)
 
 def invoice_generate_hash_v1(invoice: TextInvoice) -> str:
-    return {}
+    return ""
 
 def invoice_upload_bulk_text_v1(invoices: List[TextInvoice]) -> ReportIDs:
     return ReportIDs(report_ids=[generate_report(invoice.name, invoice.text) for invoice in invoices])
