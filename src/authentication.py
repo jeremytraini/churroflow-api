@@ -1,4 +1,5 @@
-from src.database import Users, IntegrityError, DoesNotExist
+from datetime import datetime, timedelta
+from src.database import Users, Sessions, IntegrityError, DoesNotExist
 from src.helpers import string_in_range
 from src.error import InputError
 from src.type_structure import *
@@ -85,10 +86,16 @@ def auth_register_v1(email, password) -> AuthReturnV1:
 
 
 def auth_login_v2(email, password) -> AuthReturnV2:
-    token = hashlib.sha256(auth_login_v1(email, password).auth_user_id.to_bytes(8, 'big')).hexdigest()
+    id = auth_login_v1(email, password).auth_user_id
+    token = hashlib.sha256(id.to_bytes(8, 'big')).hexdigest()
+    now = datetime.now()
+    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(hours=1))
     return AuthReturnV2(token=token)
 
 
 def auth_register_v2(email, password) -> AuthReturnV2:
-    token = hashlib.sha256(auth_register_v1(email, password).auth_user_id.to_bytes(8, 'big')).hexdigest()
+    id = auth_register_v1(email, password).auth_user_id
+    token = hashlib.sha256(id.to_bytes(8, 'big')).hexdigest()
+    now = datetime.now()
+    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(hours=1))
     return AuthReturnV2(token=token)
