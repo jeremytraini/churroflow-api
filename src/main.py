@@ -9,6 +9,7 @@ from src.type_structure import *
 from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from src.error import AuthenticationError, InputError
 from io import BytesIO
 import uvicorn
@@ -37,6 +38,16 @@ app = FastAPI(title="CHURROS VALIDATION API",
               description=description,
               version="0.0.1",
               openapi_tags=tags_metadata)
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.exception_handler(500)
 async def validation_exception_handler(request: Request, exc: Exception):
