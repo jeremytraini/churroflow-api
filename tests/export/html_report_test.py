@@ -11,7 +11,7 @@ from tests.helpers import replace_part_of_string, invalidate_invoice, clear_data
 
 # Testing that the report was generated properly and matches input data
 def test_html_valid_invoice():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
+    invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
 
     report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     report_bytes = export_html_report_v1(report_id)
@@ -21,7 +21,7 @@ def test_html_valid_invoice():
 
 def test_html_text_invalid_peppol_invoice():
     data = invalidate_invoice(VALID_INVOICE_TEXT, 'content', 'cbc:EndpointID', '', 'Not an ABN', 1)
-    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+    invoice = TextInvoice(name="My Invoice", text=data)
     report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     
     report_bytes = export_html_report_v1(report_id)
@@ -31,7 +31,7 @@ def test_html_text_invalid_peppol_invoice():
 def test_html_text_invalid_wellformedness_invoice():
     data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
 
-    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+    invoice = TextInvoice(name="My Invoice", text=data)
     report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     report_bytes = export_html_report_v1(report_id)
     

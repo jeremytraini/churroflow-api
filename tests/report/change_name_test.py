@@ -11,7 +11,7 @@ from tests.helpers import invalidate_invoice, remove_part_of_string
 
 # Testing that the report was generated properly and matches input data
 def test_change_name():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
+    invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
     report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
 
     report = Report(**export_json_report_v1(report_id))

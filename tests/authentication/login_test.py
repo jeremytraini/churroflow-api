@@ -1,5 +1,5 @@
 from tests.server_calls import auth_login_v2, auth_register_v2, clear_v1
-
+from time import sleep
 """
 ==============================================================
 AUTH_LOGIN_V1 TESTS
@@ -9,11 +9,13 @@ AUTH_LOGIN_V1 TESTS
 # Succesful login
 def test_login_success():
     clear_v1()
-    # Register and login functions should return same id for same user
+    # Register and login functions should return different tokens
     reg_return_value = auth_register_v2("test@test.com", "password")
+    # 1 second sleep to allow for a time difference between generating tokens
+    sleep(1)
     login_return_value = auth_login_v2("test@test.com", "password")
     print(login_return_value)
-    assert reg_return_value["token"] == login_return_value["token"]
+    assert reg_return_value["token"] != login_return_value["token"]
 
 def test_login_multiple_success():
     clear_v1()

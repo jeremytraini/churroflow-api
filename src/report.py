@@ -1,6 +1,6 @@
 from src.type_structure import *
 from typing import Dict
-from src.database import Reports
+from src.database import Reports, Sessions
 from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation
 from peewee import DoesNotExist
 from src.constants import ADMIN_TOKEN
@@ -38,13 +38,19 @@ def report_list_by_v1(order_by: OrderBy) -> ReportIDs:
     return ReportIDs(report_ids=[report.id for report in Reports.select().order_by(order)])
 
 def report_change_name_v1(token: str, report_id: int, new_name: str) -> Dict[None, None]:
-    if not token == ADMIN_TOKEN:
-        raise Exception("Only admins can change the names of reports at the moment")
-    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
         raise Exception(f"Report with id {report_id} not found")
+    
+    if not token == ADMIN_TOKEN:
+        try:
+            session =  Sessions.get(token=token)
+        except DoesNotExist:
+            raise Exception("Invalid token")
+        
+        if not report.owner == session.user:
+            raise Exception("You do not have permission to rename this report")
     
     report.invoice_name = new_name
     report.save()
@@ -52,13 +58,19 @@ def report_change_name_v1(token: str, report_id: int, new_name: str) -> Dict[Non
     return {}
 
 def report_delete_v1(token: str, report_id: int) -> Dict[None, None]:
-    if not token == ADMIN_TOKEN:
-        raise Exception("Only admins can delete reports at the moment")
-    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
         raise Exception(f"Report with id {report_id} not found")
+
+    if not token == ADMIN_TOKEN:
+        try:
+            session =  Sessions.get(token=token)
+        except DoesNotExist:
+            raise Exception("Invalid token")
+        
+        if not report.owner == session.user:
+            raise Exception("You do not have permission to delete this report")
     
     report.delete_instance()
     

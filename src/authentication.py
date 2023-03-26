@@ -87,15 +87,15 @@ def auth_register_v1(email, password) -> AuthReturnV1:
 
 def auth_login_v2(email, password) -> AuthReturnV2:
     id = auth_login_v1(email, password).auth_user_id
-    token = hashlib.sha256(id.to_bytes(8, 'big')).hexdigest()
     now = datetime.now()
+    token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
     Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(hours=1))
     return AuthReturnV2(token=token)
 
 
 def auth_register_v2(email, password) -> AuthReturnV2:
     id = auth_register_v1(email, password).auth_user_id
-    token = hashlib.sha256(id.to_bytes(8, 'big')).hexdigest()
     now = datetime.now()
+    token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
     Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(hours=1))
     return AuthReturnV2(token=token)

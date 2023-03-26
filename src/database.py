@@ -44,6 +44,7 @@ class Evaluations(BaseModel):
         }
 
 class Reports(BaseModel):
+    owner = ForeignKeyField(Users, backref='reports')
     date_generated = DateTimeField()
     invoice_name = TextField()
     invoice_text = TextField()

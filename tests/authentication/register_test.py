@@ -9,21 +9,21 @@ AUTH_REGISTER_V1 TESTS
 # Test single registers with valid emails
 def test_register_unique_id_valid():
     clear_v1()
-    auth_user1 = auth_register_v2("test@test.com", "luciddreams14")
-    auth_user2 = auth_register_v2("test1@test.com", "luciddreams14")
-    print(auth_user1)
-    # Testing if user ID is unique
-    assert auth_user1["token"] != auth_user2["token"]
-    assert len(auth_user1) == 1
+    token1 = auth_register_v2("test@test.com", "luciddreams14")
+    token2 = auth_register_v2("test1@test.com", "luciddreams14")
+    print(token1)
+    # Testing if tokens are unique
+    assert token1["token"] != token2["token"]
+    assert len(token1) == 1
 
 # Test multiple registers
 def test_register_multiple_success():
     clear_v1()
-    auth_user1 =auth_register_v2("test@test.com", "www.www")["token"]
-    auth_user2 =auth_register_v2("test1@test.com", "lisbon2424")["token"]
-    auth_user3 =auth_register_v2("test2@test.com", "janedoe")["token"]
-    auth_user4 =auth_register_v2("test3@test.com", "knittingislife")["token"]
-    assert auth_user1 != auth_user2 != auth_user3 != auth_user4
+    token1 =auth_register_v2("test@test.com", "www.www")["token"]
+    token2 =auth_register_v2("test1@test.com", "lisbon2424")["token"]
+    token3 =auth_register_v2("test2@test.com", "janedoe")["token"]
+    token4 =auth_register_v2("test3@test.com", "knittingislife")["token"]
+    assert token1 != token2 != token3 != token4
 
 # Test Input errors for invalid email - failing regex match
 def test_register_invalid_email():
