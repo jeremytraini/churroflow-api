@@ -10,6 +10,19 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 
 def export_json_report_v1(report_id: int):
+    '''
+    This function exports report as a json file
+
+    Arguments:
+        report_id(integer) - unique identifier with the invoice name and contents
+
+    Exceptions:
+        ReportIdNotFound          - Occurs when report id cannot be found
+
+    Return Value:
+        Returns json_report - returns report in the form of a JSON file
+        
+    '''
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
@@ -18,12 +31,23 @@ def export_json_report_v1(report_id: int):
     return Report(**report.to_json())
 
 def export_pdf_report_v1(report_id: int) -> bytes:
+    '''
+    This function exports report as a pdf file
+
+    Arguments:
+        report_id(integer) - unique identifier with the invoice name and url details
+
+    Return Value:
+        Returns pdf_report - returns report in the form of a JSON file
+        
+    '''
     html = export_html_report_v1(report_id)
     pdf_bytes = HTML(string=html).write_pdf()
     
     return pdf_bytes
 
 def copy_element(element, parent):
+    
     new_element = BeautifulSoup(str(element), "lxml").body.contents[0]
     if "hide" in new_element["class"]:
         new_element["class"].remove("hide")
@@ -35,6 +59,7 @@ def change_value(soup, tag, id, value):
     soup.find(tag, {"id": str(id)}).string = escape(str(value))
 
 def add_violations(soup, violations, parent):
+    
     failed_rule = soup.find("div", {"name": "failed-rule"})
     
     for violation in violations:
@@ -55,6 +80,16 @@ def add_violations(soup, violations, parent):
         v.find("code", {"name": "excerpt"}).string = ""
 
 def export_html_report_v1(report_id: int):
+    '''
+    This function exports report as a html file
+
+    Arguments:
+        report_id(integer) - unique identifier with the invoice name and contents
+
+    Return Value:
+        Returns html_report - returns report in the form of a HTML file
+        
+    '''
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
@@ -118,6 +153,17 @@ def export_html_report_v1(report_id: int):
     return str(soup)
 
 def write_violations(writer, violations):
+    '''
+    This function exports report as a html file
+
+    Arguments:
+        writer - 
+        violations - inputted rule_id, message, test, xpath, line, column
+
+    Return Value:
+        Returns violations - contains rule_id, message, test, xpath, line, column
+        
+    '''
     for violation in violations:
         data = [
             violation["rule_id"],
@@ -131,6 +177,17 @@ def write_violations(writer, violations):
         writer.writerow(data)
 
 def export_csv_report_v1(report_id: int):
+    '''
+    This function exports report as a csv file
+
+    Arguments:
+        report_id(integer) - unique identifier with the invoice name and contents
+
+    Return Value:
+        Returns csv_report - returns report in the form of a CSV file
+        
+    '''
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
@@ -161,11 +218,31 @@ def export_csv_report_v1(report_id: int):
     return csv_contents
 
 def report_bulk_export_json_v1(report_ids) -> List:
+    '''
+    This function exports reports as a json file
+
+    Arguments:
+        report_ids(integer) - unique identifier with the invoice name and contents
+
+    Return Value:
+        Returns json_report in a list - returns report in the form of a JSON file in a list
+        
+    '''
     return {
         "reports": [export_json_report_v1(report_id) for report_id in report_ids]
     }
 
 def report_bulk_export_pdf_v1(report_ids) -> BytesIO:
+    '''
+    This function exports reports as a pdf file
+
+    Arguments:
+        report_ids(integer) - unique identifier with the invoice name and contents
+
+    Return Value:
+        Returns pdf_report in a list - returns reports in the form of a PDF file in a list
+        
+    '''
     reports = BytesIO()
     
     with ZipFile(reports, 'w', ZIP_DEFLATED) as f:
