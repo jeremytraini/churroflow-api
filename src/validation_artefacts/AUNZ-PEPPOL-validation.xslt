@@ -1078,7 +1078,7 @@ Last update: 2022-11-08-->
             <xsl:apply-templates mode="schematron-select-full-path" select="." />
           </xsl:attribute>
           <svrl:text>Australian Business Number (ABN) MUST be stated in the correct format.</svrl:text>
-          <svrl:text>he 11 digit ABN is structured as a 9 digit identifier with two leading check digits.</svrl:text>
+          <svrl:text>The 11 digit ABN is structured as a 9 digit identifier with two leading check digits.</svrl:text>
         </svrl:failed-assert>
       </xsl:otherwise>
     </xsl:choose>
