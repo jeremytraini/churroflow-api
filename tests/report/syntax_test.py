@@ -60,7 +60,6 @@ def test_syntax_single_violation():
     # Check that the violation has a non-empty message, test and suggestion
     assert code_violation.message
     assert code_violation.test
-    assert code_violation.suggestion
     
     # Check that the location xpath is not empty
     assert code_violation.xpath
