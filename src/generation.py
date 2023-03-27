@@ -43,18 +43,22 @@ def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
 def get_schema_violations(invoice_text: str):
     # Parse the XML data
     xml_doc = etree.fromstring(invoice_text.encode("utf-8"), parser=None)
+    nsmap = {"{"+v+"}": k+":" if k is not None else "" for k, v in xml_doc.nsmap.items()}
     
     violations = []
     
     # Validate the XML against the XSD schema
     if not XSD_SCHEMA.validate(xml_doc):
         for error in XSD_SCHEMA.error_log:
+            message = error.message
+            for k, v in nsmap.items():
+                message = message.replace(k, v)
             violations.append(Violations(
                 rule_id="schema",
                 is_fatal=True,
                 line=error.line,
                 column=error.column,
-                message=error.message
+                message=message
             ))
     
     return violations
@@ -201,14 +205,13 @@ def get_line_from_xpath(xml_text: str, xpath_expression: str) -> int:
     root = etree.fromstring(xml_text.encode('utf-8'))
 
     # Evaluate the XPath expression to get the matching element
-    # nsmap = {k if k is not None else 'default': v for k, v in root.nsmap.items()}
     try:
         element = root.xpath(fix_xpath(xpath_expression))[0]
     except etree.XPathEvalError:
-        return 0, 0
+        return 0
 
     # Get the start and end lines of the element
-    return element.sourceline - 1
+    return element.sourceline
 
 def generate_diagnostic_list(invoice_text: str) -> int:
     report = []
