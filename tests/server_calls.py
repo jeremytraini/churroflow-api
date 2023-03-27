@@ -163,6 +163,16 @@ def report_change_name_v2(report_id: int, new_name: str) -> Server_call_return:
 
     return json.loads(response.text)
 
+# Linting endpoint
+
+def report_lint_v1(invoice_text: str) -> Server_call_return:
+    payload = {
+        "invoice_text": invoice_text
+    }
+    response = requests.post(full_url + 'report/lint/v1', json=payload)
+
+    return json.loads(response.text)
+
 # Authentication endpoints
 
 def auth_register_v2(email: str, password: str) -> Server_call_return:
