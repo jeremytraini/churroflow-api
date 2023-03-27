@@ -1,34 +1,20 @@
 from src.type_structure import *
 from src.constants import XSD_SCHEMA, SYNTAX_EXECUTABLE, PEPPOL_EXECUTABLE
 from lxml import etree
-from typing import Dict
-from saxonche import PySaxonProcessor
 from src.helpers import create_temp_file
-import requests
 from os import unlink
-from src.database import Users, Reports, Violations, Evaluations, db
+from src.database import Reports, Violations, Evaluations, db
 from datetime import datetime
 import hashlib
+import re
 
-
-def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
-    evaluation = Evaluations(
-        is_valid=True,
-        num_warnings=0,
-        num_errors=0,
-        num_rules_failed=0
-    )
-    
+def get_wellformedness_violations(invoice_text: str) -> List[Violation]:
     violations = []
-
+    
     try:
         etree.fromstring(invoice_text.encode("utf-8"), parser=None)
     except etree.XMLSyntaxError as error:
-        evaluation.is_valid = False
-        evaluation.num_errors = 1
-        evaluation.num_rules_failed = 1
-        
-        violations.append(Violations(
+        violations.append(Violation(
             rule_id="wellformedness",
             is_fatal=True,
             line=error.lineno,
@@ -36,7 +22,17 @@ def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
             message=error.msg
         ))
     
-    evaluation.save()
+    return violations
+
+def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
+    violations = get_wellformedness_violations(invoice_text)
+    
+    evaluation = Evaluations.create(
+        is_valid=True if len(violations) == 0 else False,
+        num_warnings=0,
+        num_errors=len(violations),
+        num_rules_failed=len(violations)
+    )
     
     for violation in violations:
         violation.evaluation = evaluation.id 
@@ -44,15 +40,7 @@ def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
     
     return evaluation
 
-
-def generate_schema_evaluation(invoice_text: str) -> Evaluations:
-    evaluation = Evaluations(
-        is_valid=True,
-        num_warnings=0,
-        num_errors=0,
-        num_rules_failed=0
-    )
-    
+def get_schema_violations(invoice_text: str):
     # Parse the XML data
     xml_doc = etree.fromstring(invoice_text.encode("utf-8"), parser=None)
     
@@ -60,21 +48,26 @@ def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     
     # Validate the XML against the XSD schema
     if not XSD_SCHEMA.validate(xml_doc):
-        evaluation.is_valid = False
-        
         for error in XSD_SCHEMA.error_log:
-            evaluation.num_errors += 1
-            evaluation.num_rules_failed += 1
-            
             violations.append(Violations(
-                rule_id="wellformedness",
+                rule_id="schema",
                 is_fatal=True,
                 line=error.line,
                 column=error.column,
                 message=error.message
             ))
     
-    evaluation.save()
+    return violations
+
+def generate_schema_evaluation(invoice_text: str) -> Evaluations:
+    violations = get_schema_violations(invoice_text)
+    
+    evaluation = Evaluations.create(
+        is_valid=True if len(violations) == 0 else False,
+        num_warnings=0,
+        num_errors=len(violations),
+        num_rules_failed=len(violations)
+    )
     
     for violation in violations:
         violation.evaluation = evaluation.id 
@@ -82,25 +75,19 @@ def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     
     return evaluation
 
-
 def generate_syntax_evaluation(invoice_text: str) -> Evaluations:
-    return generate_xslt_evaluation("syntax", invoice_text)
+    return generate_xslt_evaluation(SYNTAX_EXECUTABLE, invoice_text)
 
 def generate_peppol_evaluation(invoice_text: str) -> Evaluations:
-    return generate_xslt_evaluation("peppol", invoice_text)
+    return generate_xslt_evaluation(PEPPOL_EXECUTABLE, invoice_text)
 
-def generate_xslt_evaluation(aspect, invoice_text) -> Evaluations:
-    if (aspect == "syntax"):
-        executable = SYNTAX_EXECUTABLE
-    else:
-        executable = PEPPOL_EXECUTABLE
-    
+def get_xslt_violations(executable, invoice_text: str):
     tmp_filename = create_temp_file(invoice_text)
     schematron_output = executable.transform_to_value(source_file=tmp_filename)
     unlink(tmp_filename)
     
     if not schematron_output:
-        raise Exception("Could not generate evaluation due to bad XML!")
+        raise Exception("Could not generate evaluation due to invalid XML!")
     
     violations = []
     
@@ -140,6 +127,11 @@ def generate_xslt_evaluation(aspect, invoice_text) -> Evaluations:
                 message=message,
                 suggestion=suggestion
             ))
+    
+    return violations, num_warnings, num_errors, rules_failed
+
+def generate_xslt_evaluation(executable, invoice_text) -> Evaluations:
+    violations, num_warnings, num_errors, rules_failed = get_xslt_violations(executable, invoice_text)
     
     evaluation = Evaluations.create(
         is_valid=num_errors == 0,
@@ -196,3 +188,74 @@ def generate_report(invoice_name: str, invoice_text: str) -> int:
     )
     
     return report.id
+
+def fix_xpath(string):
+    def repl(match):
+        element_name = match.group(1)
+        return f'/*[local-name()=\'{element_name}\']['
+    
+    pattern = r'\/\*:([A-Za-z]+)\['
+    return re.sub(pattern, repl, string)
+
+def get_line_from_xpath(xml_text: str, xpath_expression: str) -> int:
+    root = etree.fromstring(xml_text.encode('utf-8'))
+
+    # Evaluate the XPath expression to get the matching element
+    # nsmap = {k if k is not None else 'default': v for k, v in root.nsmap.items()}
+    try:
+        element = root.xpath(fix_xpath(xpath_expression))[0]
+    except etree.XPathEvalError:
+        return 0, 0
+
+    # Get the start and end lines of the element
+    return element.sourceline - 1
+
+def generate_diagnostic_list(invoice_text: str) -> int:
+    report = []
+    
+    wellformedness_violations = get_wellformedness_violations(invoice_text)
+    
+    for violation in wellformedness_violations:
+        report.append(LintDiagnostic(
+            rule_id=violation.rule_id,
+            from_char=violation.line,
+            to_char=violation.column,
+            xpath=violation.xpath,
+            message=violation.message,
+            severity="error" if violation.is_fatal else "warning"
+        ))
+    
+    if wellformedness_violations:
+        return report
+    
+    schema_violations = get_schema_violations(invoice_text)
+    
+    for violation in schema_violations:
+        report.append(LintDiagnostic(
+            rule_id=violation.rule_id,
+            from_char=violation.line,
+            to_char=violation.column,
+            xpath=violation.xpath,
+            message=violation.message,
+            severity="error" if violation.is_fatal else "warning"
+        ))
+    
+    if schema_violations:
+        return report
+
+    syntax_violations, _, _, _ = get_xslt_violations(SYNTAX_EXECUTABLE, invoice_text)
+    peppol_violations, _, _, _ = get_xslt_violations(PEPPOL_EXECUTABLE, invoice_text)
+    
+    for violation in syntax_violations + peppol_violations:
+        line = get_line_from_xpath(invoice_text, violation.xpath)
+        report.append(LintDiagnostic(
+            rule_id=violation.rule_id,
+            from_char=line,
+            to_char=0,
+            xpath=violation.xpath,
+            message=violation.message,
+            suggestion=violation.suggestion,
+            severity="error" if violation.is_fatal else "warning"
+        ))
+    
+    return report

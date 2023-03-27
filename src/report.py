@@ -1,7 +1,7 @@
 from src.type_structure import *
 from typing import Dict
 from src.database import Reports
-from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation
+from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation, generate_diagnostic_list
 from peewee import DoesNotExist
 from src.constants import ADMIN_TOKEN
 
@@ -85,4 +85,9 @@ def report_bulk_json_export_v1(report_ids) -> List[ReportExport]:
     export = ReportExport(url="", invoice_hash="")
     exports = [export for _ in report_ids]
     return exports
+
+def report_lint_v1(invoice_text: str) -> LintReport:
+    return LintReport(
+        report=generate_diagnostic_list(invoice_text)
+    )
 
