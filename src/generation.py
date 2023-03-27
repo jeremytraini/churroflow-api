@@ -201,16 +201,20 @@ def fix_xpath(string):
     pattern = r'\/\*:([A-Za-z]+)\['
     return re.sub(pattern, repl, string)
 
-def get_line_from_xpath(xml_text: str, xpath_expression: str) -> int:
+def get_element_from_xpath(xml_text: str, xpath_expression: str) -> etree.Element:
     root = etree.fromstring(xml_text.encode('utf-8'))
 
     # Evaluate the XPath expression to get the matching element
     try:
-        element = root.xpath(fix_xpath(xpath_expression))[0]
+        return root.xpath(fix_xpath(xpath_expression))[0]
     except etree.XPathEvalError:
-        return 0
+        return None
 
-    # Get the start and end lines of the element
+def get_line_from_xpath(xml_text: str, xpath_expression: str) -> int:
+    element = get_element_from_xpath(xml_text, xpath_expression)
+    if element is None:
+        return 0
+        
     return element.sourceline
 
 def generate_diagnostic_list(invoice_text: str) -> int:

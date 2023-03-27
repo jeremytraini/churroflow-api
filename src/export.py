@@ -7,6 +7,7 @@ from weasyprint import HTML
 from io import StringIO, BytesIO
 import csv
 from zipfile import ZipFile, ZIP_DEFLATED
+from src.generation import get_element_from_xpath
 
 
 def export_json_report_v1(report_id: int):
@@ -34,32 +35,33 @@ def copy_element(element, parent):
 def change_value(soup, tag, id, value):
     soup.find(tag, {"id": str(id)}).string = str(value)
 
-def add_violations(soup, violations, parent):
-    failed_rule = soup.find("div", {"name": "failed-rule"})
+def add_violations(soup, invoice_text, violations, parent):
+    failed_rule = soup.find("div", {"name": "failed-rule-template"})
     
     for violation in violations:
         v = copy_element(failed_rule, parent)
+        v["name"] = "failed-rule"
+        v["class"].append("error" if violation["is_fatal"] else "warning")
+        
         v.find("span", {"name": "rule_id"}).string = violation["rule_id"]
         v.find("td", {"name": "desc"}).string = violation["message"]
         if violation["suggestion"]:
             v.find("td", {"name": "suggestion"}).string = violation["suggestion"]
         else:
-            v.find("td", {"name": "suggestion"}).display = "none"
+            v.find("tr", {"id": "suggestion"})["style"] = "display: none;"
             
         v.find("td", {"name": "severity"}).string = "Error" if violation["is_fatal"] else "Warning"
         
         if violation["test"]:
             v.find("code", {"name": "test"}).string = violation["test"]
         else:
-            v.find("code", {"name": "test"}).display = "none"
+            v.find("tr", {"id": "test"})["style"] = "display: none;"
         
         if violation["xpath"]:
             location_string = violation["xpath"]
         else:
             location_string = "Line " + str(violation["line"]) + ", Column " + str(violation["column"])
         v.find("code", {"name": "location"}).string = location_string
-        
-        v.find("code", {"name": "excerpt"}).string = ""
 
 def export_html_report_v1(report_id: int):
     try:
@@ -67,6 +69,7 @@ def export_html_report_v1(report_id: int):
     except DoesNotExist:
         raise Exception(f"Report with id {report_id} not found")
     
+    invoice_text = report.invoice_text
     report = report.to_json()
 
     with open("src/report_template.html", "r") as file:
@@ -99,28 +102,28 @@ def export_html_report_v1(report_id: int):
     elif not report["wellformedness_evaluation"]["violations"]:
         copy_element(no_violation, wellformedness)
     else:
-        add_violations(soup, report["wellformedness_evaluation"]["violations"], wellformedness)
+        add_violations(soup, invoice_text, report["wellformedness_evaluation"]["violations"], wellformedness)
 
     if not report["schema_evaluation"]:
         copy_element(no_run, schema)
     elif not report["schema_evaluation"]["violations"]:
         copy_element(no_violation, schema)
     else:
-        add_violations(soup, report["schema_evaluation"]["violations"], schema)
+        add_violations(soup, invoice_text, report["schema_evaluation"]["violations"], schema)
         
     if not report["syntax_evaluation"]:
         copy_element(no_run, syntax)
     elif not report["syntax_evaluation"]["violations"]:
         copy_element(no_violation, syntax)
     else:
-        add_violations(soup, report["syntax_evaluation"]["violations"], syntax)
+        add_violations(soup, invoice_text, report["syntax_evaluation"]["violations"], syntax)
         
     if not report["peppol_evaluation"]:
         copy_element(no_run, peppol)
     elif not report["peppol_evaluation"]["violations"]:
         copy_element(no_violation, peppol)
     else:
-        add_violations(soup, report["peppol_evaluation"]["violations"], peppol)
+        add_violations(soup, invoice_text, report["peppol_evaluation"]["violations"], peppol)
 
     return str(soup)
 
