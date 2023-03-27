@@ -14,7 +14,7 @@ def get_wellformedness_violations(invoice_text: str) -> List[Violation]:
     try:
         etree.fromstring(invoice_text.encode("utf-8"), parser=None)
     except etree.XMLSyntaxError as error:
-        violations.append(Violation(
+        violations.append(Violations(
             rule_id="wellformedness",
             is_fatal=True,
             line=error.lineno,

@@ -3,7 +3,7 @@ from typing import Dict
 from src.database import Reports
 from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation, generate_diagnostic_list
 from peewee import DoesNotExist
-from src.constants import ADMIN_TOKEN
+from src.constants import ADMIN_TOKEN, PEPPOL_EXECUTABLE, SYNTAX_EXECUTABLE
 
 
 def report_wellformedness_v1(invoice_text: str) -> Evaluation:
@@ -17,12 +17,12 @@ def report_schema_v1(invoice_text: str) -> Evaluation:
     return Evaluation(**evaluation.to_json())
 
 def report_syntax_v1(invoice_text: str) -> Evaluation:
-    evaluation = generate_xslt_evaluation("syntax", invoice_text)
+    evaluation = generate_xslt_evaluation(SYNTAX_EXECUTABLE, invoice_text)
     
     return Evaluation(**evaluation.to_json())
 
 def report_peppol_v1(invoice_text: str) -> Evaluation:
-    evaluation = generate_xslt_evaluation("peppol", invoice_text)
+    evaluation = generate_xslt_evaluation(PEPPOL_EXECUTABLE, invoice_text)
 
     return Evaluation(**evaluation.to_json())
 
