@@ -38,8 +38,8 @@ def test_lint_warning_in_invoice():
     assert lint_report[0]['rule_id'] == 'PEPPOL-COMMON-R050'
     
     # This error is on line 39, and no column is specified
-    assert lint_report[0]['from_char'] == 39
-    assert lint_report[0]['to_char'] == 0
+    assert lint_report[0]['line'] == 40
+    assert lint_report[0]['column'] == 0
     
     # Checking there is a message, suggestion, xpath
     assert lint_report[0]['message']
@@ -59,8 +59,8 @@ def test_lint_tag_order_invalid():
     
     assert len(lint_report) == 1
     assert lint_report[0] == {'rule_id': 'schema',
-                              'from_char': 5,
-                              'to_char': 0,
+                              'line': 5,
+                              'column': 0,
                               'message': lint_report[0]['message'],
                               'suggestion': None,
                               'xpath': None,

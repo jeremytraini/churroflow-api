@@ -221,8 +221,8 @@ def generate_diagnostic_list(invoice_text: str) -> int:
     for violation in wellformedness_violations:
         report.append(LintDiagnostic(
             rule_id=violation.rule_id,
-            from_char=violation.line,
-            to_char=violation.column,
+            line=violation.line,
+            column=violation.column,
             xpath=violation.xpath,
             message=violation.message,
             severity="error" if violation.is_fatal else "warning"
@@ -236,8 +236,8 @@ def generate_diagnostic_list(invoice_text: str) -> int:
     for violation in schema_violations:
         report.append(LintDiagnostic(
             rule_id=violation.rule_id,
-            from_char=violation.line,
-            to_char=violation.column,
+            line=violation.line,
+            column=violation.column,
             xpath=violation.xpath,
             message=violation.message,
             severity="error" if violation.is_fatal else "warning"
@@ -253,8 +253,8 @@ def generate_diagnostic_list(invoice_text: str) -> int:
         line = get_line_from_xpath(invoice_text, violation.xpath)
         report.append(LintDiagnostic(
             rule_id=violation.rule_id,
-            from_char=line,
-            to_char=0,
+            line=line,
+            column=0,
             xpath=violation.xpath,
             message=violation.message,
             suggestion=violation.suggestion,

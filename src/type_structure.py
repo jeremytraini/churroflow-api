@@ -69,8 +69,8 @@ class CheckValidReturn(BaseModel):
 
 class LintDiagnostic(BaseModel):
     rule_id: str
-    from_char: int
-    to_char: int
+    line: int
+    column: int
     message: str
     suggestion: Union[str, None]
     xpath: Union[str, None]
