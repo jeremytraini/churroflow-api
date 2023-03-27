@@ -41,7 +41,13 @@ def add_violations(soup, violations, parent):
         v = copy_element(failed_rule, parent)
         v.find("span", {"name": "rule_id"}).string = violation["rule_id"]
         v.find("td", {"name": "desc"}).string = violation["message"]
-        v.find("td", {"name": "severity"}).string = "Fatal" if violation["is_fatal"] == "fatal" else "Warning"
+        if violation["suggestion"]:
+            v.find("td", {"name": "suggestion"}).string = violation["suggestion"]
+        else:
+            v.find("td", {"name": "suggestion"}).display = "none"
+            
+        v.find("td", {"name": "severity"}).string = "Error" if violation["is_fatal"] else "Warning"
+        
         if violation["test"]:
             v.find("code", {"name": "test"}).string = violation["test"]
         else:
@@ -51,7 +57,8 @@ def add_violations(soup, violations, parent):
             location_string = violation["xpath"]
         else:
             location_string = "Line " + str(violation["line"]) + ", Column " + str(violation["column"])
-        v.find("code", {"name": "location"}).string = escape(location_string)
+        v.find("code", {"name": "location"}).string = location_string
+        
         v.find("code", {"name": "excerpt"}).string = ""
 
 def export_html_report_v1(report_id: int):
