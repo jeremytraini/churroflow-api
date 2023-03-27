@@ -32,15 +32,15 @@ def copy_element(element, parent):
     return new_element
     
 def change_value(soup, tag, id, value):
-    soup.find(tag, {"id": str(id)}).string = escape(str(value))
+    soup.find(tag, {"id": str(id)}).string = str(value)
 
 def add_violations(soup, violations, parent):
     failed_rule = soup.find("div", {"name": "failed-rule"})
     
     for violation in violations:
         v = copy_element(failed_rule, parent)
-        v.find("span", {"name": "rule_id"}).string = escape(violation["rule_id"])
-        v.find("td", {"name": "desc"}).string = escape(violation["message"])
+        v.find("span", {"name": "rule_id"}).string = violation["rule_id"]
+        v.find("td", {"name": "desc"}).string = violation["message"]
         v.find("td", {"name": "severity"}).string = "Fatal" if violation["is_fatal"] == "fatal" else "Warning"
         if violation["test"]:
             v.find("code", {"name": "test"}).string = violation["test"]
