@@ -7,7 +7,6 @@ from weasyprint import HTML
 from io import StringIO, BytesIO
 import csv
 from zipfile import ZipFile, ZIP_DEFLATED
-from src.generation import get_element_from_xpath
 
 
 def export_json_report_v1(report_id: int):
