@@ -90,7 +90,6 @@ def generate_report(invoice_name: str, invoice_text: str) -> int:
     report = Reports.create(
         date_generated=datetime.now(),
         invoice_name=invoice_name,
-        invoice_text=invoice_text,
         invoice_hash=invoice_hash,
         is_valid=is_valid,
         total_warnings=total_warnings,

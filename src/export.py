@@ -1,7 +1,6 @@
 from src.type_structure import *
 from src.database import Reports
 from bs4 import BeautifulSoup
-from html import escape
 from peewee import DoesNotExist
 from weasyprint import HTML
 from io import StringIO, BytesIO
@@ -34,7 +33,7 @@ def copy_element(element, parent):
 def change_value(soup, tag, id, value):
     soup.find(tag, {"id": str(id)}).string = str(value)
 
-def add_violations(soup, invoice_text, violations, parent):
+def add_violations(soup, violations, parent):
     failed_rule = soup.find("div", {"name": "failed-rule-template"})
     
     for violation in violations:
@@ -68,7 +67,6 @@ def export_html_report_v1(report_id: int):
     except DoesNotExist:
         raise Exception(f"Report with id {report_id} not found")
     
-    invoice_text = report.invoice_text
     report = report.to_json()
 
     with open("src/report_template.html", "r") as file:
@@ -101,28 +99,28 @@ def export_html_report_v1(report_id: int):
     elif not report["wellformedness_evaluation"]["violations"]:
         copy_element(no_violation, wellformedness)
     else:
-        add_violations(soup, invoice_text, report["wellformedness_evaluation"]["violations"], wellformedness)
+        add_violations(soup, report["wellformedness_evaluation"]["violations"], wellformedness)
 
     if not report["schema_evaluation"]:
         copy_element(no_run, schema)
     elif not report["schema_evaluation"]["violations"]:
         copy_element(no_violation, schema)
     else:
-        add_violations(soup, invoice_text, report["schema_evaluation"]["violations"], schema)
+        add_violations(soup, report["schema_evaluation"]["violations"], schema)
         
     if not report["syntax_evaluation"]:
         copy_element(no_run, syntax)
     elif not report["syntax_evaluation"]["violations"]:
         copy_element(no_violation, syntax)
     else:
-        add_violations(soup, invoice_text, report["syntax_evaluation"]["violations"], syntax)
+        add_violations(soup, report["syntax_evaluation"]["violations"], syntax)
         
     if not report["peppol_evaluation"]:
         copy_element(no_run, peppol)
     elif not report["peppol_evaluation"]["violations"]:
         copy_element(no_violation, peppol)
     else:
-        add_violations(soup, invoice_text, report["peppol_evaluation"]["violations"], peppol)
+        add_violations(soup, report["peppol_evaluation"]["violations"], peppol)
 
     return str(soup)
 
