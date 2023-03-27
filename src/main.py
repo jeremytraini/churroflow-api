@@ -173,6 +173,9 @@ async def report_list_by(order_by: OrderBy) -> ReportIDs:
 async def invoice_check_validity(report_id: int) -> CheckValidReturn:
     return invoice_check_validity_v1(report_id)
 
+@app.post("/report/lint/v1", tags=["report"])
+async def report_lint(invoice: TextInvoice) -> LintReport:
+    return report_lint_v1(invoice_text=invoice.text)
 
 ### Below to be replaced with proper authentication system ###
 
