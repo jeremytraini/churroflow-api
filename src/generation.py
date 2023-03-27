@@ -9,22 +9,14 @@ from src.helpers import get_line_from_xpath
 def generate_wellformedness_evaluation(invoice_text: str) -> Evaluations:
     violations = get_wellformedness_violations(invoice_text)
     
-    evaluation = Evaluations.create(
-        is_valid=True if len(violations) == 0 else False,
-        num_warnings=0,
-        num_errors=len(violations),
-        num_rules_failed=len(violations)
-    )
-    
-    for violation in violations:
-        violation.evaluation = evaluation.id 
-        violation.save()
-    
-    return evaluation
+    return generate_parser_evaluation(violations)
 
 def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     violations = get_schema_violations(invoice_text)
     
+    return generate_parser_evaluation(violations)
+
+def generate_parser_evaluation(violations) -> Evaluations:
     evaluation = Evaluations.create(
         is_valid=True if len(violations) == 0 else False,
         num_warnings=0,
@@ -35,7 +27,7 @@ def generate_schema_evaluation(invoice_text: str) -> Evaluations:
     for violation in violations:
         violation.evaluation = evaluation.id 
         violation.save()
-    
+        
     return evaluation
 
 def generate_syntax_evaluation(invoice_text: str) -> Evaluations:
