@@ -7,7 +7,6 @@ from tests.helpers import replace_part_of_string, invalidate_invoice, clear_data
 /report/pdf_report/v1 TESTS
 =====================================
 """
-
 # Testing that the report was generated properly and matches input data
 def test_pdf_valid_invoice():
     invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
