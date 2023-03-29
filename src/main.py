@@ -10,7 +10,6 @@ from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from src.error import AuthenticationError, InputError
 from io import BytesIO
 import uvicorn
 
