@@ -46,7 +46,7 @@ def test_csv_extensive_test_valid_invoice():
 
     report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
     report = export_csv_report_v1(report_id)
-    report = Report(**report)
+    # report = Report(**report)
 
     # Report id must be an integer
     assert isinstance(report.report_id, int)
