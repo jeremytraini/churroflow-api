@@ -1,19 +1,31 @@
 from src.type_structure import *
 from src.database import Reports, DoesNotExist
+from src.error import InputError
 import requests
 from src.generation import generate_report
 
 
 def invoice_upload_text_v1(invoice_name: str, invoice_text: str):
+    if len(invoice_name) > 100:
+        raise InputError(status_code=400, detail="Name cannot be longer than 100 characters")
+    
     return {
         "report_id": generate_report(invoice_name, invoice_text)
     }
 
 
 def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
-    response = requests.get(invoice_url)
-    if response.status_code != 200:
-        raise Exception("Could not retrieve invoice from url")
+    if len(invoice_name) > 100:
+        print("here")
+        raise InputError(status_code=400, detail="Name cannot be longer than 100 characters")
+    
+    try:
+        response = requests.get(invoice_url)
+    except IOError:
+        raise InputError(status_code=400, detail="Could not retrieve invoice from url")
+    
+    if not (invoice_url.endswith('.txt') or invoice_url.endswith('.xml')):
+        raise InputError(status_code=400, detail="URL does not point to plain text or XML data")
     
     invoice_text = response.text
 
@@ -25,6 +37,9 @@ def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
 
 
 def invoice_upload_file_v1(invoice_name: str, invoice_text: str):
+    if not invoice_name.endswith('.xml'):
+        raise InputError(status_code=400, detail="Invoice file type is not XML")
+    
     return {
         "report_id": generate_report(invoice_name, invoice_text)
     }
