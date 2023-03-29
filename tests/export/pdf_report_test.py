@@ -1,7 +1,7 @@
 from src.type_structure import *
 from tests.server_calls import export_pdf_report_v1, invoice_upload_text_v1
-from tests.constants import VALID_INVOICE_TEXT, invalidate_invoice, replace_part_of_string
-
+from tests.constants import VALID_INVOICE_TEXT
+from tests.helpers import replace_part_of_string, invalidate_invoice, clear_database
 """
 =====================================
 /report/pdf_report/v1 TESTS
