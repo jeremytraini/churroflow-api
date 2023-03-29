@@ -27,7 +27,6 @@ def test_csv_text_invalid_peppol_invoice():
     
     assert report_bytes
 
-
 def test_csv_text_invalid_wellformedness_invoice():
     data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
 
