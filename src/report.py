@@ -1,6 +1,6 @@
 from src.type_structure import *
 from typing import Dict
-from src.database import Reports, Sessions
+from src.database import Reports, Sessions, Users
 from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation
 from peewee import DoesNotExist
 from src.constants import ADMIN_TOKEN
@@ -45,12 +45,12 @@ def report_change_name_v1(token: str, report_id: int, new_name: str) -> Dict[Non
     
     if not token == ADMIN_TOKEN:
         try:
-            session =  Sessions.get(token=token)
+            user =  Users.get(api_key=token)
         except DoesNotExist:
-            raise Exception("Invalid token")
+            raise Exception("Invalid API key")
         
-        if not report.owner == session.user:
-            raise Exception("You do not have permission to rename this report")
+        if not report.owner == user:
+            raise Exception("You do not have permission to delete this report")
     
     report.invoice_name = new_name
     report.save()
@@ -65,11 +65,11 @@ def report_delete_v1(token: str, report_id: int) -> Dict[None, None]:
 
     if not token == ADMIN_TOKEN:
         try:
-            session =  Sessions.get(token=token)
+            user =  Users.get(api_key=token)
         except DoesNotExist:
-            raise Exception("Invalid token")
+            raise Exception("Invalid API key")
         
-        if not report.owner == session.user:
+        if not report.owner == user:
             raise Exception("You do not have permission to delete this report")
     
     report.delete_instance()

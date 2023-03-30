@@ -33,10 +33,7 @@ def auth_login_v1(email, password) -> AuthReturnV1:
         raise InputError(status_code=400, detail="Invalid input: No user with email " + email + ".")
     
     if user.password_hash != hashlib.sha256(password.encode("utf-8")).hexdigest():
-        raise InputError(status_code=400, detail="Invalid input: Incorrect password.")
-
-
-    # data_store.start_token_session(data_store.encode_user_jwt(user_id))
+        raise InputError(status_code=400, detail="Invalid input: Incorrect enail or password.")
 
     return AuthReturnV1(auth_user_id=user.id)
 
@@ -72,11 +69,11 @@ def auth_register_v1(email, password) -> AuthReturnV1:
         raise InputError(status_code=400, detail="Invalid input: Password is too short.")
 
     # Generate password hash
-    # salt = data_store.gen_salt()
     password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    key = hashlib.sha256(id.to_bytes(8, 'big') + datetime.now().strftime("%s").encode("utf-8")).hexdigest()
 
     try:
-        user = Users.create(email=email, password_hash=password_hash)
+        user = Users.create(email=email, password_hash=password_hash, api_key=key)
     except IntegrityError:
         # duplicate email
         raise InputError(status_code=400, detail="Invalid input: Email " + email + " is already taken.")
@@ -90,7 +87,7 @@ def auth_login_v2(email, password) -> AuthReturnV2:
     now = datetime.now()
     token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
     Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(hours=1))
-    return AuthReturnV2(token=token)
+    return AuthReturnV2(api_key=Users.get_by_id(id).api_key)
 
 
 def auth_register_v2(email, password) -> AuthReturnV2:
@@ -98,4 +95,4 @@ def auth_register_v2(email, password) -> AuthReturnV2:
     now = datetime.now()
     token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
     Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(hours=1))
-    return AuthReturnV2(token=token)
+    return AuthReturnV2(api_key=Users.get_by_id(id).api_key)

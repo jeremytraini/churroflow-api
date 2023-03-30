@@ -7,7 +7,9 @@ from src.export import *
 from src.authentication import *
 from src.type_structure import *
 from src.database import clear_v1
-from fastapi import FastAPI, Request, HTTPException, UploadFile, File
+from fastapi import Depends, FastAPI, Request, HTTPException, Security, UploadFile, File
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
 from src.error import AuthenticationError, InputError
 from io import BytesIO
@@ -33,10 +35,12 @@ tags_metadata = [
     },
 ]
 
+
 app = FastAPI(title="CHURROS VALIDATION API",
               description=description,
               version="0.0.1",
               openapi_tags=tags_metadata)
+token_check = OAuth2PasswordBearer(tokenUrl="/auth_login/v2")  
 
 @app.exception_handler(500)
 async def validation_exception_handler(request: Request, exc: Exception):
@@ -48,6 +52,26 @@ async def validation_exception_handler(request: Request, exc: Exception):
             "message": str(exc)
             },
     )
+
+# API key validation below
+
+API_KEY_NAME = "access_token"
+api_key_query = APIKeyQuery(name=API_KEY_NAME, auto_error=False)
+api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
+
+async def get_api_key(
+    api_key_query: str = Security(api_key_query),
+    api_key_header: str = Security(api_key_header)
+):
+    try:
+        Users.get(api_key=api_key_query)
+        return api_key_query
+    except DoesNotExist:
+        try:
+            Users.get(api_key=api_key_header)
+            return api_key_header
+        except DoesNotExist:
+            raise HTTPException(status_code=403, detail="Could not validate credentials")
 
 # ENDPOINTS BELOW
 
@@ -166,27 +190,18 @@ async def invoice_check_validity(report_id: int) -> CheckValidReturn:
 ### Below to be replaced with proper authentication system ###
 
 @app.put("/report/change_name/v2", include_in_schema=False)
-async def report_change_name(token: str, report_id: int, new_name: str) -> Dict[None, None]:
-    return report_change_name_v1(token, report_id, new_name)
+async def report_change_name(report_id: int, new_name: str, api_key = Depends(get_api_key)) -> Dict[None, None]:
+    return report_change_name_v1(api_key, report_id, new_name)
 
 @app.delete("/report/delete/v2", include_in_schema=False)
-async def report_delete(token: str, report_id: int) -> Dict[None, None]:
-    return report_delete_v1(token, report_id)
+async def report_delete(report_id: int, api_key = Depends(get_api_key)) -> Dict[None, None]:
+    return report_delete_v1(api_key, report_id)
 
-# TODO: check if we should still keep this
-# @app.get("/auth_login/v2", include_in_schema=False)
-# async def auth_login(email: str, password: str):
-#     return auth_login_v1(email, password)
-
-# @app.get("/auth_register/v2", include_in_schema=False)
-# async def auth_register(email: str, password: str):
-#     return auth_register_v1(email, password)
-
-@app.get("/auth_login/v2", include_in_schema=False)
+@app.get("/auth_login/v2", tags=["auth"])
 async def auth_login(email: str, password: str) -> AuthReturnV2:
     return auth_login_v2(email, password)
 
-@app.get("/auth_register/v2", include_in_schema=False)
+@app.get("/auth_register/v2", tags=["auth"])
 async def auth_register(email: str, password: str) -> AuthReturnV2:
     return auth_register_v2(email, password)
 

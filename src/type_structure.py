@@ -71,4 +71,4 @@ class AuthReturnV1(BaseModel):
     auth_user_id: int
 
 class AuthReturnV2(BaseModel):
-    token: str
+    api_key: str
