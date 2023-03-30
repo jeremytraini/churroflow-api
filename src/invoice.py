@@ -48,7 +48,7 @@ def invoice_check_validity_v1(report_id: int) -> CheckValidReturn:
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise Exception(f"Report with id {report_id} not found")
+        raise InputError(status_code=400, detail=f"Report with id {report_id} not found")
     
     return CheckValidReturn(is_valid=report.is_valid)
 
