@@ -14,4 +14,4 @@ def test_delete():
     
     report_delete_v2(report_id)
     
-    assert export_json_report_v1(report_id)["code"] == 500
+    assert export_json_report_v1(report_id)["detail"] == f"Report with id {report_id} not found"
