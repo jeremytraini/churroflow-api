@@ -10,18 +10,24 @@ from src.error import *
 
 
 def export_json_report_v1(report_id: int):
+    if report_id < 0:
+        raise InputError(status_code=400, detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise InputError(status_code=400, detail=f"Report with id {report_id} not found")
+        raise NotFoundError(status_code=404, detail=f"Report with id {report_id} not found")
     
     return Report(**report.to_json())
 
 def export_pdf_report_v1(report_id: int) -> bytes:
+    if report_id < 0:
+        raise InputError(status_code=400, detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise InputError(status_code=400, detail=f"Report with id {report_id} not found")
+        raise NotFoundError(status_code=404, detail=f"Report with id {report_id} not found")
     
     html = export_html_report_v1(report_id)
     pdf_bytes = HTML(string=html).write_pdf()
@@ -68,10 +74,13 @@ def add_violations(soup, violations, parent):
         v.find("code", {"name": "location"}).string = location_string
 
 def export_html_report_v1(report_id: int):
+    if report_id < 0:
+        raise InputError(status_code=400, detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise InputError(status_code=400, detail=f"Report with id {report_id} not found")
+        raise NotFoundError(status_code=404, detail=f"Report with id {report_id} not found")
     
     report = report.to_json()
 
@@ -144,10 +153,13 @@ def write_violations(writer, violations):
         writer.writerow(data)
 
 def export_csv_report_v1(report_id: int):
+    if report_id < 0:
+        raise InputError(status_code=400, detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise InputError(status_code=400, detail=f"Report with id {report_id} not found")
+        raise NotFoundError(status_code=404, detail=f"Report with id {report_id} not found")
     
     report = report.to_json()
     

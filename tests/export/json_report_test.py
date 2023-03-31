@@ -277,7 +277,7 @@ def test_json_invalid_wellformedness():
 
 def test_json_invalid_id_negative():
     
-    assert export_json_report_v1(-1)['detail'] == "Report with id -1 not found"
+    assert export_json_report_v1(-1)['detail'] == "Report id cannot be less than 0"
 
 def test_json_invalid_id_not_found():
     

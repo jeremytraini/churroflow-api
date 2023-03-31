@@ -42,7 +42,7 @@ def test_html_invalid_id_negative():
     result = export_html_report_v1(-1)
     result = result.decode("utf-8")
     result = json.loads(result)
-    assert result['detail'] == "Report with id -1 not found"
+    assert result['detail'] == "Report id cannot be less than 0"
 
 def test_html_invalid_id_not_found():
     result = export_html_report_v1(9332839283)

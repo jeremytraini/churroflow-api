@@ -20,7 +20,7 @@ def test_check_validity_one_report():
 
 def test_check_validity_invalid_negative():
     
-    assert report_check_validity_v1(-1)['detail'] == "Report with id -1 not found"
+    assert report_check_validity_v1(-1)['detail'] == "Report id cannot be less than 0"
 
 def test_check_validity_invalid_not_exist():
     
