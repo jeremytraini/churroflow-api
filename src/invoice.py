@@ -16,7 +16,6 @@ def invoice_upload_text_v1(invoice_name: str, invoice_text: str):
 
 def invoice_upload_url_v1(invoice_name: str, invoice_url: str):
     if len(invoice_name) > 100:
-        print("here")
         raise InputError(status_code=400, detail="Name cannot be longer than 100 characters")
     
     try:
