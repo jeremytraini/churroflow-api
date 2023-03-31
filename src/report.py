@@ -14,7 +14,7 @@ def report_wellformedness_v1(invoice_text: str) -> Evaluation:
 
 def report_schema_v1(invoice_text: str) -> Evaluation:
     if not report_wellformedness_v1(invoice_text).is_valid:
-        raise InputError(status_code=400, detail="Invoice is not wellformed")
+        raise InputError(detail="Invoice is not wellformed")
     
     evaluation = generate_schema_evaluation(invoice_text)
     
@@ -22,7 +22,7 @@ def report_schema_v1(invoice_text: str) -> Evaluation:
 
 def report_syntax_v1(invoice_text: str) -> Evaluation:
     if not report_wellformedness_v1(invoice_text).is_valid:
-        raise InputError(status_code=400, detail="Invoice is not wellformed")
+        raise InputError(detail="Invoice is not wellformed")
     
     evaluation = generate_xslt_evaluation(SYNTAX_EXECUTABLE, invoice_text)
     
@@ -30,7 +30,7 @@ def report_syntax_v1(invoice_text: str) -> Evaluation:
 
 def report_peppol_v1(invoice_text: str) -> Evaluation:
     if not report_wellformedness_v1(invoice_text).is_valid:
-        raise InputError(status_code=400, detail="Invoice is not wellformed")
+        raise InputError(detail="Invoice is not wellformed")
     
     evaluation = generate_xslt_evaluation(PEPPOL_EXECUTABLE, invoice_text)
 
@@ -49,18 +49,18 @@ def report_list_by_v1(order_by: OrderBy) -> List[int]:
 
 def report_change_name_v1(token: str, report_id: int, new_name: str) -> Dict[None, None]:
     if len(new_name) > 100:
-        raise InputError(status_code=400, detail="New name is longer than 100 characters")
+        raise InputError(detail="New name is longer than 100 characters")
     
     if not token == ADMIN_TOKEN:
-        raise InputError(status_code=400, detail="Only admins can change the names of reports at the moment")
+        raise InputError(detail="Only admins can change the names of reports at the moment")
     
     if report_id < 0:
-        raise InputError(status_code=400, detail="Report id cannot be less than 0")
+        raise InputError(detail="Report id cannot be less than 0")
     
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise NotFoundError(status_code=404, detail=f"Report with id {report_id} not found")
+        raise NotFoundError(detail=f"Report with id {report_id} not found")
     
     report.invoice_name = new_name
     report.save()
@@ -69,15 +69,15 @@ def report_change_name_v1(token: str, report_id: int, new_name: str) -> Dict[Non
 
 def report_delete_v1(token: str, report_id: int) -> Dict[None, None]:
     if report_id < 0:
-        raise InputError(status_code=400, detail="Report id cannot be less than 0")
+        raise InputError(detail="Report id cannot be less than 0")
     
     if not token == ADMIN_TOKEN:
-        raise InputError(status_code=400, detail="Only admins can change the names of reports at the moment")
+        raise InputError(detail="Only admins can change the names of reports at the moment")
     
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise NotFoundError(status_code=404, detail=f"Report with id {report_id} not found")
+        raise NotFoundError(detail=f"Report with id {report_id} not found")
     
     report.delete_instance()
     

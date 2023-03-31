@@ -1,17 +1,21 @@
-from fastapi.exceptions import HTTPException
+# FastAPI custom exception
 
-class InputError(HTTPException):
-    status_code = 400
-    detail = 'The input you have provided is invalid'
+class InputError(Exception):
+    def __init__(self, detail: str):
+        self.status_code = 400
+        self.detail = detail
 
-class TokenError(HTTPException):
-    status_code = 402
-    detail = 'The token is invalid'
+class TokenError(Exception):
+    def __init__(self, detail: str):
+        self.status_code = 402
+        self.detail = detail
 
-class NotFoundError(HTTPException):
-    status_code = 404
-    detail = 'Input provided cannot be found'
+class NotFoundError(Exception):
+    def __init__(self, detail: str):
+        self.status_code = 404
+        self.detail = detail
 
-class InternalServerError(HTTPException):
-    status_code = 500
-    detail = 'An internal server error occured'
+class InternalServerError(Exception):
+    def __init__(self):
+        self.status_code = 500
+        self.detail = 'An internal server error occured'
