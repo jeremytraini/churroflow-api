@@ -29,10 +29,10 @@ def auth_login_v1(email, password):
     try:
         user = Users.get(email=email)
     except DoesNotExist:
-        raise InputError(status_code=400, detail="Invalid input: No user with email " + email + ".")
+        raise InputError(detail="Invalid input: No user with email " + email + ".")
     
     if user.password_hash != hashlib.sha256(password.encode("utf-8")).hexdigest():
-        raise InputError(status_code=400, detail="Invalid input: Incorrect password.")
+        raise InputError(detail="Invalid input: Incorrect password.")
 
 
     # data_store.start_token_session(data_store.encode_user_jwt(user_id))
@@ -64,11 +64,11 @@ def auth_register_v1(email, password):
     # Check for valid email, i.e. has @ in the string
     regex = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$'
     if re.fullmatch(regex, email) is None:
-        raise InputError(status_code=400, detail="Email is invalid!")
+        raise InputError(detail="Email is invalid!")
 
     # Check if length of password is a valid length (> 5)
     if string_in_range(0, 5, password):
-        raise InputError(status_code=400, detail="Invalid input: Password is too short.")
+        raise InputError(detail="Invalid input: Password is too short.")
 
     # Generate password hash
     # salt = data_store.gen_salt()
@@ -78,7 +78,7 @@ def auth_register_v1(email, password):
         user = Users.create(email=email, password_hash=password_hash)
     except IntegrityError:
         # duplicate email
-        raise InputError(status_code=400, detail="Invalid input: Email " + email + " is already taken.")
+        raise InputError(detail="Invalid input: Email " + email + " is already taken.")
     
     # Return id once register is successful
     return {

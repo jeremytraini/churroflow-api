@@ -153,9 +153,28 @@ def report_delete_v2(report_id: int) -> Server_call_return:
 
     return json.loads(response.text)
 
+def report_delete_invalid_token_v2(report_id: int) -> Server_call_return:
+    payload = {
+        "token": "invalidtoken",
+        "report_id": report_id
+    }
+    response = requests.delete(full_url + 'report/delete/v2', params=payload)
+
+    return json.loads(response.text)
+
 def report_change_name_v2(report_id: int, new_name: str) -> Server_call_return:
     payload = {
         "token": ADMIN_TOKEN,
+        "report_id": report_id,
+        "new_name": new_name
+    }
+    response = requests.put(full_url + 'report/change_name/v2', params=payload)
+
+    return json.loads(response.text)
+
+def report_change_name_invalid_token_v2(report_id: int, new_name: str) -> Server_call_return:
+    payload = {
+        "token": "invalidtoken",
         "report_id": report_id,
         "new_name": new_name
     }

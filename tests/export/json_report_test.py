@@ -274,3 +274,11 @@ def test_json_invalid_wellformedness():
     assert report.schema_evaluation == None
     assert report.syntax_evaluation == None
     assert report.peppol_evaluation == None
+
+def test_json_invalid_id_negative():
+    
+    assert export_json_report_v1(-1)['detail'] == "Report id cannot be less than 0"
+
+def test_json_invalid_id_not_found():
+    
+    assert export_json_report_v1(9332839283)['detail'] == "Report with id 9332839283 not found"

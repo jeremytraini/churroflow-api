@@ -54,7 +54,7 @@ jobs:
         sleep 3
     - name: Generate coverage report
       run: |
-        coverage report
+        coverage report -m
 
     - name: Run pylint
       run: |
