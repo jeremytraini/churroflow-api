@@ -15,7 +15,7 @@ def test_login_success():
     sleep(1)
     login_return_value = auth_login_v2("test@test.com", "password")
     print(login_return_value)
-    assert reg_return_value["token"] != login_return_value["token"]
+    assert reg_return_value["token"] != login_return_value["access_token"]
 
 def test_login_multiple_success():
     clear_v1()
@@ -33,19 +33,19 @@ def test_login_multiple_success():
 def test_login_incorrect_email():
     clear_v1()
     auth_register_v2("test@test.com", "password")
-    assert auth_login_v2("test2@test.com", "password")['detail'] == "Invalid input: No user with email test2@test.com."
+    assert auth_login_v2("test2@test.com", "password")['detail'] == "Invalid input: Incorrect email or password."
 
 def test_login_incorrect_email_and_password():
     clear_v1()
     auth_register_v2("test@test.com", "password")
-    assert auth_login_v2("test@test.com", "efef")['detail'] == "Invalid input: Incorrect password."
+    assert auth_login_v2("test@test.com", "efef")['detail'] == "Invalid input: Incorrect email or password."
 
 def test_login_incorrect_password():
     clear_v1()
     # Password is incorrect
     auth_register_v2("test@test.com", "password")
-    assert auth_login_v2("test@test.com", "eeffef")['detail'] == "Invalid input: Incorrect password."
+    assert auth_login_v2("test@test.com", "eeffef")['detail'] == "Invalid input: Incorrect email or password."
 
     # Password is incorrect (and empty)
     auth_register_v2("test1@test.com", "password")
-    assert auth_login_v2("test1@test.com", "")['detail'] == "Invalid input: Incorrect password."
+    assert auth_login_v2("test1@test.com", "")['detail'][0]['msg'] == "field required"

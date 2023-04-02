@@ -153,12 +153,15 @@ def report_check_validity_v1(report_id: int) -> Server_call_return:
 
 ### Other Endpoints
 
-def report_delete_v2(report_id: int) -> Server_call_return:
+def report_delete_v2(token: str, report_id: int) -> Server_call_return:
     payload = {
         "token": ADMIN_TOKEN,
         "report_id": report_id
     }
-    response = requests.delete(full_url + 'report/delete/v2', params=payload)
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.delete(full_url + 'report/delete/v2', params=payload, headers=headers)
 
     return json.loads(response.text)
 

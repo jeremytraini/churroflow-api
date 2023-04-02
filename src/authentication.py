@@ -32,10 +32,10 @@ def auth_login_v1(email, password) -> AuthReturnV1:
     try:
         user = Users.get(email=email)
     except DoesNotExist:
-        raise HTTPException(status_code=400, detail="Invalid input: Incorrect enail or password.")
+        raise HTTPException(status_code=400, detail="Invalid input: Incorrect email or password.")
     
     if user.password_hash != hashlib.sha256(password.encode("utf-8")).hexdigest():
-        raise HTTPException(status_code=400, detail="Invalid input: Incorrect enail or password.")
+        raise HTTPException(status_code=400, detail="Invalid input: Incorrect email or password.")
 
     return AuthReturnV1(auth_user_id=user.id)
 

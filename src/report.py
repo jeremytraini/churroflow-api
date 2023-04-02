@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from src.type_structure import *
 from typing import Dict
 from src.database import Reports, Sessions, Users
@@ -47,9 +48,9 @@ def report_change_name_v2(token: str, report_id: int, new_name: str) -> Dict[Non
         try:
             session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise Exception("Invalid token")
+            raise HTTPException(403, "Invalid token")
         if not report.owner == session.user:
-            raise Exception("You do not have permission to rename this report")
+            raise HTTPException(403, "You do not have permission to rename this report")
     
     report.invoice_name = new_name
     report.save()
@@ -66,10 +67,10 @@ def report_delete_v2(token: str, report_id: int) -> Dict[None, None]:
         try:
             session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise Exception("Invalid API key")
+            raise HTTPException(403, "Invalid token")
         
         if not report.owner == session.user:
-            raise Exception("You do not have permission to delete this report")
+            raise HTTPException(403, "You do not have permission to delete this report")
     
     report.delete_instance()
     
