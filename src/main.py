@@ -8,8 +8,7 @@ from src.authentication import *
 from src.type_structure import *
 from src.database import clear_v1
 from fastapi import Depends, FastAPI, Request, HTTPException, Security, UploadFile, File
-from fastapi.security import OAuth2PasswordBearer
-from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
 from src.error import AuthenticationError, InputError
 from io import BytesIO
@@ -40,7 +39,6 @@ app = FastAPI(title="CHURROS VALIDATION API",
               description=description,
               version="0.0.1",
               openapi_tags=tags_metadata)
-token_check = OAuth2PasswordBearer(tokenUrl="/auth_login/v2")  
 
 @app.exception_handler(500)
 async def validation_exception_handler(request: Request, exc: Exception):
@@ -53,25 +51,23 @@ async def validation_exception_handler(request: Request, exc: Exception):
             },
     )
 
-# API key validation below
+# token validation below
 
-API_KEY_NAME = "access_token"
-api_key_query = APIKeyQuery(name=API_KEY_NAME, auto_error=False)
-api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth_login/v2")
 
-async def get_api_key(
-    api_key_query: str = Security(api_key_query),
-    api_key_header: str = Security(api_key_header)
-):
+async def get_token(token: str = Depends(oauth2_scheme)) -> str:
+    if token == ADMIN_TOKEN:
+        return token
+    
     try:
-        Users.get(api_key=api_key_query)
-        return api_key_query
+        session = Sessions.get(token=token)
     except DoesNotExist:
-        try:
-            Users.get(api_key=api_key_header)
-            return api_key_header
-        except DoesNotExist:
-            raise HTTPException(status_code=403, detail="Could not validate credentials")
+        raise HTTPException(401, "Invalid token, please login/register")
+    
+    if session.date_expires < datetime.now():
+        raise HTTPException(401, "Expired token, please login again")
+
+    return session.token
 
 # ENDPOINTS BELOW
 
@@ -88,6 +84,11 @@ async def invoice_upload_file(file: UploadFile = File(...)) -> ReportID:
     invoice_text = await file.read()
     return invoice_upload_file_v1(invoice_name=file.filename, invoice_text=invoice_text.decode("utf-8")) #type: ignore
 
+@app.post("/invoice/upload_file/v2", tags=["invoice"])
+async def invoice_upload_file_v2(file: UploadFile = File(...), token = Depends(get_token)) -> ReportID:
+    invoice_text = await file.read()
+    return invoice_upload_file_v1(invoice_name=file.filename, invoice_text=invoice_text.decode("utf-8"), owner=Sessions.get(token=token).user) #type: ignore
+
 @app.post("/invoice/bulk_upload_file/v1", tags=["invoice"])
 async def invoice_bulk_upload_file(files: List[UploadFile] = File(...)) -> ReportIDs:
     invoices = []
@@ -102,6 +103,10 @@ async def invoice_bulk_upload_file(files: List[UploadFile] = File(...)) -> Repor
 @app.post("/invoice/upload_text/v1", tags=["invoice"])
 async def invoice_upload_text(invoice: TextInvoice) -> ReportID:
     return invoice_upload_text_v1(invoice_name=invoice.name, invoice_text=invoice.text)
+
+@app.post("/invoice/upload_text/v2", tags=["invoice"])
+async def invoice_upload_text_v2(invoice: TextInvoice, token = Depends(get_token)) -> ReportID:
+    return invoice_upload_text_v1(invoice_name=invoice.name, invoice_text=invoice.text, owner=Sessions.get(token=token).user)
 
 @app.post("/invoice/bulk_upload_text/v1", tags=["invoice"])
 async def invoice_upload_bulk_text(invoices: List[TextInvoice]) -> ReportIDs:
@@ -189,19 +194,19 @@ async def invoice_check_validity(report_id: int) -> CheckValidReturn:
 
 ### Below to be replaced with proper authentication system ###
 
-@app.put("/report/change_name/v2", include_in_schema=False)
-async def report_change_name(report_id: int, new_name: str, api_key = Depends(get_api_key)) -> Dict[None, None]:
-    return report_change_name_v1(api_key, report_id, new_name)
+@app.put("/report/change_name/v2", tags=["report"])
+async def report_change_name(report_id: int, new_name: str, token: str = Depends(get_token)) -> Dict[None, None]:
+    return report_change_name_v2(token, report_id, new_name)
 
-@app.delete("/report/delete/v2", include_in_schema=False)
-async def report_delete(report_id: int, api_key = Depends(get_api_key)) -> Dict[None, None]:
-    return report_delete_v1(api_key, report_id)
+@app.delete("/report/delete/v2", tags=["report"])
+async def report_delete(report_id: int, token: str = Depends(get_token)) -> Dict[None, None]:
+    return report_delete_v2(token, report_id)
 
-@app.get("/auth_login/v2", tags=["auth"])
-async def auth_login(email: str, password: str) -> AuthReturnV2:
-    return auth_login_v2(email, password)
+@app.post("/auth_login/v2", tags=["auth"])
+async def auth_login(form_data: OAuth2PasswordRequestForm = Depends()):
+    return Token(access_token=auth_login_v2(form_data.username, form_data.password).token, token_type="bearer")
 
-@app.get("/auth_register/v2", tags=["auth"])
+@app.post("/auth_register/v2", tags=["auth"])
 async def auth_register(email: str, password: str) -> AuthReturnV2:
     return auth_register_v2(email, password)
 
