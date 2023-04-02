@@ -25,7 +25,6 @@ class BaseModel(Model):
 class Users(BaseModel):
     email = TextField(unique=True)
     password_hash = TextField()
-    api_key = TextField(unique=True)
 
 class Evaluations(BaseModel):
     is_valid = BooleanField()
