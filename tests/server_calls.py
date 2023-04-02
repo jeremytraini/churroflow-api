@@ -177,6 +177,27 @@ def report_change_name_v2(token: str, report_id: int, new_name: str) -> Server_c
 
     return json.loads(response.text)
 
+def report_change_name_v2(token: str, report_id: int, new_name: str) -> Server_call_return:
+    payload = {
+        "token": ADMIN_TOKEN,
+        "report_id": report_id,
+        "new_name": new_name
+    }
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.put(full_url + 'report/change_name/v2', params=payload, headers=headers)
+
+    return json.loads(response.text)
+
+# Linting endpoint
+
+def report_lint_v1(invoice: TextInvoice) -> Server_call_return:
+    payload = invoice.dict()
+    response = requests.post(full_url + 'report/lint/v1', json=payload)
+
+    return json.loads(response.text)
+
 # Authentication endpoints
 
 def auth_register_v2(email: str, password: str) -> Server_call_return:

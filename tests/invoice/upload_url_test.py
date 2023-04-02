@@ -16,3 +16,20 @@ def test_upload_url_valid_invoice():
     
     assert response['report_id'] >= 0
 
+def test_upload_url_invalid_invoice_name():
+    invalid_invoice_name = 'hellohellohellohellohellohellohellohellohellohellohellohello\
+        hellohellohellohellohellohellohellohellohello'
+    
+    invoice = RemoteInvoice(name="My Invoice", url="https://raw.githubusercontent.com/A-NZ-PEPPOL/A-NZ-PEPPOL-BIS-3.0/master/Message%20examples/AU%20Invoice.xml")
+    
+    assert invoice_upload_url_v1(invalid_invoice_name, invoice.url)['detail'] == "Name cannot be longer than 100 characters"
+
+def test_upload_url_invalid_url():
+    invoice = RemoteInvoice(name="My Invoice", url="invalidurl")
+    
+    assert invoice_upload_url_v1(invoice.name, invoice.url)['detail'] == "Could not retrieve invoice from url"
+
+def test_upload_url_invalid_format():
+    invoice = RemoteInvoice(name="My Invoice", url="https://raw.githubusercontent.com/A-NZ-PEPPOL/A-NZ-PEPPOL-BIS-3.0/master/Message%20examples/AU%20Invoice.pdf")
+    
+    assert invoice_upload_url_v1(invoice.name, invoice.url)['detail'] == "URL does not point to plain text or XML data"

@@ -10,7 +10,7 @@ from src.database import clear_v1
 from fastapi import Depends, FastAPI, Request, HTTPException, Security, UploadFile, File
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
-from src.error import AuthenticationError, InputError
+from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import uvicorn
 
@@ -40,15 +40,80 @@ app = FastAPI(title="CHURROS VALIDATION API",
               version="0.0.1",
               openapi_tags=tags_metadata)
 
-@app.exception_handler(500)
-async def validation_exception_handler(request: Request, exc: Exception):
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.exception_handler(InputError)
+async def input_error_exception_handler(request: Request, exc: InputError):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "code": 400,
+            "name": "Input Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(AuthorizationError)
+async def authorization_error_exception_handler(request: Request, exc: TokenError):
+    return JSONResponse(
+        status_code=401,
+        content={
+            "code": 401,
+            "name": "Token Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(TokenError)
+async def token_error_exception_handler(request: Request, exc: TokenError):
+    return JSONResponse(
+        status_code=402,
+        content={
+            "code": 402,
+            "name": "Token Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(AuthenticationError)
+async def authentication_error_exception_handler(request: Request, exc: TokenError):
+    return JSONResponse(
+        status_code=403,
+        content={
+            "code": 403,
+            "name": "Authentication Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(NotFoundError)
+async def not_found_error_exception_handler(request: Request, exc: NotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "code": 404,
+            "name": "Not Found Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(InternalServerError)
+async def validation_exception_handler(request: Request, exc: InternalServerError):
     return JSONResponse(
         status_code=500,
         content={
             "code": 500,
-            "name": "System Error",
-            "message": str(exc)
-            },
+            "name": "Internal Server Error",
+            "detail": exc.detail
+        },
     )
 
 # token validation below
@@ -62,10 +127,10 @@ async def get_token(token: str = Depends(oauth2_scheme)) -> str:
     try:
         session = Sessions.get(token=token)
     except DoesNotExist:
-        raise HTTPException(401, "Invalid token, please login/register")
+        raise AuthorizationError("Invalid token, please login/register")
     
     if session.date_expires < datetime.now():
-        raise HTTPException(401, "Expired token, please login again")
+        raise AuthorizationError("Expired token, please login again")
 
     return session.token
 
@@ -191,6 +256,9 @@ async def report_list_by(order_by: OrderBy) -> ReportIDs:
 async def invoice_check_validity(report_id: int) -> CheckValidReturn:
     return invoice_check_validity_v1(report_id)
 
+@app.post("/report/lint/v1", tags=["report"])
+async def report_lint(invoice: TextInvoice) -> LintReport:
+    return report_lint_v1(invoice_text=invoice.text)
 
 ### Below to be replaced with proper authentication system ###
 

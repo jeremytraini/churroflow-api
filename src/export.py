@@ -1,23 +1,34 @@
 from src.type_structure import *
 from src.database import Reports
 from bs4 import BeautifulSoup
-from html import escape
 from peewee import DoesNotExist
 from weasyprint import HTML
 from io import StringIO, BytesIO
 import csv
 from zipfile import ZipFile, ZIP_DEFLATED
+from src.error import *
 
 
 def export_json_report_v1(report_id: int):
+    if report_id < 0:
+        raise InputError(detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise Exception(f"Report with id {report_id} not found")
+        raise NotFoundError(detail=f"Report with id {report_id} not found")
     
     return Report(**report.to_json())
 
 def export_pdf_report_v1(report_id: int) -> bytes:
+    if report_id < 0:
+        raise InputError(detail="Report id cannot be less than 0")
+    
+    try:
+        report = Reports.get_by_id(report_id)
+    except DoesNotExist:
+        raise NotFoundError(detail=f"Report with id {report_id} not found")
+    
     html = export_html_report_v1(report_id)
     pdf_bytes = HTML(string=html).write_pdf()
     
@@ -32,33 +43,44 @@ def copy_element(element, parent):
     return new_element
     
 def change_value(soup, tag, id, value):
-    soup.find(tag, {"id": str(id)}).string = escape(str(value))
+    soup.find(tag, {"id": str(id)}).string = str(value)
 
 def add_violations(soup, violations, parent):
-    failed_rule = soup.find("div", {"name": "failed-rule"})
+    failed_rule = soup.find("div", {"name": "failed-rule-template"})
     
     for violation in violations:
         v = copy_element(failed_rule, parent)
-        v.find("span", {"name": "rule_id"}).string = escape(violation["rule_id"])
-        v.find("td", {"name": "desc"}).string = escape(violation["message"])
-        v.find("td", {"name": "severity"}).string = "Fatal" if violation["is_fatal"] == "fatal" else "Warning"
+        v["name"] = "failed-rule"
+        v["class"].append("error" if violation["is_fatal"] else "warning")
+        
+        v.find("span", {"name": "rule_id"}).string = violation["rule_id"]
+        v.find("td", {"name": "desc"}).string = violation["message"]
+        if violation["suggestion"]:
+            v.find("td", {"name": "suggestion"}).string = violation["suggestion"]
+        else:
+            v.find("tr", {"id": "suggestion"})["style"] = "display: none;"
+            
+        v.find("td", {"name": "severity"}).string = "Error" if violation["is_fatal"] else "Warning"
+        
         if violation["test"]:
             v.find("code", {"name": "test"}).string = violation["test"]
         else:
-            v.find("code", {"name": "test"}).display = "none"
+            v.find("tr", {"id": "test"})["style"] = "display: none;"
         
         if violation["xpath"]:
             location_string = violation["xpath"]
         else:
             location_string = "Line " + str(violation["line"]) + ", Column " + str(violation["column"])
-        v.find("code", {"name": "location"}).string = escape(location_string)
-        v.find("code", {"name": "excerpt"}).string = ""
+        v.find("code", {"name": "location"}).string = location_string
 
 def export_html_report_v1(report_id: int):
+    if report_id < 0:
+        raise InputError(detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise Exception(f"Report with id {report_id} not found")
+        raise NotFoundError(detail=f"Report with id {report_id} not found")
     
     report = report.to_json()
 
@@ -131,10 +153,13 @@ def write_violations(writer, violations):
         writer.writerow(data)
 
 def export_csv_report_v1(report_id: int):
+    if report_id < 0:
+        raise InputError(detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise Exception(f"Report with id {report_id} not found")
+        raise NotFoundError(detail=f"Report with id {report_id} not found")
     
     report = report.to_json()
     

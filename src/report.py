@@ -2,9 +2,10 @@ from fastapi import HTTPException
 from src.type_structure import *
 from typing import Dict
 from src.database import Reports, Sessions, Users
-from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation
+from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation, generate_diagnostic_list
 from peewee import DoesNotExist
-from src.constants import ADMIN_TOKEN
+from src.constants import ADMIN_TOKEN, PEPPOL_EXECUTABLE, SYNTAX_EXECUTABLE
+from src.error import *
 
 
 def report_wellformedness_v1(invoice_text: str) -> Evaluation:
@@ -13,17 +14,26 @@ def report_wellformedness_v1(invoice_text: str) -> Evaluation:
     return Evaluation(**evaluation.to_json())
 
 def report_schema_v1(invoice_text: str) -> Evaluation:
+    if not report_wellformedness_v1(invoice_text).is_valid:
+        raise InputError(detail="Invoice is not wellformed")
+    
     evaluation = generate_schema_evaluation(invoice_text)
     
     return Evaluation(**evaluation.to_json())
 
 def report_syntax_v1(invoice_text: str) -> Evaluation:
-    evaluation = generate_xslt_evaluation("syntax", invoice_text)
+    if not report_wellformedness_v1(invoice_text).is_valid:
+        raise InputError(detail="Invoice is not wellformed")
+    
+    evaluation = generate_xslt_evaluation(SYNTAX_EXECUTABLE, invoice_text)
     
     return Evaluation(**evaluation.to_json())
 
 def report_peppol_v1(invoice_text: str) -> Evaluation:
-    evaluation = generate_xslt_evaluation("peppol", invoice_text)
+    if not report_wellformedness_v1(invoice_text).is_valid:
+        raise InputError(detail="Invoice is not wellformed")
+    
+    evaluation = generate_xslt_evaluation(PEPPOL_EXECUTABLE, invoice_text)
 
     return Evaluation(**evaluation.to_json())
 
@@ -39,18 +49,24 @@ def report_list_by_v1(order_by: OrderBy) -> ReportIDs:
     return ReportIDs(report_ids=[report.id for report in Reports.select().order_by(order)])
 
 def report_change_name_v2(token: str, report_id: int, new_name: str) -> Dict[None, None]:
+    if report_id < 0:
+        raise InputError(detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise Exception(f"Report with id {report_id} not found")
+        raise NotFoundError(detail=f"Report with id {report_id} not found")
     
     if not token == ADMIN_TOKEN:
         try:
             session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise HTTPException(403, "Invalid token")
+            raise AuthenticationError("Invalid token")
         if not report.owner == session.user:
-            raise HTTPException(403, "You do not have permission to rename this report")
+            raise AuthenticationError("You do not have permission to rename this report")
+    
+    if len(new_name) > 100:
+        raise InputError(detail="New name is longer than 100 characters")
     
     report.invoice_name = new_name
     report.save()
@@ -58,19 +74,22 @@ def report_change_name_v2(token: str, report_id: int, new_name: str) -> Dict[Non
     return {}
 
 def report_delete_v2(token: str, report_id: int) -> Dict[None, None]:
+    if report_id < 0:
+        raise InputError(detail="Report id cannot be less than 0")
+    
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
-        raise Exception(f"Report with id {report_id} not found")
+        raise NotFoundError(detail=f"Report with id {report_id} not found")
 
     if not token == ADMIN_TOKEN:
         try:
             session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise HTTPException(403, "Invalid token")
+            raise AuthenticationError("Invalid token")
         
         if not report.owner == session.user:
-            raise HTTPException(403, "You do not have permission to delete this report")
+            raise AuthenticationError("You do not have permission to delete this report")
     
     report.delete_instance()
     
@@ -97,4 +116,9 @@ def report_bulk_json_export_v1(report_ids) -> List[ReportExport]:
     export = ReportExport(url="", invoice_hash="")
     exports = [export for _ in report_ids]
     return exports
+
+def report_lint_v1(invoice_text: str) -> LintReport:
+    return LintReport(
+        report=generate_diagnostic_list(invoice_text)
+    )
 

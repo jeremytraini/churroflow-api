@@ -46,7 +46,7 @@ class Evaluations(BaseModel):
 class Reports(BaseModel):
     date_generated = DateTimeField()
     invoice_name = TextField()
-    invoice_text = TextField()
+    invoice_text = TextField(null=True, default=None)
     invoice_hash = TextField()
     is_valid = BooleanField()
     total_warnings = IntegerField()
@@ -62,7 +62,6 @@ class Reports(BaseModel):
             "report_id": self.id, # type: ignore
             "date_generated": str(self.date_generated),
             "invoice_name": self.invoice_name,
-            "invoice_text": self.invoice_text,
             "invoice_hash": self.invoice_hash,
             "is_valid": self.is_valid,
             "total_warnings": self.total_warnings,
