@@ -59,13 +59,24 @@ async def input_error_exception_handler(request: Request, exc: InputError):
         },
     )
 
-@app.exception_handler(TokenError)
-async def input_error_exception_handler(request: Request, exc: TokenError):
+@app.exception_handler(UnauthorisedError)
+async def input_error_exception_handler(request: Request, exc: UnauthorisedError):
     return JSONResponse(
-        status_code=402,
+        status_code=401,
         content={
-            "code": 402,
-            "name": "Token Error",
+            "code": 401,
+            "name": "Unauthorised Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(ForbiddenError)
+async def input_error_exception_handler(request: Request, exc: ForbiddenError):
+    return JSONResponse(
+        status_code=403,
+        content={
+            "code": 403,
+            "name": "Forbidden Error",
             "detail": exc.detail
         },
     )
