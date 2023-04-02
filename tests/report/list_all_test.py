@@ -10,7 +10,7 @@ from tests.helpers import invalidate_invoice, remove_part_of_string, clear_datab
 """
 
 def test_list_all_one_report():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
+    invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
     invoice_upload_text_v1(invoice.name, invoice.text)
 
     report_ids = report_list_all_v1()["report_ids"]
@@ -23,7 +23,7 @@ def test_list_all_one_report():
     
     
 def test_list_all_many_reports():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
+    invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
     invoice_upload_text_v1(invoice.name, invoice.text)
     invoice_upload_text_v1(invoice.name, invoice.text)
     invoice_upload_text_v1(invoice.name, invoice.text)

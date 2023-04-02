@@ -1,4 +1,5 @@
-from src.database import Users, IntegrityError, DoesNotExist
+from datetime import datetime, timedelta
+from src.database import Users, Sessions, IntegrityError, DoesNotExist
 from src.helpers import string_in_range
 from src.error import InputError
 from src.type_structure import *
@@ -9,7 +10,7 @@ import re
 Auth login and register functions.
 '''
 
-def auth_login_v1(email, password):
+def auth_login_v1(email, password) -> AuthReturnV1:
     '''
     This function uses user-inputted login data to log a user into the system.
 
@@ -29,18 +30,15 @@ def auth_login_v1(email, password):
     try:
         user = Users.get(email=email)
     except DoesNotExist:
-        raise InputError(detail="Invalid input: No user with email " + email + ".")
+        raise InputError(detail="Invalid input: Incorrect email or password.")
     
     if user.password_hash != hashlib.sha256(password.encode("utf-8")).hexdigest():
-        raise InputError(detail="Invalid input: Incorrect password.")
+        raise InputError(detail="Invalid input: Incorrect email or password.")
+
+    return AuthReturnV1(auth_user_id=user.id)
 
 
-    # data_store.start_token_session(data_store.encode_user_jwt(user_id))
-
-    return {'auth_user_id' : user.id}
-
-
-def auth_register_v1(email, password):
+def auth_register_v1(email, password) -> AuthReturnV1:
     '''
     This function registers a user into the system by getting their details.
 
@@ -71,7 +69,6 @@ def auth_register_v1(email, password):
         raise InputError(detail="Invalid input: Password is too short.")
 
     # Generate password hash
-    # salt = data_store.gen_salt()
     password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
 
     try:
@@ -81,6 +78,20 @@ def auth_register_v1(email, password):
         raise InputError(detail="Invalid input: Email " + email + " is already taken.")
     
     # Return id once register is successful
-    return {
-        'auth_user_id': user.id,
-    }
+    return AuthReturnV1(auth_user_id=user.id)
+
+
+def auth_login_v2(email, password) -> AuthReturnV2:
+    id = auth_login_v1(email, password).auth_user_id
+    now = datetime.now()
+    token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
+    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=1))
+    return AuthReturnV2(token=token)
+
+
+def auth_register_v2(email, password) -> AuthReturnV2:
+    id = auth_register_v1(email, password).auth_user_id
+    now = datetime.now()
+    token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
+    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=1))
+    return AuthReturnV2(token=token)

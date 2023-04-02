@@ -1,4 +1,3 @@
-import signal
 from src.config import base_url, port
 from src.health_check import health_check_v1
 from src.report import *
@@ -7,8 +6,9 @@ from src.export import *
 from src.authentication import *
 from src.type_structure import *
 from src.database import clear_v1
-from fastapi import FastAPI, Request, HTTPException, UploadFile, File
-from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
+from fastapi import Depends, FastAPI, Request,UploadFile, File
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
+from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import uvicorn
@@ -32,6 +32,7 @@ tags_metadata = [
         "description": "Generate individual evaluations and manage your reports."
     },
 ]
+
 
 app = FastAPI(title="CHURROS VALIDATION API",
               description=description,
@@ -60,7 +61,7 @@ async def input_error_exception_handler(request: Request, exc: InputError):
     )
 
 @app.exception_handler(UnauthorisedError)
-async def input_error_exception_handler(request: Request, exc: UnauthorisedError):
+async def authorization_error_exception_handler(request: Request, exc: UnauthorisedError):
     return JSONResponse(
         status_code=401,
         content={
@@ -71,7 +72,7 @@ async def input_error_exception_handler(request: Request, exc: UnauthorisedError
     )
 
 @app.exception_handler(ForbiddenError)
-async def input_error_exception_handler(request: Request, exc: ForbiddenError):
+async def forbidden_error_exception_handler(request: Request, exc: ForbiddenError):
     return JSONResponse(
         status_code=403,
         content={
@@ -82,7 +83,7 @@ async def input_error_exception_handler(request: Request, exc: ForbiddenError):
     )
 
 @app.exception_handler(NotFoundError)
-async def input_error_exception_handler(request: Request, exc: NotFoundError):
+async def not_found_error_exception_handler(request: Request, exc: NotFoundError):
     return JSONResponse(
         status_code=404,
         content={
@@ -103,6 +104,24 @@ async def validation_exception_handler(request: Request, exc: InternalServerErro
         },
     )
 
+# token validation below
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth_login/v2")
+
+async def get_token(token: str = Depends(oauth2_scheme)) -> str:
+    if token == ADMIN_TOKEN:
+        return token
+    
+    try:
+        session = Sessions.get(token=token)
+    except DoesNotExist:
+        raise UnauthorisedError("Invalid token, please login/register")
+    
+    if session.date_expires < datetime.now():
+        raise UnauthorisedError("Expired token, please login again")
+
+    return session.token
+
 # ENDPOINTS BELOW
 
 @app.get("/")
@@ -116,7 +135,12 @@ async def health_check():
 @app.post("/invoice/upload_file/v1", tags=["invoice"])
 async def invoice_upload_file(file: UploadFile = File(...)) -> ReportID:
     invoice_text = await file.read()
-    return invoice_upload_file_v1(invoice_name=file.filename, invoice_text=invoice_text.decode("utf-8"))
+    return invoice_upload_file_v1(invoice_name=file.filename, invoice_text=invoice_text.decode("utf-8")) #type: ignore
+
+@app.post("/invoice/upload_file/v2", tags=["invoice"])
+async def invoice_upload_file_v2(file: UploadFile = File(...), token = Depends(get_token)) -> ReportID:
+    invoice_text = await file.read()
+    return invoice_upload_file_v1(invoice_name=file.filename, invoice_text=invoice_text.decode("utf-8"), owner=Sessions.get(token=token).user) #type: ignore
 
 @app.post("/invoice/bulk_upload_file/v1", tags=["invoice"])
 async def invoice_bulk_upload_file(files: List[UploadFile] = File(...)) -> ReportIDs:
@@ -124,22 +148,45 @@ async def invoice_bulk_upload_file(files: List[UploadFile] = File(...)) -> Repor
     
     for file in files:
         invoice_text = await file.read()
-        invoice = TextInvoice(name=file.filename, text=invoice_text.decode("utf-8"))
+        invoice = TextInvoice(name=file.filename, text=invoice_text.decode("utf-8")) #type: ignore
         invoices.append(invoice)
     
     return invoice_upload_bulk_text_v1(invoices)
+
+@app.post("/invoice/bulk_upload_file/v2", tags=["invoice"])
+async def invoice_bulk_upload_file_v2(files: List[UploadFile] = File(...), token = Depends(get_token)) -> ReportIDs:
+    invoices = []
+    
+    for file in files:
+        invoice_text = await file.read()
+        invoice = TextInvoice(name=file.filename, text=invoice_text.decode("utf-8")) #type: ignore
+        invoices.append(invoice)
+    
+    return invoice_upload_bulk_text_v1(invoices, owner=Sessions.get(token=token).user)
 
 @app.post("/invoice/upload_text/v1", tags=["invoice"])
 async def invoice_upload_text(invoice: TextInvoice) -> ReportID:
     return invoice_upload_text_v1(invoice_name=invoice.name, invoice_text=invoice.text)
 
+@app.post("/invoice/upload_text/v2", tags=["invoice"])
+async def invoice_upload_text_v2(invoice: TextInvoice, token = Depends(get_token)) -> ReportID:
+    return invoice_upload_text_v1(invoice_name=invoice.name, invoice_text=invoice.text, owner=Sessions.get(token=token).user)
+
 @app.post("/invoice/bulk_upload_text/v1", tags=["invoice"])
 async def invoice_upload_bulk_text(invoices: List[TextInvoice]) -> ReportIDs:
     return invoice_upload_bulk_text_v1(invoices)
 
+@app.post("/invoice/bulk_upload_text/v2", tags=["invoice"])
+async def invoice_upload_bulk_text_v2(invoices: List[TextInvoice], token = Depends(get_token)) -> ReportIDs:
+    return invoice_upload_bulk_text_v1(invoices, owner=Sessions.get(token=token).user)
+
 @app.post("/invoice/upload_url/v1", tags=["invoice"])
 async def invoice_upload_url(invoice: RemoteInvoice) -> ReportID:
     return invoice_upload_url_v1(invoice_name=invoice.name, invoice_url=invoice.url)
+
+@app.post("/invoice/upload_url/v2", tags=["invoice"])
+async def invoice_upload_url_v2(invoice: RemoteInvoice, token = Depends(get_token)) -> ReportID:
+    return invoice_upload_url_v1(invoice_name=invoice.name, invoice_url=invoice.url, owner=Sessions.get(token=token).user)
 
 @app.get("/export/json_report/v1", tags=["export"])
 async def export_json_report(report_id: int) -> Report:
@@ -222,24 +269,24 @@ async def report_lint(invoice: TextInvoice) -> LintReport:
 
 ### Below to be replaced with proper authentication system ###
 
-@app.put("/report/change_name/v2", include_in_schema=False)
-async def report_change_name(token: str, report_id: int, new_name: str) -> Dict[None, None]:
-    return report_change_name_v1(token, report_id, new_name)
+@app.put("/report/change_name/v2", tags=["report"])
+async def report_change_name(report_id: int, new_name: str, token: str = Depends(get_token)) -> Dict[None, None]:
+    return report_change_name_v2(token, report_id, new_name)
 
-@app.delete("/report/delete/v2", include_in_schema=False)
-async def report_delete(token: str, report_id: int) -> Dict[None, None]:
-    return report_delete_v1(token, report_id)
+@app.delete("/report/delete/v2", tags=["report"])
+async def report_delete(report_id: int, token: str = Depends(get_token)) -> Dict[None, None]:
+    return report_delete_v2(token, report_id)
 
-@app.get("/auth_login/v2", include_in_schema=False)
-async def auth_login(email: str, password: str):
-    return auth_login_v1(email, password)
+@app.post("/auth_login/v2", tags=["auth"])
+async def auth_login(form_data: OAuth2PasswordRequestForm = Depends()):
+    return Token(access_token=auth_login_v2(form_data.username, form_data.password).token, token_type="bearer")
 
-@app.get("/auth_register/v2", include_in_schema=False)
-async def auth_register(email: str, password: str):
-    return auth_register_v1(email, password)
+@app.post("/auth_register/v2", tags=["auth"])
+async def auth_register(email: str, password: str) -> AuthReturnV2:
+    return auth_register_v2(email, password)
 
 @app.post("/invoice/generate_hash/v2", include_in_schema=False)
-async def invoice_generate_hash(invoice_text: str) -> str:
+async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
     return invoice_generate_hash_v1(invoice_text)
 
 @app.delete("/clear/v1", include_in_schema=False)

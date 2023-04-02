@@ -28,6 +28,15 @@ def invoice_upload_text_v1(invoice_name: str, invoice_text: str) -> Server_call_
     
     return json.loads(response.text)
 
+def invoice_upload_text_v2(token: str, invoice_name: str, invoice_text: str) -> Server_call_return:
+    payload = TextInvoice(name=invoice_name, text=invoice_text).dict()
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.post(full_url + 'invoice/upload_text/v2', json=payload, headers=headers)
+    
+    return json.loads(response.text)
+
 def invoice_bulk_upload_text_v1(invoices: List[TextInvoice]) -> Server_call_return:
     payload = {
         "invoices": [invoice.dict() for invoice in invoices]
@@ -144,41 +153,40 @@ def report_check_validity_v1(report_id: int) -> Server_call_return:
 
 ### Other Endpoints
 
-def report_delete_v2(report_id: int) -> Server_call_return:
+def report_delete_v2(token: str, report_id: int) -> Server_call_return:
     payload = {
         "token": ADMIN_TOKEN,
         "report_id": report_id
     }
-    response = requests.delete(full_url + 'report/delete/v2', params=payload)
-
-    return json.loads(response.text)
-
-def report_delete_invalid_token_v2(report_id: int) -> Server_call_return:
-    payload = {
-        "token": "invalidtoken",
-        "report_id": report_id
+    headers = {
+        "Authorization": "bearer " + token
     }
-    response = requests.delete(full_url + 'report/delete/v2', params=payload)
+    response = requests.delete(full_url + 'report/delete/v2', params=payload, headers=headers)
 
     return json.loads(response.text)
 
-def report_change_name_v2(report_id: int, new_name: str) -> Server_call_return:
+def report_change_name_v2(token: str, report_id: int, new_name: str) -> Server_call_return:
+    payload = {
+        "report_id": report_id,
+        "new_name": new_name
+    }
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.put(full_url + 'report/change_name/v2', params=payload, headers=headers)
+
+    return json.loads(response.text)
+
+def report_change_name_v2(token: str, report_id: int, new_name: str) -> Server_call_return:
     payload = {
         "token": ADMIN_TOKEN,
         "report_id": report_id,
         "new_name": new_name
     }
-    response = requests.put(full_url + 'report/change_name/v2', params=payload)
-
-    return json.loads(response.text)
-
-def report_change_name_invalid_token_v2(report_id: int, new_name: str) -> Server_call_return:
-    payload = {
-        "token": "invalidtoken",
-        "report_id": report_id,
-        "new_name": new_name
+    headers = {
+        "Authorization": "bearer " + token
     }
-    response = requests.put(full_url + 'report/change_name/v2', params=payload)
+    response = requests.put(full_url + 'report/change_name/v2', params=payload, headers=headers)
 
     return json.loads(response.text)
 
@@ -197,17 +205,17 @@ def auth_register_v2(email: str, password: str) -> Server_call_return:
         "email": email,
         "password": password
     }
-    response = requests.get(full_url + 'auth_register/v2', params=payload)
+    response = requests.post(full_url + 'auth_register/v2', params=payload)
 
     return json.loads(response.text)
 
 
 def auth_login_v2(email: str, password: str) -> Server_call_return:
     payload = {
-        "email": email,
+        "username": email,
         "password": password
     }
-    response = requests.get(full_url + 'auth_login/v2', params=payload)
+    response = requests.post(full_url + 'auth_login/v2', data=payload)
 
     return json.loads(response.text)
 

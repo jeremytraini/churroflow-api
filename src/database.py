@@ -55,6 +55,7 @@ class Reports(BaseModel):
     schema = ForeignKeyField(Evaluations, backref='schema', null=True, default=None)
     syntax = ForeignKeyField(Evaluations, backref='syntax', null=True, default=None)
     peppol = ForeignKeyField(Evaluations, backref='peppol', null=True, default=None)
+    owner = ForeignKeyField(Users, backref='users', null=True)
     
     def to_json(self):
         return {
