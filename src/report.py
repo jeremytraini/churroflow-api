@@ -40,9 +40,9 @@ def report_list_all_v1(owner=None) -> ReportIDs:
     report_ids = []
     for report in Reports.select():
         if owner == None and report.owner == None:
-            report_ids.append(report)
+            report_ids.append(report.id)
         elif report.owner == owner:
-            report_ids.append(report)
+            report_ids.append(report.id)
             
     return ReportIDs(report_ids=report_ids)
 
@@ -55,9 +55,9 @@ def report_list_by_v1(order_by: OrderBy, owner=None) -> ReportIDs:
     report_ids = []
     for report in Reports.select().order_by(order):
         if owner == None and report.owner == None:
-            report_ids.append(report)
+            report_ids.append(report.id)
         elif report.owner == owner:
-            report_ids.append(report)
+            report_ids.append(rereport.idport)
     
     return ReportIDs(report_ids=report_ids)
 
