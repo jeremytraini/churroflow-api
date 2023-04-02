@@ -37,7 +37,7 @@ def report_list_by_v1(order_by: OrderBy) -> ReportIDs:
     
     return ReportIDs(report_ids=[report.id for report in Reports.select().order_by(order)])
 
-def report_change_name_v1(token: str, report_id: int, new_name: str) -> Dict[None, None]:
+def report_change_name_v2(token: str, report_id: int, new_name: str) -> Dict[None, None]:
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
@@ -45,19 +45,18 @@ def report_change_name_v1(token: str, report_id: int, new_name: str) -> Dict[Non
     
     if not token == ADMIN_TOKEN:
         try:
-            user =  Users.get(api_key=token)
+            session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise Exception("Invalid API key")
-        
-        if not report.owner == user:
-            raise Exception("You do not have permission to delete this report")
+            raise Exception("Invalid token")
+        if not report.owner == session.user:
+            raise Exception("You do not have permission to rename this report")
     
     report.invoice_name = new_name
     report.save()
     
     return {}
 
-def report_delete_v1(token: str, report_id: int) -> Dict[None, None]:
+def report_delete_v2(token: str, report_id: int) -> Dict[None, None]:
     try:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
@@ -65,11 +64,11 @@ def report_delete_v1(token: str, report_id: int) -> Dict[None, None]:
 
     if not token == ADMIN_TOKEN:
         try:
-            user =  Users.get(api_key=token)
+            session =  Sessions.get(token=token)
         except DoesNotExist:
             raise Exception("Invalid API key")
         
-        if not report.owner == user:
+        if not report.owner == session.user:
             raise Exception("You do not have permission to delete this report")
     
     report.delete_instance()
