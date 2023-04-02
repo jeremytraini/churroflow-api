@@ -4,6 +4,7 @@ from src.health_check import health_check_v1
 from src.report import *
 from src.invoice import *
 from src.export import *
+from src.send_email_report import *
 from src.authentication import *
 from src.type_structure import *
 from src.database import clear_v1
@@ -11,8 +12,12 @@ from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
 from src.error import AuthenticationError, InputError
 from io import BytesIO
+# import os
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
+
+# os.environ["OPENAI_API_KEY"] = "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"
 
 description = """
 CHURROS VALIDATION API helps you validate **any** invoice! 🚀🚀
@@ -37,6 +42,14 @@ app = FastAPI(title="CHURROS VALIDATION API",
               description=description,
               version="0.0.1",
               openapi_tags=tags_metadata)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.exception_handler(500)
 async def validation_exception_handler(request: Request, exc: Exception):
@@ -129,6 +142,19 @@ async def export_csv_report(report_id: int) -> HTMLResponse:
     response.headers['Content-Disposition'] = f'attachment; filename="invoice_validation_report_{report_id}.csv"'
 
     return response
+
+@app.post("/report/send_email/v2", tags=["report"])
+async def send_email_report(email, report_id):
+    pdf_file = BytesIO(export_pdf_report_v1(report_id)).read()
+    send_email(pdf_file, email)
+    return JSONResponse(
+        status_code=200,
+        content={
+            "code": 200,
+            "name": "Email",
+            "message": "Email sent successfully"
+        },
+    )
 
 @app.post("/report/wellformedness/v1", tags=["report"])
 async def report_wellformedness(file: UploadFile = File(...)) -> Evaluation:
