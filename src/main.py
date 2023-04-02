@@ -298,9 +298,17 @@ async def report_peppol(file: UploadFile = File(...)) -> Evaluation:
 async def report_list_all() -> ReportIDs:
     return report_list_all_v1()
 
+@app.get("/report/list_all/v2", tags=["report"])
+async def report_list_all_v2(token = Depends(get_token)) -> ReportIDs:
+    return report_list_all_v1(owner=Sessions.get(token=token).user)
+
 @app.get("/report/list_by/v1", tags=["report"])
 async def report_list_by(order_by: OrderBy) -> ReportIDs:
     return report_list_by_v1(order_by)
+
+@app.get("/report/list_by/v2", tags=["report"])
+async def report_list_by_v2(order_by: OrderBy, token = Depends(get_token)) -> ReportIDs:
+    return report_list_by_v1(order_by, owner=Sessions.get(token=token).user)
 
 @app.get("/report/check_validity/v1", tags=["report"])
 async def invoice_check_validity(report_id: int) -> CheckValidReturn:
@@ -309,8 +317,6 @@ async def invoice_check_validity(report_id: int) -> CheckValidReturn:
 @app.post("/report/lint/v1", tags=["report"])
 async def report_lint(invoice: TextInvoice) -> LintReport:
     return report_lint_v1(invoice_text=invoice.text)
-
-### Below to be replaced with proper authentication system ###
 
 @app.put("/report/change_name/v2", tags=["report"])
 async def report_change_name(report_id: int, new_name: str, token: str = Depends(get_token)) -> Dict[None, None]:
@@ -327,6 +333,8 @@ async def auth_login(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.post("/auth_register/v2", tags=["auth"])
 async def auth_register(email: str, password: str) -> AuthReturnV2:
     return auth_register_v2(email, password)
+
+# Not in schema
 
 @app.post("/invoice/generate_hash/v2", include_in_schema=False)
 async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
