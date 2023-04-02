@@ -167,18 +167,6 @@ def report_delete_v2(token: str, report_id: int) -> Server_call_return:
 
 def report_change_name_v2(token: str, report_id: int, new_name: str) -> Server_call_return:
     payload = {
-        "report_id": report_id,
-        "new_name": new_name
-    }
-    headers = {
-        "Authorization": "bearer " + token
-    }
-    response = requests.put(full_url + 'report/change_name/v2', params=payload, headers=headers)
-
-    return json.loads(response.text)
-
-def report_change_name_v2(token: str, report_id: int, new_name: str) -> Server_call_return:
-    payload = {
         "token": ADMIN_TOKEN,
         "report_id": report_id,
         "new_name": new_name
