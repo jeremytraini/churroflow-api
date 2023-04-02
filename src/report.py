@@ -1,7 +1,6 @@
-from fastapi import HTTPException
-from src.type_structure import *
 from typing import Dict
-from src.database import Reports, Sessions, Users
+from src.type_structure import *
+from src.database import Reports, Sessions
 from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation, generate_diagnostic_list
 from peewee import DoesNotExist
 from src.constants import ADMIN_TOKEN, PEPPOL_EXECUTABLE, SYNTAX_EXECUTABLE
@@ -61,7 +60,7 @@ def report_change_name_v2(token: str, report_id: int, new_name: str) -> Dict[Non
         try:
             session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise ForbiddenError("Invalid token")
+            raise UnauthorisedError("Invalid token")
         if not report.owner == session.user:
             raise ForbiddenError("You do not have permission to rename this report")
     
@@ -86,7 +85,7 @@ def report_delete_v2(token: str, report_id: int) -> Dict[None, None]:
         try:
             session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise ForbiddenError("Invalid token")
+            raise UnauthorisedError("Invalid token")
         
         if not report.owner == session.user:
             raise ForbiddenError("You do not have permission to delete this report")

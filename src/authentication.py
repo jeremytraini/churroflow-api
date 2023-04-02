@@ -1,6 +1,4 @@
 from datetime import datetime, timedelta
-
-from fastapi import HTTPException
 from src.database import Users, Sessions, IntegrityError, DoesNotExist
 from src.helpers import string_in_range
 from src.error import InputError

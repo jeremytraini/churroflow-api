@@ -107,6 +107,7 @@ def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
             column=violation.column,
             xpath=violation.xpath,
             message=violation.message,
+            suggestion=None,
             severity="error" if violation.is_fatal else "warning"
         ))
     
@@ -122,6 +123,7 @@ def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
             column=violation.column,
             xpath=violation.xpath,
             message=violation.message,
+            suggestion=None,
             severity="error" if violation.is_fatal else "warning"
         ))
     

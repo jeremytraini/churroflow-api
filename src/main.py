@@ -1,4 +1,3 @@
-import signal
 from src.config import base_url, port
 from src.health_check import health_check_v1
 from src.report import *
@@ -7,9 +6,9 @@ from src.export import *
 from src.authentication import *
 from src.type_structure import *
 from src.database import clear_v1
-from fastapi import Depends, FastAPI, Request, HTTPException, Security, UploadFile, File
+from fastapi import Depends, FastAPI, Request,UploadFile, File
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
-from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import uvicorn
