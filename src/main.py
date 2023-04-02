@@ -61,35 +61,24 @@ async def input_error_exception_handler(request: Request, exc: InputError):
         },
     )
 
-@app.exception_handler(AuthorizationError)
-async def authorization_error_exception_handler(request: Request, exc: TokenError):
+@app.exception_handler(UnauthorisedError)
+async def authorization_error_exception_handler(request: Request, exc: UnauthorisedError):
     return JSONResponse(
         status_code=401,
         content={
             "code": 401,
-            "name": "Token Error",
+            "name": "Unauthorised Error",
             "detail": exc.detail
         },
     )
 
-@app.exception_handler(TokenError)
-async def token_error_exception_handler(request: Request, exc: TokenError):
-    return JSONResponse(
-        status_code=402,
-        content={
-            "code": 402,
-            "name": "Token Error",
-            "detail": exc.detail
-        },
-    )
-
-@app.exception_handler(AuthenticationError)
-async def authentication_error_exception_handler(request: Request, exc: TokenError):
+@app.exception_handler(ForbiddenError)
+async def forbidden_error_exception_handler(request: Request, exc: ForbiddenError):
     return JSONResponse(
         status_code=403,
         content={
             "code": 403,
-            "name": "Authentication Error",
+            "name": "Forbidden Error",
             "detail": exc.detail
         },
     )
@@ -127,10 +116,10 @@ async def get_token(token: str = Depends(oauth2_scheme)) -> str:
     try:
         session = Sessions.get(token=token)
     except DoesNotExist:
-        raise AuthorizationError("Invalid token, please login/register")
+        raise UnauthorisedError("Invalid token, please login/register")
     
     if session.date_expires < datetime.now():
-        raise AuthorizationError("Expired token, please login again")
+        raise UnauthorisedError("Expired token, please login again")
 
     return session.token
 
@@ -165,6 +154,17 @@ async def invoice_bulk_upload_file(files: List[UploadFile] = File(...)) -> Repor
     
     return invoice_upload_bulk_text_v1(invoices)
 
+@app.post("/invoice/bulk_upload_file/v2", tags=["invoice"])
+async def invoice_bulk_upload_file_v2(files: List[UploadFile] = File(...), token = Depends(get_token)) -> ReportIDs:
+    invoices = []
+    
+    for file in files:
+        invoice_text = await file.read()
+        invoice = TextInvoice(name=file.filename, text=invoice_text.decode("utf-8")) #type: ignore
+        invoices.append(invoice)
+    
+    return invoice_upload_bulk_text_v1(invoices, owner=Sessions.get(token=token).user)
+
 @app.post("/invoice/upload_text/v1", tags=["invoice"])
 async def invoice_upload_text(invoice: TextInvoice) -> ReportID:
     return invoice_upload_text_v1(invoice_name=invoice.name, invoice_text=invoice.text)
@@ -177,9 +177,17 @@ async def invoice_upload_text_v2(invoice: TextInvoice, token = Depends(get_token
 async def invoice_upload_bulk_text(invoices: List[TextInvoice]) -> ReportIDs:
     return invoice_upload_bulk_text_v1(invoices)
 
+@app.post("/invoice/bulk_upload_text/v2", tags=["invoice"])
+async def invoice_upload_bulk_text_v2(invoices: List[TextInvoice], token = Depends(get_token)) -> ReportIDs:
+    return invoice_upload_bulk_text_v1(invoices, owner=Sessions.get(token=token).user)
+
 @app.post("/invoice/upload_url/v1", tags=["invoice"])
 async def invoice_upload_url(invoice: RemoteInvoice) -> ReportID:
     return invoice_upload_url_v1(invoice_name=invoice.name, invoice_url=invoice.url)
+
+@app.post("/invoice/upload_url/v2", tags=["invoice"])
+async def invoice_upload_url_v2(invoice: RemoteInvoice, token = Depends(get_token)) -> ReportID:
+    return invoice_upload_url_v1(invoice_name=invoice.name, invoice_url=invoice.url, owner=Sessions.get(token=token).user)
 
 @app.get("/export/json_report/v1", tags=["export"])
 async def export_json_report(report_id: int) -> Report:

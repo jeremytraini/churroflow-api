@@ -61,9 +61,9 @@ def report_change_name_v2(token: str, report_id: int, new_name: str) -> Dict[Non
         try:
             session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise AuthenticationError("Invalid token")
+            raise ForbiddenError("Invalid token")
         if not report.owner == session.user:
-            raise AuthenticationError("You do not have permission to rename this report")
+            raise ForbiddenError("You do not have permission to rename this report")
     
     if len(new_name) > 100:
         raise InputError(detail="New name is longer than 100 characters")
@@ -86,10 +86,10 @@ def report_delete_v2(token: str, report_id: int) -> Dict[None, None]:
         try:
             session =  Sessions.get(token=token)
         except DoesNotExist:
-            raise AuthenticationError("Invalid token")
+            raise ForbiddenError("Invalid token")
         
         if not report.owner == session.user:
-            raise AuthenticationError("You do not have permission to delete this report")
+            raise ForbiddenError("You do not have permission to delete this report")
     
     report.delete_instance()
     
