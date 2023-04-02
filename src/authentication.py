@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+from fastapi import HTTPException
 from src.database import Users, Sessions, IntegrityError, DoesNotExist
 from src.helpers import string_in_range
 from src.error import InputError
@@ -30,10 +32,10 @@ def auth_login_v1(email, password) -> AuthReturnV1:
     try:
         user = Users.get(email=email)
     except DoesNotExist:
-        raise InputError(status_code=400, detail="Invalid input: No user with email " + email + ".")
+        raise HTTPException(status_code=400, detail="Invalid input: Incorrect enail or password.")
     
     if user.password_hash != hashlib.sha256(password.encode("utf-8")).hexdigest():
-        raise InputError(status_code=400, detail="Invalid input: Incorrect enail or password.")
+        raise HTTPException(status_code=400, detail="Invalid input: Incorrect enail or password.")
 
     return AuthReturnV1(auth_user_id=user.id)
 
@@ -70,10 +72,9 @@ def auth_register_v1(email, password) -> AuthReturnV1:
 
     # Generate password hash
     password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
-    key = hashlib.sha256(id.to_bytes(8, 'big') + datetime.now().strftime("%s").encode("utf-8")).hexdigest()
 
     try:
-        user = Users.create(email=email, password_hash=password_hash, api_key=key)
+        user = Users.create(email=email, password_hash=password_hash)
     except IntegrityError:
         # duplicate email
         raise InputError(status_code=400, detail="Invalid input: Email " + email + " is already taken.")
@@ -86,13 +87,13 @@ def auth_login_v2(email, password) -> AuthReturnV2:
     id = auth_login_v1(email, password).auth_user_id
     now = datetime.now()
     token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
-    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(hours=1))
-    return AuthReturnV2(api_key=Users.get_by_id(id).api_key)
+    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=1))
+    return AuthReturnV2(token=token)
 
 
 def auth_register_v2(email, password) -> AuthReturnV2:
     id = auth_register_v1(email, password).auth_user_id
     now = datetime.now()
     token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
-    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(hours=1))
-    return AuthReturnV2(api_key=Users.get_by_id(id).api_key)
+    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=1))
+    return AuthReturnV2(token=token)
