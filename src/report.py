@@ -36,16 +36,30 @@ def report_peppol_v1(invoice_text: str) -> Evaluation:
 
     return Evaluation(**evaluation.to_json())
 
-def report_list_all_v1() -> ReportIDs:
-    return ReportIDs(report_ids=[report.id for report in Reports.select()])
+def report_list_all_v1(owner=None) -> ReportIDs:
+    report_ids = []
+    for report in Reports.select():
+        if owner == None and report.owner == None:
+            report_ids.append(report.id)
+        elif report.owner == owner:
+            report_ids.append(report.id)
+            
+    return ReportIDs(report_ids=report_ids)
 
-def report_list_by_v1(order_by: OrderBy) -> ReportIDs:
+def report_list_by_v1(order_by: OrderBy, owner=None) -> ReportIDs:
     if order_by.is_ascending:
         order = getattr(Reports, order_by.table).asc()
     else:
         order = getattr(Reports, order_by.table).desc()
+        
+    report_ids = []
+    for report in Reports.select().order_by(order):
+        if owner == None and report.owner == None:
+            report_ids.append(report.id)
+        elif report.owner == owner:
+            report_ids.append(rereport.idport)
     
-    return ReportIDs(report_ids=[report.id for report in Reports.select().order_by(order)])
+    return ReportIDs(report_ids=report_ids)
 
 def report_change_name_v2(token: str, report_id: int, new_name: str) -> Dict[None, None]:
     if report_id < 0:

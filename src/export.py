@@ -9,7 +9,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from src.error import *
 
 
-def export_json_report_v1(report_id: int):
+def export_json_report_v1(report_id: int, owner=None):
     if report_id < 0:
         raise InputError(detail="Report id cannot be less than 0")
     
@@ -17,10 +17,13 @@ def export_json_report_v1(report_id: int):
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
         raise NotFoundError(detail=f"Report with id {report_id} not found")
+    
+    if report.owner != None and report.owner != owner:
+        raise ForbiddenError("You do not have permission to view report")
     
     return Report(**report.to_json())
 
-def export_pdf_report_v1(report_id: int) -> bytes:
+def export_pdf_report_v1(report_id: int, owner=None) -> bytes:
     if report_id < 0:
         raise InputError(detail="Report id cannot be less than 0")
     
@@ -28,6 +31,9 @@ def export_pdf_report_v1(report_id: int) -> bytes:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
         raise NotFoundError(detail=f"Report with id {report_id} not found")
+    
+    if report.owner != None and report.owner != owner:
+        raise ForbiddenError("You do not have permission to view report")
     
     html = export_html_report_v1(report_id)
     pdf_bytes = HTML(string=html).write_pdf()
@@ -73,7 +79,7 @@ def add_violations(soup, violations, parent):
             location_string = "Line " + str(violation["line"]) + ", Column " + str(violation["column"])
         v.find("code", {"name": "location"}).string = location_string
 
-def export_html_report_v1(report_id: int):
+def export_html_report_v1(report_id: int, owner=None):
     if report_id < 0:
         raise InputError(detail="Report id cannot be less than 0")
     
@@ -81,6 +87,9 @@ def export_html_report_v1(report_id: int):
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
         raise NotFoundError(detail=f"Report with id {report_id} not found")
+    
+    if report.owner != None and report.owner != owner:
+        raise ForbiddenError("You do not have permission to view report")
     
     report = report.to_json()
 
@@ -152,7 +161,7 @@ def write_violations(writer, violations):
         ]
         writer.writerow(data)
 
-def export_csv_report_v1(report_id: int):
+def export_csv_report_v1(report_id: int, owner=None):
     if report_id < 0:
         raise InputError(detail="Report id cannot be less than 0")
     
@@ -160,6 +169,9 @@ def export_csv_report_v1(report_id: int):
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
         raise NotFoundError(detail=f"Report with id {report_id} not found")
+    
+    if report.owner != None and report.owner != owner:
+        raise ForbiddenError("You do not have permission to view report")
     
     report = report.to_json()
     
@@ -185,15 +197,15 @@ def export_csv_report_v1(report_id: int):
     
     return csv_contents
 
-def report_bulk_export_json_v1(report_ids) -> ReportList:
-    return ReportList(reports=[export_json_report_v1(report_id) for report_id in report_ids])
+def report_bulk_export_json_v1(report_ids, owner=None) -> ReportList:
+    return ReportList(reports=[export_json_report_v1(report_id, owner) for report_id in report_ids])
 
-def report_bulk_export_pdf_v1(report_ids) -> BytesIO:
+def report_bulk_export_pdf_v1(report_ids, owner=None) -> BytesIO:
     reports = BytesIO()
     
     with ZipFile(reports, 'w', ZIP_DEFLATED) as f:
         for report_id in report_ids:
-            f.writestr(f"invoice_validation_report_{report_id}.pdf", export_pdf_report_v1(report_id))
+            f.writestr(f"invoice_validation_report_{report_id}.pdf", export_pdf_report_v1(report_id, owner))
     
     reports.seek(0)
     

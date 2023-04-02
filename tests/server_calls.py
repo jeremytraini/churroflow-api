@@ -61,9 +61,29 @@ def export_json_report_v1(report_id: int) -> Server_call_return:
 
     return json.loads(response.text)
 
+def export_json_report_v2(token: str, report_id: int) -> Server_call_return:
+    payload = {
+        "report_id": report_id
+    }
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.get(full_url + 'export/json_report/v2', params=payload, headers=headers)
+
+    return json.loads(response.text)
+
 def export_bulk_json_reports_v1(report_ids) -> Server_call_return:
     payload = report_ids
     response = requests.post(full_url + 'export/bulk_json_reports/v1', json=payload)
+
+    return json.loads(response.text)
+
+def export_bulk_json_reports_v2(token: str, report_ids) -> Server_call_return:
+    payload = report_ids
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.post(full_url + 'export/bulk_json_reports/v2', json=payload, headers=headers)
 
     return json.loads(response.text)
 
@@ -75,11 +95,33 @@ def export_pdf_report_v1(report_id: int):
     
     return response.content
 
+def export_pdf_report_v2(token: str, report_id: int):
+    payload = {
+        "report_id": report_id
+    }
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.get(full_url + 'export/pdf_report/v2', params=payload, headers=headers)
+    
+    return response.content
+
 def export_bulk_pdf_reports_v1(report_ids) -> Server_call_return:
     payload = {
         "report_ids": report_ids
     }
     response = requests.get(full_url + 'export/bulk_pdf_reports/v1', params=payload)
+
+    return json.loads(response.text)
+
+def export_bulk_pdf_reports_v2(token: str, report_ids) -> Server_call_return:
+    payload = {
+        "report_ids": report_ids
+    }
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.get(full_url + 'export/bulk_pdf_reports/v2', params=payload, headers=headers)
 
     return json.loads(response.text)
 
@@ -91,11 +133,33 @@ def export_html_report_v1(report_id: int):
     
     return response.content
 
+def export_html_report_v2(token: str, report_id: int):
+    payload = {
+        "report_id": report_id
+    }
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.get(full_url + 'export/html_report/v2', params=payload, headers=headers)
+    
+    return response.content
+
 def export_csv_report_v1(report_id: int):
     payload = {
         "report_id": report_id
     }
     response = requests.get(full_url + 'export/csv_report/v1', params=payload)
+    
+    return response.content
+
+def export_csv_report_v2(token: str, report_id: int):
+    payload = {
+        "report_id": report_id
+    }
+    headers = {
+        "Authorization": "bearer " + token
+    }
+    response = requests.get(full_url + 'export/csv_report/v2', params=payload, headers=headers)
     
     return response.content
 
@@ -162,18 +226,6 @@ def report_delete_v2(token: str, report_id: int) -> Server_call_return:
         "Authorization": "bearer " + token
     }
     response = requests.delete(full_url + 'report/delete/v2', params=payload, headers=headers)
-
-    return json.loads(response.text)
-
-def report_change_name_v2(token: str, report_id: int, new_name: str) -> Server_call_return:
-    payload = {
-        "report_id": report_id,
-        "new_name": new_name
-    }
-    headers = {
-        "Authorization": "bearer " + token
-    }
-    response = requests.put(full_url + 'report/change_name/v2', params=payload, headers=headers)
 
     return json.loads(response.text)
 

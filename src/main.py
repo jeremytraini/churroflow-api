@@ -192,13 +192,32 @@ async def invoice_upload_url_v2(invoice: RemoteInvoice, token = Depends(get_toke
 async def export_json_report(report_id: int) -> Report:
     return export_json_report_v1(report_id)
 
+@app.get("/export/json_report/v2", tags=["export"])
+async def export_json_report_v2(report_id: int, token = Depends(get_token)) -> Report:
+    return export_json_report_v1(report_id, owner=Sessions.get(token=token).user)
+
 @app.post("/export/bulk_json_reports/v1", tags=["export"])
 async def report_bulk_export_json(report_ids: List[int]) -> ReportList:
     return report_bulk_export_json_v1(report_ids)
 
+@app.post("/export/bulk_json_reports/v2", tags=["export"])
+async def report_bulk_export_json_v2(report_ids: List[int], token = Depends(get_token)) -> ReportList:
+    return report_bulk_export_json_v1(report_ids, owner=Sessions.get(token=token).user)
+
 @app.get("/export/pdf_report/v1", tags=["export"])
 async def export_pdf_report(report_id: int) -> StreamingResponse:
     pdf_file = BytesIO(export_pdf_report_v1(report_id))
+
+    # Return the PDF as a streaming response
+    headers = {
+        "Content-Disposition": f"attachment; filename=invoice_validation_report_{report_id}.pdf",
+        "Content-Type": "application/pdf",
+    }
+    return StreamingResponse(pdf_file, headers=headers)
+
+@app.get("/export/pdf_report/v2", tags=["export"])
+async def export_pdf_report_v2(report_id: int, token = Depends(get_token)) -> StreamingResponse:
+    pdf_file = BytesIO(export_pdf_report_v1(report_id, owner=Sessions.get(token=token).user))
 
     # Return the PDF as a streaming response
     headers = {
@@ -217,14 +236,38 @@ async def report_bulk_export_pdf(report_ids: List[int]) -> StreamingResponse:
         headers = { "Content-Disposition": f"attachment; filename=reports.zip"}
     )
 
+@app.post("/export/bulk_pdf_reports/v2", tags=["export"])
+async def report_bulk_export_pdf_v2(report_ids: List[int], token = Depends(get_token)) -> StreamingResponse:
+    reports_zip = report_bulk_export_pdf_v1(report_ids, owner=Sessions.get(token=token).user)
+    
+    return StreamingResponse(
+        reports_zip, 
+        media_type="application/x-zip-compressed", 
+        headers = { "Content-Disposition": f"attachment; filename=reports.zip"}
+    )
+
 @app.get("/export/html_report/v1", response_class=HTMLResponse, tags=["export"])
 async def export_html_report(report_id: int) -> HTMLResponse:
     html_content = export_html_report_v1(report_id)
     return HTMLResponse(content=html_content, status_code=200)
 
+@app.get("/export/html_report/v2", response_class=HTMLResponse, tags=["export"])
+async def export_html_report_v2(report_id: int, token = Depends(get_token)) -> HTMLResponse:
+    html_content = export_html_report_v1(report_id, owner=Sessions.get(token=token).user)
+    return HTMLResponse(content=html_content, status_code=200)
+
 @app.get("/export/csv_report/v1", tags=["export"])
 async def export_csv_report(report_id: int) -> HTMLResponse:
     csv_contents = export_csv_report_v1(report_id)
+    
+    response = HTMLResponse(content=csv_contents, media_type='text/csv')
+    response.headers['Content-Disposition'] = f'attachment; filename="invoice_validation_report_{report_id}.csv"'
+
+    return response
+
+@app.get("/export/csv_report/v2", tags=["export"])
+async def export_csv_report_v2(report_id: int, token = Depends(get_token)) -> HTMLResponse:
+    csv_contents = export_csv_report_v1(report_id, owner=Sessions.get(token=token).user)
     
     response = HTMLResponse(content=csv_contents, media_type='text/csv')
     response.headers['Content-Disposition'] = f'attachment; filename="invoice_validation_report_{report_id}.csv"'
@@ -255,9 +298,17 @@ async def report_peppol(file: UploadFile = File(...)) -> Evaluation:
 async def report_list_all() -> ReportIDs:
     return report_list_all_v1()
 
+@app.get("/report/list_all/v2", tags=["report"])
+async def report_list_all_v2(token = Depends(get_token)) -> ReportIDs:
+    return report_list_all_v1(owner=Sessions.get(token=token).user)
+
 @app.get("/report/list_by/v1", tags=["report"])
 async def report_list_by(order_by: OrderBy) -> ReportIDs:
     return report_list_by_v1(order_by)
+
+@app.get("/report/list_by/v2", tags=["report"])
+async def report_list_by_v2(order_by: OrderBy, token = Depends(get_token)) -> ReportIDs:
+    return report_list_by_v1(order_by, owner=Sessions.get(token=token).user)
 
 @app.get("/report/check_validity/v1", tags=["report"])
 async def invoice_check_validity(report_id: int) -> CheckValidReturn:
@@ -266,8 +317,6 @@ async def invoice_check_validity(report_id: int) -> CheckValidReturn:
 @app.post("/report/lint/v1", tags=["report"])
 async def report_lint(invoice: TextInvoice) -> LintReport:
     return report_lint_v1(invoice_text=invoice.text)
-
-### Below to be replaced with proper authentication system ###
 
 @app.put("/report/change_name/v2", tags=["report"])
 async def report_change_name(report_id: int, new_name: str, token: str = Depends(get_token)) -> Dict[None, None]:
@@ -284,6 +333,8 @@ async def auth_login(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.post("/auth_register/v2", tags=["auth"])
 async def auth_register(email: str, password: str) -> AuthReturnV2:
     return auth_register_v2(email, password)
+
+# Not in schema
 
 @app.post("/invoice/generate_hash/v2", include_in_schema=False)
 async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
