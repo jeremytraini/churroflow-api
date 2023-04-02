@@ -1,7 +1,7 @@
 from src.type_structure import *
 from tests.server_calls import report_peppol_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import invalidate_invoice, remove_part_of_string
+from tests.helpers import invalidate_invoice, remove_part_of_string, replace_part_of_string
 
 """
 =====================================
@@ -178,3 +178,11 @@ def test_peppol_fatal_error_invalidates_report():
     
     # Evaluation is not valid due to fatal error
     assert peppol_evaluation.is_valid == False
+
+def test_peppol_invoice_invalid_not_wellformed():
+    # Invalidating the tags so that only one of the tags is capitalised
+    data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
+
+    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+
+    assert report_peppol_v1(invoice)['detail'] == "Invoice is not wellformed"

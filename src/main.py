@@ -10,7 +10,7 @@ from src.type_structure import *
 from src.database import clear_v1
 from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
-from src.error import AuthenticationError, InputError
+from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 # import os
 import uvicorn
@@ -43,23 +43,58 @@ app = FastAPI(title="CHURROS VALIDATION API",
               version="0.0.1",
               openapi_tags=tags_metadata)
 
+origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.exception_handler(500)
-async def validation_exception_handler(request: Request, exc: Exception):
+@app.exception_handler(InputError)
+async def input_error_exception_handler(request: Request, exc: InputError):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "code": 400,
+            "name": "Input Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(TokenError)
+async def input_error_exception_handler(request: Request, exc: TokenError):
+    return JSONResponse(
+        status_code=402,
+        content={
+            "code": 402,
+            "name": "Token Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(NotFoundError)
+async def input_error_exception_handler(request: Request, exc: NotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={
+            "code": 404,
+            "name": "Not Found Error",
+            "detail": exc.detail
+        },
+    )
+
+@app.exception_handler(InternalServerError)
+async def validation_exception_handler(request: Request, exc: InternalServerError):
     return JSONResponse(
         status_code=500,
         content={
             "code": 500,
-            "name": "System Error",
-            "message": str(exc)
-            },
+            "name": "Internal Server Error",
+            "detail": exc.detail
+        },
     )
 
 # ENDPOINTS BELOW
@@ -188,6 +223,9 @@ async def report_list_by(order_by: OrderBy) -> ReportIDs:
 async def invoice_check_validity(report_id: int) -> CheckValidReturn:
     return invoice_check_validity_v1(report_id)
 
+@app.post("/report/lint/v1", tags=["report"])
+async def report_lint(invoice: TextInvoice) -> LintReport:
+    return report_lint_v1(invoice_text=invoice.text)
 
 ### Below to be replaced with proper authentication system ###
 

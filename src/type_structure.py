@@ -66,3 +66,15 @@ class ReportExport(BaseModel):
 
 class CheckValidReturn(BaseModel):
     is_valid: bool
+
+class LintDiagnostic(BaseModel):
+    rule_id: str
+    line: int
+    column: int
+    message: str
+    suggestion: Union[str, None]
+    xpath: Union[str, None]
+    severity: Literal["error", "warning"]
+
+class LintReport(BaseModel):
+    report: List[LintDiagnostic]
