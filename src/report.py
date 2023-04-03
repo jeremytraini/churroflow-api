@@ -57,7 +57,7 @@ def report_list_by_v1(order_by: OrderBy, owner=None) -> ReportIDs:
         if owner == None and report.owner == None:
             report_ids.append(report.id)
         elif report.owner == owner:
-            report_ids.append(rereport.idport)
+            report_ids.append(report.id)
     
     return ReportIDs(report_ids=report_ids)
 
