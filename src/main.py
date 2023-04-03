@@ -12,12 +12,9 @@ from fastapi import FastAPI, Request, HTTPException, UploadFile, File
 from fastapi.responses import Response, JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
-# import os
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 
-
-# os.environ["OPENAI_API_KEY"] = "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"
 
 description = """
 CHURROS VALIDATION API helps you validate **any** invoice! 🚀🚀
