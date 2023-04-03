@@ -3,6 +3,7 @@ from src.health_check import health_check_v1
 from src.report import *
 from src.invoice import *
 from src.export import *
+from src.send_email_report import *
 from src.authentication import *
 from src.type_structure import *
 from src.responses import *
@@ -13,6 +14,7 @@ from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from io import BytesIO
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 
 description = """
@@ -269,6 +271,19 @@ async def export_csv_report(report_id: int) -> HTMLResponse:
     response.headers['Content-Disposition'] = f'attachment; filename="invoice_validation_report_{report_id}.csv"'
 
     return response
+
+@app.post("/report/send_email/v2", tags=["report"])
+async def send_email_report(email, report_id):
+    pdf_file = BytesIO(export_pdf_report_v1(report_id)).read()
+    send_email(pdf_file, email)
+    return JSONResponse(
+        status_code=200,
+        content={
+            "code": 200,
+            "name": "Email",
+            "message": "Email sent successfully"
+        },
+    )
 
 @app.get("/export/csv_report/v2", tags=["export"], responses=res_export_csv_report_v2)
 async def export_csv_report_v2(report_id: int, token = Depends(get_token)) -> HTMLResponse:
