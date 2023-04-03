@@ -5,9 +5,14 @@ class InputError(Exception):
         self.status_code = 400
         self.detail = detail
 
-class TokenError(Exception):
+class UnauthorisedError(Exception):
     def __init__(self, detail: str):
-        self.status_code = 402
+        self.status_code = 401
+        self.detail = detail
+    
+class ForbiddenError(Exception):
+    def __init__(self, detail: str):
+        self.status_code = 403
         self.detail = detail
 
 class NotFoundError(Exception):

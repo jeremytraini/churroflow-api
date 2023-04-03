@@ -18,14 +18,14 @@ def generate_schema_evaluation(invoice_text: str) -> Evaluations:
 
 def generate_parser_evaluation(violations) -> Evaluations:
     evaluation = Evaluations.create(
-        is_valid=True if len(violations) == 0 else False,
+        is_valid=len(violations) == 0,
         num_warnings=0,
         num_errors=len(violations),
         num_rules_failed=len(violations)
     )
     
     for violation in violations:
-        violation.evaluation = evaluation.id 
+        violation.evaluation = evaluation.id #type: ignore
         violation.save()
         
     return evaluation
@@ -52,7 +52,7 @@ def generate_xslt_evaluation(executable, invoice_text) -> Evaluations:
     
     return evaluation
 
-def generate_report(invoice_name: str, invoice_text: str) -> int:
+def generate_report(invoice_name: str, invoice_text: str, owner) -> int:
     wellformedness_evaluation = None
     schema_evaluation = None
     syntax_evaluation = None
@@ -89,12 +89,13 @@ def generate_report(invoice_name: str, invoice_text: str) -> int:
         wellformedness=wellformedness_evaluation.id if wellformedness_evaluation else None,
         schema=schema_evaluation.id if schema_evaluation else None,
         syntax=syntax_evaluation.id if syntax_evaluation else None,
-        peppol=peppol_evaluation.id if peppol_evaluation else None
+        peppol=peppol_evaluation.id if peppol_evaluation else None,
+        owner=owner
     )
     
     return report.id
 
-def generate_diagnostic_list(invoice_text: str) -> int:
+def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
     report = []
     
     wellformedness_violations = get_wellformedness_violations(invoice_text)
@@ -106,6 +107,7 @@ def generate_diagnostic_list(invoice_text: str) -> int:
             column=violation.column,
             xpath=violation.xpath,
             message=violation.message,
+            suggestion=None,
             severity="error" if violation.is_fatal else "warning"
         ))
     
@@ -121,6 +123,7 @@ def generate_diagnostic_list(invoice_text: str) -> int:
             column=violation.column,
             xpath=violation.xpath,
             message=violation.message,
+            suggestion=None,
             severity="error" if violation.is_fatal else "warning"
         ))
     

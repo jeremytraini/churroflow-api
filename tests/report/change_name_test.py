@@ -1,71 +1,81 @@
 from src.type_structure import *
-from tests.server_calls import report_change_name_invalid_token_v2, report_change_name_v2, export_json_report_v1, invoice_upload_text_v1
+from tests.server_calls import report_change_name_v2, export_json_report_v2, invoice_upload_text_v2, auth_register_v2, clear_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import invalidate_invoice, remove_part_of_string
 
 """
 =====================================
 /report/change_name/v1 TESTS
 =====================================
 """
-
 # Testing that the report was generated properly and matches input data
-def test_change_name():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
-    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
+def test_change_name_valid():
+    clear_v1()
+    token = AuthReturnV2(**auth_register_v2("test@gmail.com", "abc123")).token
+    invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
+    report_id = invoice_upload_text_v2(token, invoice.name, invoice.text)["report_id"]
 
-    report = Report(**export_json_report_v1(report_id))
+    report = Report(**export_json_report_v2(token, report_id))
     
     # Checking for the old name of the invoice
     assert report.invoice_name == "My Invoice"
 
-    report_change_name_v2(report_id, "New Name")
-    report = Report(**export_json_report_v1(report_id))
+    report_change_name_v2(token, report_id, "New Name")
+    report = Report(**export_json_report_v2(token, report_id))
 
     # Checking for the new name of the invoice
     assert report.invoice_name == "New Name"
 
-def test_change_name_long_invalid():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
-    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
+def test_change_name_valid_upload_invalid_token():
+    clear_v1()
+    token = AuthReturnV2(**auth_register_v2("test@gmail.com", "abc123")).token
+    report_id = invoice_upload_text_v2(token, "invoice", VALID_INVOICE_TEXT)["report_id"]
+    
+    assert report_change_name_v2("invalid", report_id, "New Name")['detail'] == "Invalid token, please login/register"
 
-    report = Report(**export_json_report_v1(report_id))
+def test_change_name_not_owner():
+    clear_v1()
+    token = AuthReturnV2(**auth_register_v2("test@gmail.com", "abc123")).token
+    token2 = AuthReturnV2(**auth_register_v2("test1@gmail.com", "abc123")).token
+    report_id = invoice_upload_text_v2(token, "invoice", VALID_INVOICE_TEXT)["report_id"]
+    
+    assert report_change_name_v2(token2, report_id, "New Name")['detail'] == "You do not have permission to rename this report"
+
+def test_change_name_long_invalid():
+    clear_v1()
+    token = AuthReturnV2(**auth_register_v2("test@gmail.com", "abc123")).token
+    invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
+    report_id = invoice_upload_text_v2(token, invoice.name, invoice.text)["report_id"]
+
+    report = Report(**export_json_report_v2(token, report_id))
     
     # Checking for the old name of the invoice
     assert report.invoice_name == "My Invoice"
     
     new_name = "hellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohellohello"
-    assert report_change_name_v2(report_id, new_name)['detail'] == "New name is longer than 100 characters"
-
-def test_change_name_invalid_token():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
-    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
-
-    report = Report(**export_json_report_v1(report_id))
-    
-    # Checking for the old name of the invoice
-    assert report.invoice_name == "My Invoice"
-
-    assert report_change_name_invalid_token_v2(report_id, "New Name")['detail'] == "Only admins can change the names of reports at the moment"
+    assert report_change_name_v2(token, report_id, new_name)['detail'] == "New name is longer than 100 characters"
 
 def test_change_name_invalid_report_id_negative():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
-    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
+    clear_v1()
+    token = AuthReturnV2(**auth_register_v2("test@gmail.com", "abc123")).token
+    invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
+    report_id = invoice_upload_text_v2(token, invoice.name, invoice.text)["report_id"]
 
-    report = Report(**export_json_report_v1(report_id))
+    report = Report(**export_json_report_v2(token, report_id))
     
     # Checking for the old name of the invoice
     assert report.invoice_name == "My Invoice"
 
-    assert report_change_name_v2(-1, "New Name")['detail'] == "Report id cannot be less than 0"
+    assert report_change_name_v2(token, -1, "New Name")['detail'] == "Report id cannot be less than 0"
 
 def test_change_name_invalid_report_id_not_found():
-    invoice = TextInvoice(name="My Invoice", source="text", text=VALID_INVOICE_TEXT)
-    report_id = invoice_upload_text_v1(invoice.name, invoice.text)["report_id"]
+    clear_v1()
+    token = AuthReturnV2(**auth_register_v2("test@gmail.com", "abc123")).token
+    invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
+    report_id = invoice_upload_text_v2(token, invoice.name, invoice.text)["report_id"]
 
-    report = Report(**export_json_report_v1(report_id))
+    report = Report(**export_json_report_v2(token, report_id))
     
     # Checking for the old name of the invoice
     assert report.invoice_name == "My Invoice"
 
-    assert report_change_name_v2(2937293, "New Name")['detail'] == "Report with id 2937293 not found"
+    assert report_change_name_v2(token, 2937293, "New Name")['detail'] == "Report with id 2937293 not found"
