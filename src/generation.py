@@ -53,6 +53,11 @@ def generate_xslt_evaluation(executable, invoice_text) -> Evaluations:
     return evaluation
 
 def generate_report(invoice_name: str, invoice_text: str, owner) -> int:
+    report = create_report(invoice_name, invoice_text, owner)
+    report.save()
+    return report.id
+
+def create_report(invoice_name: str, invoice_text: str, owner=None):
     wellformedness_evaluation = None
     schema_evaluation = None
     syntax_evaluation = None
@@ -79,7 +84,7 @@ def generate_report(invoice_name: str, invoice_text: str, owner) -> int:
     
     invoice_hash = int(hashlib.sha1(invoice_text.encode("utf-8")).hexdigest(), 16) % (10 ** 8)
     
-    report = Reports.create(
+    return Reports(
         date_generated=datetime.now(),
         invoice_name=invoice_name,
         invoice_hash=invoice_hash,
@@ -92,9 +97,7 @@ def generate_report(invoice_name: str, invoice_text: str, owner) -> int:
         peppol=peppol_evaluation.id if peppol_evaluation else None,
         owner=owner
     )
-    
-    return report.id
-
+ 
 def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
     report = []
     
