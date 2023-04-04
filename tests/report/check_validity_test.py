@@ -1,7 +1,7 @@
 from src.type_structure import *
-from tests.server_calls import invoice_upload_text_v1, report_check_validity_v1
+from tests.server_calls import auth_register_v2, clear_v1, invoice_upload_text_v1, report_check_validity_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import invalidate_invoice, remove_part_of_string, clear_database
+from tests.helpers import invalidate_invoice, remove_part_of_string
 
 """
 =====================================
@@ -17,6 +17,7 @@ def test_check_validity_one_report():
     
     assert report_check_validity_v1(report_id_valid)["is_valid"] == True
     assert report_check_validity_v1(report_id_invalid)["is_valid"] == False
+    clear_v1(auth_register_v2("test_check_validity_one_report@tests.com", "abc123")["token"])
 
 def test_check_validity_invalid_negative():
     
@@ -25,3 +26,4 @@ def test_check_validity_invalid_negative():
 def test_check_validity_invalid_not_exist():
     
     assert report_check_validity_v1(320923904934)['detail'] == "Report with id 320923904934 not found"
+    clear_v1(auth_register_v2("test_check_validity_invalid_not_exist@tests.com", "abc123")["token"])

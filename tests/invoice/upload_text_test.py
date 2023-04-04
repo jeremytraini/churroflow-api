@@ -31,7 +31,7 @@ def test_upload_text_invalid_invoice_name():
     
     # Invalidating the ABN, changing the content of the ABN
     data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN', 1)
-    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+    invoice = TextInvoice(name="My Invoice", text=data)
     response = invoice_upload_text_v1(invalid_invoice_name, invoice.text)
     
     assert invoice_upload_text_v1(invalid_invoice_name, invoice.text)['detail'] == "Name cannot be longer than 100 characters"    
