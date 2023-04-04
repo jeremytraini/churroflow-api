@@ -8,7 +8,6 @@ from src.authentication import *
 from src.type_structure import *
 from src.responses import *
 from src.database import clear_v1
-from src.generation import create_report
 from fastapi import Depends, FastAPI, Request,UploadFile, File
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
 from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
@@ -369,35 +368,6 @@ async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
 async def clear(token = Depends(get_token)):
     return clear_v1(token)
 
-# creation routes used by frontend
-@app.get("/craete/json_report/v1", include_in_schema=False)
-async def create_json_report_v1(invoice: TextInvoice) -> Report:
-    return create_json_report(create_report(invoice.name, invoice.text))
-
-@app.get("/create/pdf_report/v1", include_in_schema=False)
-async def create_pdf_repor_v1t(invoice: TextInvoice) -> StreamingResponse:
-    pdf_file = BytesIO(create_pdf_report(create_report(invoice.name, invoice.text)))
-
-    # Return the PDF as a streaming response
-    headers = {
-        "Content-Disposition": "attachment; filename=invoice_validation_report_.pdf",
-        "Content-Type": "application/pdf",
-    }
-    return StreamingResponse(pdf_file, headers=headers)
-
-@app.get("/create/html_report/v1", response_class=HTMLResponse, include_in_schema=False)
-async def create_html_report_v1(invoice: TextInvoice) -> HTMLResponse:
-    html_content = create_html_report(create_report(invoice.name, invoice.text))
-    return HTMLResponse(content=html_content, status_code=200)
-
-@app.get("/create/csv_report/v1", include_in_schema=False)
-async def create_csv_report_v1(invoice: TextInvoice) -> HTMLResponse:
-    csv_contents = create_csv_report(create_report(invoice.name, invoice.text))
-    
-    response = HTMLResponse(content=csv_contents, media_type='text/csv')
-    response.headers['Content-Disposition'] = f'attachment; filename="invoice_validation_report_{report_id}.csv"'
-
-    return response
 
 # ENDPOINTS ABOVE
 
