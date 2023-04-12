@@ -137,7 +137,18 @@ class Invoices(BaseModel):
     
     total_amount = FloatField(null=True,default=None)
     
-    def to_json(self):
+    def to_json(self, verbose = True):
+        if not verbose:
+            return {
+                "id": self.id,
+                "name": self.name,
+                "date_last_modified": str(self.date_last_modified),
+                "date_added": str(self.date_added),
+                "num_warnings": self.num_warnings,
+                "num_errors": self.num_errors,
+                "is_valid": self.is_valid,
+                "invoice_title": self.invoice_title,
+            }
         return {
             "id": self.id,
             "name": self.name,
