@@ -55,7 +55,7 @@ class Reports(BaseModel):
     schema = ForeignKeyField(Evaluations, backref='schema', null=True, default=None)
     syntax = ForeignKeyField(Evaluations, backref='syntax', null=True, default=None)
     peppol = ForeignKeyField(Evaluations, backref='peppol', null=True, default=None)
-    owner = ForeignKeyField(Users, backref='users', null=True)
+    owner = ForeignKeyField(Users, backref='owner', null=True)
     
     def to_json(self):
         return {
@@ -103,7 +103,7 @@ class Sessions(BaseModel):
 
 class Invoices(BaseModel):
     name = TextField()
-    owner = ForeignKeyField(Users, backref='users')
+    owner = ForeignKeyField(Users, backref='invoices')
     date_last_modified = DateField()
     date_added = DateField()
     num_warnings = IntegerField()
@@ -170,7 +170,7 @@ class Invoices(BaseModel):
         }
 
 class LineItems(BaseModel):
-    invoice = ForeignKeyField(Invoices, backref='invoices')
+    invoice = ForeignKeyField(Invoices, backref='line_items')
     
     description = TextField()
     quantity = IntegerField()

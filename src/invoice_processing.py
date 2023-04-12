@@ -60,7 +60,6 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
             supplier_latitude, supplier_longitude = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
             delivery_latitude, delivery_longitude = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
             
-            print(invoice_data["AccountingSupplierParty"]["Party"]["PartyIdentification"])
             invoice = Invoices.create(
                 name=invoice_name,
                 owner=owner,
@@ -99,6 +98,16 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
                 total_amount=   invoice_data["LegalMonetaryTotal"]["PrepaidAmount"]["_text"] +
                                 invoice_data["LegalMonetaryTotal"]["PayableAmount"]["_text"],
             )
+            
+            for line_item in invoice_data["InvoiceLine"]:
+                LineItems.create(
+                    invoice=invoice,
+                    description=line_item["Item"]["Description"],
+                    quantity=line_item["InvoicedQuantity"]["_text"],
+                    unit_price=line_item["Price"]["PriceAmount"]["_text"],
+                    total_price=line_item["LineExtensionAmount"]["_text"],
+                )
+            
             return invoice.id
 
 def get_lat_long_from_address(data: str) -> tuple:
@@ -120,6 +129,8 @@ def get_lat_long_from_address(data: str) -> tuple:
         if data:
             return data[0]["lat"], data[0]["lon"]
     raise InputError(detail="Could not find location of party. Address: " + " ".join(query))
+
+
 
 def invoice_processing_upload_text_v2(invoice_name: str, invoice_text: str, owner: int) -> InvoiceID:
     if len(invoice_name) > 100:
