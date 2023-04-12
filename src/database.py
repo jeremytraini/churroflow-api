@@ -1,6 +1,5 @@
 from peewee import *
 import os
-from src.constants import ADMIN_TOKEN
 
 db = None
 if 'RDS_DB_NAME' in os.environ:
@@ -73,7 +72,6 @@ class Reports(BaseModel):
             "peppol_evaluation": self.peppol.to_json() if self.peppol else None
         }
 
-
 class Violations(BaseModel):
     evaluation = ForeignKeyField(Evaluations, backref='violations', null=True, default=None)
     rule_id = TextField()
@@ -97,7 +95,6 @@ class Violations(BaseModel):
             "column": self.column
         }
 
-
 class Sessions(BaseModel):
     user = ForeignKeyField(Users, backref='sessions')
     token = TextField(unique=True)
@@ -109,56 +106,47 @@ class Invoices(BaseModel):
     owner: ForeignKeyField(Users, backref='users')
     date_last_modified: DateField()
     date_added: DateField()
-    
-    is_valid: BooleanField()
-    text_content: TextField()
-    
     num_warnings: IntegerField()
     num_errors: IntegerField()
     
-    issue_date: TextField()
-    due_date: TextField()
-    order_id: TextField()
-    invoice_start_date: DateField()
-    invoice_end_date: DateField()
+    is_valid: BooleanField()
+    text_content: TextField(null=True,default=None)
     
-    supplier_name: TextField()
+    invoice_title: TextField(null=True,default=None)
+    issue_date: TextField(null=True,default=None)
+    due_date: TextField(null=True,default=None)
+    order_id: TextField(null=True,default=None)
+    invoice_start_date: DateField(null=True,default=None)
+    invoice_end_date: DateField(null=True,default=None)
+    
+    supplier_name: TextField(null=True,default=None)
     supplier_abn: TextField(null=True,default=None)
-    supplier_latitude: FloatField()
-    supplier_longitude: FloatField()
+    supplier_latitude: FloatField(null=True,default=None)
+    supplier_longitude: FloatField(null=True,default=None)
     
-    
-    customer_name: TextField()
+    customer_name: TextField(null=True,default=None)
     customer_abn: TextField(null=True,default=None)
     
-    delivery_date: DateField()
-    delivery_latitude: FloatField()
-    delivery_longitude: FloatField()
+    delivery_date: DateField(null=True,default=None)
+    delivery_latitude: FloatField(null=True,default=None)
+    delivery_longitude: FloatField(null=True,default=None)
     
-    # customer_street: TextField(null=True,default=None)
-    # customer_additional_street: TextField(null=True,default=None)
-    # customer_city: TextField(null=True,default=None)
-    # customer_postcode: TextField(null=True,default=None)
-    # customer_latitude: FloatField()
-    # customer_longitude: FloatField()
+    customer_contact_name: TextField(null=True,default=None)
+    customer_contact_email: TextField(null=True,default=None)
+    customer_contact_phone: TextField(null=True,default=None)
     
-    customer_contact_name: TextField()
-    customer_contact_email: TextField()
-    customer_contact_phone: TextField()
-    
-    total_amount: FloatField()
-    
+    total_amount: FloatField(null=True,default=None)
 
 class LineItems(BaseModel):
     invoice: ForeignKeyField(Invoices, backref='invoices')
     
-    line_number: IntegerField()
     description: TextField()
     quantity: IntegerField()
     unit_price: FloatField()
     total_price: FloatField()
 
-tables = [Users, Evaluations, Reports, Violations, Sessions, Invoices]
+
+tables = [Users, Evaluations, Reports, Violations, Sessions, Invoices, LineItems]
 
 # Create the tables in the database
 def create_tables():
@@ -173,7 +161,7 @@ def create_tables():
             
         db.create_tables(tables)
 
-def clear_v1(token: str):
+def clear_v2(token: str):
     session = Sessions.get(token=token)
     
     if session.user.email != "churros@admin.com":

@@ -3,7 +3,7 @@ from src.type_structure import *
 from src.database import Reports, Sessions
 from src.generation import generate_xslt_evaluation, generate_schema_evaluation, generate_wellformedness_evaluation, generate_diagnostic_list
 from peewee import DoesNotExist
-from src.constants import ADMIN_TOKEN, PEPPOL_EXECUTABLE, SYNTAX_EXECUTABLE
+from src.constants import PEPPOL_EXECUTABLE, SYNTAX_EXECUTABLE
 from src.error import *
 
 
@@ -70,13 +70,14 @@ def report_change_name_v2(token: str, report_id: int, new_name: str) -> Dict[Non
     except DoesNotExist:
         raise NotFoundError(detail=f"Report with id {report_id} not found")
     
-    if not token == ADMIN_TOKEN:
-        try:
-            session =  Sessions.get(token=token)
-        except DoesNotExist:
-            raise UnauthorisedError("Invalid token")
-        if not report.owner == session.user:
-            raise ForbiddenError("You do not have permission to rename this report")
+    session = Sessions.get(token=token)
+    
+    try:
+        session = Sessions.get(token=token)
+    except DoesNotExist:
+        raise UnauthorisedError("Invalid token")
+    if not report.owner == session.user:
+        raise ForbiddenError("You do not have permission to rename this report")
     
     if len(new_name) > 100:
         raise InputError(detail="New name is longer than 100 characters")

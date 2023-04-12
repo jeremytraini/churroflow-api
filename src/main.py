@@ -5,10 +5,11 @@ from src.invoice import *
 from src.export import *
 from src.send_email_report import *
 from src.authentication import *
+from src.invoice_processing import *
 from src.type_structure import *
 from src.responses import *
-from src.database import clear_v1
-from fastapi import Depends, FastAPI, Request,UploadFile, File
+from src.database import clear_v2
+from fastapi import Depends, FastAPI, Request, UploadFile, File
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
 from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -112,9 +113,6 @@ async def validation_exception_handler(request: Request, exc: InternalServerErro
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth_login/v2")
 
 async def get_token(token: str = Depends(oauth2_scheme)) -> str:
-    if token == ADMIN_TOKEN:
-        return token
-    
     try:
         session = Sessions.get(token=token)
     except DoesNotExist:
@@ -362,6 +360,20 @@ async def report_change_name(report_id: int, new_name: str, token: str = Depends
 async def report_delete(report_id: int, token: str = Depends(get_token)) -> Dict:
     return report_delete_v2(token, report_id)
 
+# INVOICE PROCESSING
+
+@app.post("/invoice_processing/upload_file/v2", tags=["v2 invoice_processing"])
+async def api_invoice_processing_upload_file_v2(file: UploadFile = File(...), token = Depends(get_token)) -> InvoiceID:
+    invoice_text = await file.read()
+    return invoice_processing_upload_text_v2(invoice_name=file.filename, invoice_text=invoice_text.decode("utf-8"), owner=Sessions.get(token=token).user) #type: ignore
+
+@app.post("/invoice_processing/upload_text/v2", tags=["v2 invoice_processing"])
+async def api_invoice_processing_upload_text_v2(invoice: TextInvoice, token = Depends(get_token)) -> InvoiceID:
+    return invoice_processing_upload_text_v2(invoice_name=invoice.name, invoice_text=invoice.text, owner=Sessions.get(token=token).user)
+
+
+# invoice_processing_upload_text_v2
+
 
 # AUTHENTICATION
 
@@ -379,7 +391,7 @@ async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
 
 @app.delete("/clear/v2", tags=["v2 auth"])
 async def clear(token = Depends(get_token)):
-    return clear_v1(token)
+    return clear_v2(token)
 
 
 # ENDPOINTS ABOVE

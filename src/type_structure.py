@@ -65,6 +65,9 @@ class ReportList(BaseModel):
 class ReportID(BaseModel):
     report_id: int
     
+class InvoiceID(BaseModel):
+    invoice_id: int
+    
 class ReportIDs(BaseModel):
     report_ids: List[int]
 

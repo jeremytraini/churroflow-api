@@ -95,7 +95,7 @@ def generate_report(invoice_name: str, invoice_text: str, owner) -> int:
     
     return report.id
 
-def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
+def generate_diagnostic_list(invoice_text: str):
     num_errors = 0
     num_warnings = 0
     report = []
