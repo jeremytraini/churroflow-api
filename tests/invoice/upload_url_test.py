@@ -1,7 +1,7 @@
 from src.type_structure import *
 from tests.server_calls import invoice_upload_url_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import invalidate_invoice, remove_part_of_string
+from tests.helpers import invalidate_invoice, remove_part_of_string, clear_database
 
 """
 =====================================

@@ -1,7 +1,7 @@
 from src.type_structure import *
-from tests.server_calls import clear_v1, auth_register_v2, export_json_report_v1, invoice_upload_text_v1
+from tests.server_calls import export_json_report_v1, invoice_upload_text_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import remove_part_of_string, invalidate_invoice
+from tests.helpers import remove_part_of_string, invalidate_invoice, clear_database
 
 """
 =====================================
@@ -65,8 +65,7 @@ def test_json_valid_invoice():
     assert report.peppol_evaluation.num_errors == 0
     assert report.syntax_evaluation.num_warnings == 0
     assert len(report.peppol_evaluation.violations) == 0
-    clear_v1(auth_register_v2("test_json_valid_invoice@tests.com", "abc123")["token"])
-
+    
 def test_json_unique_id():
     data = VALID_INVOICE_TEXT
 
@@ -89,8 +88,7 @@ def test_json_unique_id():
     assert report1.invoice_name == "Invoice01"
     assert report2.invoice_name == "Invoice02"
 
-    clear_v1(auth_register_v2("test_json_unique_id@tests.com", "abc123")["token"])
-
+    
 # Testing that a single rule fails when there is one error in the invoice
 def test_json_single_violation():
     data = VALID_INVOICE_TEXT
@@ -141,8 +139,7 @@ def test_json_single_violation():
     assert report.peppol_evaluation.num_errors == 2
     assert report.syntax_evaluation.num_warnings == 0
     assert len(report.peppol_evaluation.violations) == 2
-    clear_v1(auth_register_v2("test_json_single_violation@tests.com", "abc123")["token"])
-
+    
 # Testing that multiple violations are generated when there are multiple errors in the invoice
 def test_json_multiple_violations_same_rule():
     data = VALID_INVOICE_TEXT
@@ -191,8 +188,7 @@ def test_json_multiple_violations_same_rule():
     assert report.peppol_evaluation.num_errors == 0
     assert report.peppol_evaluation.num_warnings == 2
     assert len(report.peppol_evaluation.violations) == 2
-    clear_v1(auth_register_v2("test_json_multiple_violations_same_rule@tests.com", "abc123")["token"])
-
+    
 def test_json_multiple_violations_different_rules():
     data = VALID_INVOICE_TEXT
     
@@ -244,8 +240,7 @@ def test_json_multiple_violations_different_rules():
     assert report.peppol_evaluation.num_errors == 0
     assert report.peppol_evaluation.num_warnings == 2
     assert len(report.peppol_evaluation.violations) == 2
-    clear_v1(auth_register_v2("test_json_multiple_violations_different_rules@tests.com", "abc123")["token"])
-
+    
 # Testing invalid wellformedness
 def test_json_invalid_wellformedness():
     data = VALID_INVOICE_TEXT
@@ -285,4 +280,4 @@ def test_json_invalid_id_negative():
 def test_json_invalid_id_not_found():
     
     assert export_json_report_v1(9332839283)['detail'] == "Report with id 9332839283 not found"
-    clear_v1(auth_register_v2("test_json_invalid_wellformedness@tests.com", "abc123")["token"])
+    

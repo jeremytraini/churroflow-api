@@ -1,4 +1,5 @@
 from tests.server_calls import clear_v1, auth_register_v2
+from tests.helpers import clear_database
 
 """
 ==============================================================
@@ -10,11 +11,9 @@ AUTH_REGISTER_V1 TESTS
 def test_register_unique_id_valid():
     token1 = auth_register_v2("test@test.com", "luciddreams14")
     token2 = auth_register_v2("test1@test.com", "luciddreams14")
-    print(token1)
     # Testing if tokens are unique
     assert token1["token"] != token2["token"]
     assert len(token1) == 1
-    clear_v1(token1["token"])
 
 # Test multiple registers
 def test_register_multiple_success():
@@ -23,7 +22,6 @@ def test_register_multiple_success():
     token3 =auth_register_v2("test2@test.com", "janedoe")["token"]
     token4 =auth_register_v2("test3@test.com", "knittingislife")["token"]
     assert token1 != token2 != token3 != token4
-    clear_v1(token1)
 
 # Test Input errors for invalid email - failing regex match
 def test_register_invalid_email():
@@ -48,7 +46,6 @@ def test_register_duplicate_email():
     # Duplicate email example 2 - only email is duplicated
     auth_register_v2("test1@test.com", "dasani2048")
     assert auth_register_v2("test1@test.com", "dasani")['detail'] == "Invalid input: Email test1@test.com is already taken."
-    clear_v1(token)
 
 # Length of password is less than 6 characters
 def test_register_short_passwords():

@@ -1,6 +1,6 @@
 from src.type_structure import *
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import invalidate_invoice, replace_part_of_string
+from tests.helpers import invalidate_invoice, replace_part_of_string, clear_database
 from tests.server_calls import export_bulk_json_reports_v1, invoice_upload_text_v1
 
 """

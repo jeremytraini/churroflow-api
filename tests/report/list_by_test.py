@@ -1,7 +1,7 @@
 from src.type_structure import *
-from tests.server_calls import auth_register_v2, clear_v1, report_list_by_v1, invoice_upload_text_v1, export_json_report_v1
+from tests.server_calls import report_list_by_v1, invoice_upload_text_v1, export_json_report_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import invalidate_invoice, remove_part_of_string
+from tests.helpers import invalidate_invoice, remove_part_of_string, clear_database
 
 """
 =====================================
@@ -25,4 +25,3 @@ def test_list_by_many_reports():
     
     # Checking for the name of the first invoice
     assert report.invoice_name == "invoice1"
-    clear_v1(auth_register_v2("test_list_by_many_reports@tests.com", "abc123")["token"])

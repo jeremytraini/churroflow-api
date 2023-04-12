@@ -1,7 +1,8 @@
 from src.type_structure import *
 from tests.server_calls import report_wellformedness_v1
 from tests.constants import VALID_INVOICE_TEXT
-from tests.helpers import remove_part_of_string, append_to_string, replace_part_of_string
+from tests.helpers import *
+
 """
 =====================================
 /report/wellformedness/v1 TESTS
