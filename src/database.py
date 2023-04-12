@@ -104,7 +104,61 @@ class Sessions(BaseModel):
     date_created = DateTimeField()
     date_expires = DateTimeField()
 
-tables = [Users, Evaluations, Reports, Violations, Sessions]
+class Invoices(BaseModel):
+    name: TextField()
+    owner: ForeignKeyField(Users, backref='users')
+    date_last_modified: DateField()
+    date_added: DateField()
+    
+    is_valid: BooleanField()
+    text_content: TextField()
+    
+    num_warnings: IntegerField()
+    num_errors: IntegerField()
+    
+    issue_date: TextField()
+    due_date: TextField()
+    order_id: TextField()
+    invoice_start_date: DateField()
+    invoice_end_date: DateField()
+    
+    supplier_name: TextField()
+    supplier_abn: TextField(null=True,default=None)
+    supplier_latitude: FloatField()
+    supplier_longitude: FloatField()
+    
+    
+    customer_name: TextField()
+    customer_abn: TextField(null=True,default=None)
+    
+    delivery_date: DateField()
+    delivery_latitude: FloatField()
+    delivery_longitude: FloatField()
+    
+    # customer_street: TextField(null=True,default=None)
+    # customer_additional_street: TextField(null=True,default=None)
+    # customer_city: TextField(null=True,default=None)
+    # customer_postcode: TextField(null=True,default=None)
+    # customer_latitude: FloatField()
+    # customer_longitude: FloatField()
+    
+    customer_contact_name: TextField()
+    customer_contact_email: TextField()
+    customer_contact_phone: TextField()
+    
+    total_amount: FloatField()
+    
+
+class LineItems(BaseModel):
+    invoice: ForeignKeyField(Invoices, backref='invoices')
+    
+    line_number: IntegerField()
+    description: TextField()
+    quantity: IntegerField()
+    unit_price: FloatField()
+    total_price: FloatField()
+
+tables = [Users, Evaluations, Reports, Violations, Sessions, Invoices]
 
 # Create the tables in the database
 def create_tables():
