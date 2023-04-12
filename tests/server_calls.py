@@ -283,11 +283,11 @@ def health_check_v1():
     return json.loads(response.text)
 
 
-def clear_v1(token: str):
+def clear_v2(token: str):
     headers = {
         "Authorization": "bearer " + token
     }
-    response = requests.delete(full_url + 'clear/v1', headers=headers)
+    response = requests.delete(full_url + 'clear/v2', headers=headers)
     
     return json.loads(response.text)
 

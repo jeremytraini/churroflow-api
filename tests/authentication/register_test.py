@@ -1,4 +1,4 @@
-from tests.server_calls import clear_v1, auth_register_v2
+from tests.server_calls import clear_v2, auth_register_v2
 from tests.helpers import clear_database
 
 """
