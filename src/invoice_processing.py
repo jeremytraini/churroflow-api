@@ -2,17 +2,10 @@ from datetime import datetime
 from src.error import InputError, NotFoundError
 from src.type_structure import *
 from src.database import Invoices, LineItems
-from tests.constants import VALID_INVOICE_TEXT
 import requests
 from src.generation import generate_diagnostic_list
+from peewee import DoesNotExist
 
-# class LineItems(BaseModel):
-#     invoice: ForeignKeyField(Invoices, backref='invoices')
-    
-#     description: TextField()
-#     quantity: IntegerField()
-#     unit_price: FloatField()
-#     total_price: FloatField()
 
 def get_invoice_field(invoice_data: dict, field: str) -> str:
     if field in invoice_data:
@@ -139,5 +132,23 @@ def invoice_processing_upload_text_v2(invoice_name: str, invoice_text: str, owne
     return InvoiceID(invoice_id=store_and_process_invoice(invoice_name, invoice_text, owner))
 
 
+def invoice_processing_report_lint_v2(invoice_id: int, owner: int, invoice_text: str = None) -> LintReport:
+    try:
+        invoice = Invoices.get_by_id(invoice_id)
+    except DoesNotExist:
+        raise NotFoundError(detail=f"Invoice with id {invoice_id} not found")
+    
+    if invoice_text is None:
+        invoice_text = invoice.text_content
+    else:
+        invoice.text_content = invoice_text
+        # TODO: Logic to update invoice data
+    
+    num_errors, num_warnings, diagonostics = generate_diagnostic_list(invoice_text)
+    return LintReport(
+        num_errors=num_errors,
+        num_warnings=num_warnings,
+        report=diagonostics
+    )
 
 

@@ -371,8 +371,12 @@ async def api_invoice_processing_upload_file_v2(file: UploadFile = File(...), to
 async def api_invoice_processing_upload_text_v2(invoice: TextInvoice, token = Depends(get_token)) -> InvoiceID:
     return invoice_processing_upload_text_v2(invoice_name=invoice.name, invoice_text=invoice.text, owner=Sessions.get(token=token).user)
 
-
-# invoice_processing_upload_text_v2
+@app.post("/invoice_processing/lint/v2", tags=["v2 invoice_processing"])
+async def api_invoice_processing_report_lint_v2(invoice_id: int, invoice: TextInvoice = None, token = Depends(get_token)) -> LintReport:
+    if not invoice:
+        return invoice_processing_report_lint_v2(invoice_id=invoice_id, owner=Sessions.get(token=token).user)
+    
+    return invoice_processing_report_lint_v2(invoice_id=invoice_id, invoice_text=invoice.text, owner=Sessions.get(token=token).user)
 
 
 # AUTHENTICATION
