@@ -111,7 +111,9 @@ def create_tables():
         db.create_tables(tables)
 
 def clear_v1(token: str):
-    if not token == ADMIN_TOKEN:
+    session = Sessions.get(token=token)
+    
+    if session.user.email != "churros@admin.com":
         raise Exception("Only admins can clear the database")
     
     with db:

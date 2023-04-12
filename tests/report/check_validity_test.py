@@ -19,7 +19,6 @@ def test_check_validity_one_report():
     assert report_check_validity_v1(report_id_invalid)["is_valid"] == False
 
 def test_check_validity_invalid_negative():
-    
     assert report_check_validity_v1(-1)['detail'] == "Report id cannot be less than 0"
 
 def test_check_validity_invalid_not_exist():

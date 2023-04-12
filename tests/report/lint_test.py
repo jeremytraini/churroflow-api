@@ -13,7 +13,7 @@ from tests.helpers import invalidate_invoice
 def test_lint_valid_invoice():
     data = VALID_INVOICE_TEXT
     
-    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+    invoice = TextInvoice(name="My Invoice", text=data)
 
     lint_report = report_lint_v1(invoice)
     
@@ -28,7 +28,7 @@ def test_lint_warning_in_invoice():
     # Invalidating the ABN, changing the content of the ABN
     data = invalidate_invoice(data, 'content', 'cbc:EndpointID', '', 'Not an ABN', 1)
     
-    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+    invoice = TextInvoice(name="My Invoice", text=data)
 
     lint_report = report_lint_v1(invoice)['report']
     
@@ -53,7 +53,7 @@ def test_lint_tag_order_invalid():
     # Invalidating the date
     data = invalidate_invoice(VALID_INVOICE_TEXT, "tag", "cbc:IssueDate", "", "cbc:DueDate", 1)
     data = invalidate_invoice(data, "tag", "cbc:DueDate", "", "cbc:IssueDate", 2)
-    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+    invoice = TextInvoice(name="My Invoice", text=data)
 
     lint_report = report_lint_v1(invoice)['report']
     
@@ -77,7 +77,7 @@ def test_lint_many_syntax_and_peppol():
     # data = invalidate_invoice(data, 'tag', 'cbc:Note', '', 'cbc:ProfileExecutionID', 1)
     data = invalidate_invoice(data, 'attrib', 'cbc:Amount', 'currencyID', 'TEST', 1)
     
-    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+    invoice = TextInvoice(name="My Invoice", text=data)
     
     lint_report = report_lint_v1(invoice)['report']
     

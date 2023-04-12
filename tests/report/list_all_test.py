@@ -19,9 +19,8 @@ def test_list_all_one_report():
 
     # Checking for the name of the invoice
     assert report.invoice_name == "My Invoice"
-    
-    
-    
+
+
 def test_list_all_many_reports():
     invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
     invoice_upload_text_v1(invoice.name, invoice.text)

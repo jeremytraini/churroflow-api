@@ -365,7 +365,7 @@ async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
     return invoice_generate_hash_v1(invoice_text)
 
 @app.delete("/clear/v1", include_in_schema=False)
-async def clear(token: str):
+async def clear(token = Depends(get_token)):
     return clear_v1(token)
 
 

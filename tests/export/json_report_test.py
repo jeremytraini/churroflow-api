@@ -65,7 +65,7 @@ def test_json_valid_invoice():
     assert report.peppol_evaluation.num_errors == 0
     assert report.syntax_evaluation.num_warnings == 0
     assert len(report.peppol_evaluation.violations) == 0
-
+    
 def test_json_unique_id():
     data = VALID_INVOICE_TEXT
 
@@ -82,15 +82,13 @@ def test_json_unique_id():
     report2 = Report(**report2)
 
     # Check that the report_id is not the same
-    report1.report_id != report2.report_id
+    assert report1.report_id != report2.report_id
 
     # Check names of the invoice
-    report1.invoice_name == "Invoice01"
-    report2.invoice_name == "Invoice02"
+    assert report1.invoice_name == "Invoice01"
+    assert report2.invoice_name == "Invoice02"
 
-    # Check that the hash is not the same
-    report1.invoice_hash != report2.invoice_hash
-
+    
 # Testing that a single rule fails when there is one error in the invoice
 def test_json_single_violation():
     data = VALID_INVOICE_TEXT
@@ -141,7 +139,7 @@ def test_json_single_violation():
     assert report.peppol_evaluation.num_errors == 2
     assert report.syntax_evaluation.num_warnings == 0
     assert len(report.peppol_evaluation.violations) == 2
-
+    
 # Testing that multiple violations are generated when there are multiple errors in the invoice
 def test_json_multiple_violations_same_rule():
     data = VALID_INVOICE_TEXT
@@ -190,7 +188,7 @@ def test_json_multiple_violations_same_rule():
     assert report.peppol_evaluation.num_errors == 0
     assert report.peppol_evaluation.num_warnings == 2
     assert len(report.peppol_evaluation.violations) == 2
-
+    
 def test_json_multiple_violations_different_rules():
     data = VALID_INVOICE_TEXT
     
@@ -242,7 +240,7 @@ def test_json_multiple_violations_different_rules():
     assert report.peppol_evaluation.num_errors == 0
     assert report.peppol_evaluation.num_warnings == 2
     assert len(report.peppol_evaluation.violations) == 2
-
+    
 # Testing invalid wellformedness
 def test_json_invalid_wellformedness():
     data = VALID_INVOICE_TEXT
@@ -282,3 +280,4 @@ def test_json_invalid_id_negative():
 def test_json_invalid_id_not_found():
     
     assert export_json_report_v1(9332839283)['detail'] == "Report with id 9332839283 not found"
+    

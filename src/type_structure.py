@@ -3,6 +3,10 @@ from typing import Any, Dict, List, Literal, Union
 
 Server_call_return = Dict[str, Any]
 
+class User(BaseModel):
+    email: str
+    password: str
+
 class OrderBy(BaseModel):
     table: Literal["date_generated", "invoice_name", "total_errors", "total_warnings"]
     is_ascending: bool

@@ -183,6 +183,6 @@ def test_schema_invoice_invalid_not_wellformed():
     # Invalidating the tags so that only one of the tags is capitalised
     data = replace_part_of_string(VALID_INVOICE_TEXT, 2025, 2027, "id")
 
-    invoice = TextInvoice(name="My Invoice", source="text", text=data)
+    invoice = TextInvoice(name="My Invoice", text=data)
 
     assert report_schema_v1(invoice)['detail'] == "Invoice is not wellformed"
