@@ -70,6 +70,7 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
                 num_errors=num_errors,
                 
                 is_valid=True,
+                text_content=invoice_text,
                 
                 invoice_title=invoice_data["ID"],
                 issue_date=invoice_data["IssueDate"],

@@ -102,48 +102,88 @@ class Sessions(BaseModel):
     date_expires = DateTimeField()
 
 class Invoices(BaseModel):
-    name: TextField()
-    owner: ForeignKeyField(Users, backref='users')
-    date_last_modified: DateField()
-    date_added: DateField()
-    num_warnings: IntegerField()
-    num_errors: IntegerField()
+    name = TextField()
+    owner = ForeignKeyField(Users, backref='users')
+    date_last_modified = DateField()
+    date_added = DateField()
+    num_warnings = IntegerField()
+    num_errors = IntegerField()
     
-    is_valid: BooleanField()
-    text_content: TextField(null=True,default=None)
+    is_valid = BooleanField()
+    text_content = TextField(null=True,default=None)
     
-    invoice_title: TextField(null=True,default=None)
-    issue_date: TextField(null=True,default=None)
-    due_date: TextField(null=True,default=None)
-    order_id: TextField(null=True,default=None)
-    invoice_start_date: DateField(null=True,default=None)
-    invoice_end_date: DateField(null=True,default=None)
+    invoice_title = TextField(null=True,default=None)
+    issue_date = TextField(null=True,default=None)
+    due_date = TextField(null=True,default=None)
+    order_id = TextField(null=True,default=None)
+    invoice_start_date = DateField(null=True,default=None)
+    invoice_end_date = DateField(null=True,default=None)
     
-    supplier_name: TextField(null=True,default=None)
-    supplier_abn: TextField(null=True,default=None)
-    supplier_latitude: FloatField(null=True,default=None)
-    supplier_longitude: FloatField(null=True,default=None)
+    supplier_name = TextField(null=True,default=None)
+    supplier_abn = TextField(null=True,default=None)
+    supplier_latitude = FloatField(null=True,default=None)
+    supplier_longitude = FloatField(null=True,default=None)
     
-    customer_name: TextField(null=True,default=None)
-    customer_abn: TextField(null=True,default=None)
+    customer_name = TextField(null=True,default=None)
+    customer_abn = TextField(null=True,default=None)
     
-    delivery_date: DateField(null=True,default=None)
-    delivery_latitude: FloatField(null=True,default=None)
-    delivery_longitude: FloatField(null=True,default=None)
+    delivery_date = DateField(null=True,default=None)
+    delivery_latitude = FloatField(null=True,default=None)
+    delivery_longitude = FloatField(null=True,default=None)
     
-    customer_contact_name: TextField(null=True,default=None)
-    customer_contact_email: TextField(null=True,default=None)
-    customer_contact_phone: TextField(null=True,default=None)
+    customer_contact_name = TextField(null=True,default=None)
+    customer_contact_email = TextField(null=True,default=None)
+    customer_contact_phone = TextField(null=True,default=None)
     
-    total_amount: FloatField(null=True,default=None)
+    total_amount = FloatField(null=True,default=None)
+    
+    def to_json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "date_last_modified": str(self.date_last_modified),
+            "date_added": str(self.date_added),
+            "num_warnings": self.num_warnings,
+            "num_errors": self.num_errors,
+            "is_valid": self.is_valid,
+            "text_content": self.text_content,
+            "invoice_title": self.invoice_title,
+            "issue_date": self.issue_date,
+            "due_date": self.due_date,
+            "order_id": self.order_id,
+            "invoice_start_date": str(self.invoice_start_date),
+            "invoice_end_date": str(self.invoice_end_date),
+            "supplier_name": self.supplier_name,
+            "supplier_abn": self.supplier_abn,
+            "supplier_latitude": self.supplier_latitude,
+            "supplier_longitude": self.supplier_longitude,
+            "customer_name": self.customer_name,
+            "customer_abn": self.customer_abn,
+            "delivery_date": str(self.delivery_date),
+            "delivery_latitude": self.delivery_latitude,
+            "delivery_longitude": self.delivery_longitude,
+            "customer_contact_name": self.customer_contact_name,
+            "customer_contact_email": self.customer_contact_email,
+            "customer_contact_phone": self.customer_contact_phone,
+            "total_amount": self.total_amount,
+            "line_items": [line_item.to_json() for line_item in self.invoices]
+        }
 
 class LineItems(BaseModel):
-    invoice: ForeignKeyField(Invoices, backref='invoices')
+    invoice = ForeignKeyField(Invoices, backref='invoices')
     
-    description: TextField()
-    quantity: IntegerField()
-    unit_price: FloatField()
-    total_price: FloatField()
+    description = TextField()
+    quantity = IntegerField()
+    unit_price = FloatField()
+    total_price = FloatField()
+    
+    def to_json(self):
+        return {
+            "description": self.description,
+            "quantity": self.quantity,
+            "unit_price": self.unit_price,
+            "total_price": self.total_price
+        }
 
 
 tables = [Users, Evaluations, Reports, Violations, Sessions, Invoices, LineItems]
