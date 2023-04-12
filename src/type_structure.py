@@ -85,6 +85,8 @@ class LintDiagnostic(BaseModel):
     severity: Literal["error", "warning"]
 
 class LintReport(BaseModel):
+    num_errors: int
+    num_warnings: int
     report: List[LintDiagnostic]
     
 class AuthRegister(BaseModel):

@@ -131,7 +131,10 @@ def report_bulk_json_export_v1(report_ids) -> List[ReportExport]:
     return exports
 
 def report_lint_v1(invoice_text: str) -> LintReport:
+    num_errors, num_warnings, diagonostics = generate_diagnostic_list(invoice_text)
     return LintReport(
-        report=generate_diagnostic_list(invoice_text)
+        num_errors=num_errors,
+        num_warnings=num_warnings,
+        report=diagonostics
     )
 
