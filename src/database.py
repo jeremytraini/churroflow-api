@@ -23,6 +23,7 @@ class BaseModel(Model):
       database = db
 
 class Users(BaseModel):
+    name = TextField()
     email = TextField(unique=True)
     password_hash = TextField()
 
@@ -108,9 +109,14 @@ tables = [Users, Evaluations, Reports, Violations, Sessions]
 # Create the tables in the database
 def create_tables():
     with db:
+        if db.table_exists('users'):
+            # add name column to users table if it doesn't exist
+            db.execute_sql('ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;')
+            
         if db.table_exists('reports'):
             # add owner column to reports table if it doesn't exist
             db.execute_sql('ALTER TABLE reports ADD COLUMN IF NOT EXISTS owner_id INTEGER REFERENCES users(id);')
+            
         db.create_tables(tables)
 
 def clear_v1(token: str):

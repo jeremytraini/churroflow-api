@@ -86,6 +86,11 @@ class LintDiagnostic(BaseModel):
 
 class LintReport(BaseModel):
     report: List[LintDiagnostic]
+    
+class AuthRegister(BaseModel):
+    name: str
+    email: str
+    password: str
 
 class AuthReturnV1(BaseModel):
     auth_user_id: int

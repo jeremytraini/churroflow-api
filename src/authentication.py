@@ -38,11 +38,12 @@ def auth_login_v1(email, password) -> AuthReturnV1:
     return AuthReturnV1(auth_user_id=user.id)
 
 
-def auth_register_v1(email, password) -> AuthReturnV1:
+def auth_register_v1(name, email, password) -> AuthReturnV1:
     '''
     This function registers a user into the system by getting their details.
 
     Arguments:
+        name (string)       - Full name of the user.
         email (string)      - Email used to register with the specified user. Must be unique.
         password (string)   - Password used to register with the specified user account.
         name_first (string) - First name of the user. Used to generate handle.
@@ -72,7 +73,7 @@ def auth_register_v1(email, password) -> AuthReturnV1:
     password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
 
     try:
-        user = Users.create(email=email, password_hash=password_hash)
+        user = Users.create(name=name, email=email, password_hash=password_hash)
     except IntegrityError:
         # duplicate email
         raise InputError(detail="Invalid input: Email " + email + " is already taken.")
@@ -89,8 +90,8 @@ def auth_login_v2(email, password) -> AuthReturnV2:
     return AuthReturnV2(token=token)
 
 
-def auth_register_v2(email, password) -> AuthReturnV2:
-    id = auth_register_v1(email, password).auth_user_id
+def auth_register_v2(name, email, password) -> AuthReturnV2:
+    id = auth_register_v1(name, email, password).auth_user_id
     now = datetime.now()
     token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
     Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=1))

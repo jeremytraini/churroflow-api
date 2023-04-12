@@ -370,8 +370,8 @@ async def auth_login(form_data: OAuth2PasswordRequestForm = Depends()):
     return Token(access_token=auth_login_v2(form_data.username, form_data.password).token, token_type="bearer")
 
 @app.post("/auth_register/v2", tags=["v2 auth"], responses=res_auth_register_v2)
-async def auth_register(email: str, password: str) -> AuthReturnV2:
-    return auth_register_v2(email, password)
+async def auth_register(form_data: AuthRegister) -> AuthReturnV2:
+    return auth_register_v2(form_data.name, form_data.email, form_data.password)
 
 @app.post("/invoice/generate_hash/v2", include_in_schema=False)
 async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
