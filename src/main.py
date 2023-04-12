@@ -372,11 +372,19 @@ async def api_invoice_processing_upload_text_v2(invoice: TextInvoice, token = De
     return invoice_processing_upload_text_v2(invoice_name=invoice.name, invoice_text=invoice.text, owner=Sessions.get(token=token).user)
 
 @app.post("/invoice_processing/lint/v2", tags=["v2 invoice_processing"])
-async def api_invoice_processing_report_lint_v2(invoice_id: int, invoice: TextInvoice = None, token = Depends(get_token)) -> LintReport:
+async def api_invoice_processing_lint_v2(invoice_id: int, invoice: TextInvoice = None, token = Depends(get_token)) -> LintReport:
     if not invoice:
-        return invoice_processing_report_lint_v2(invoice_id=invoice_id, owner=Sessions.get(token=token).user)
+        return invoice_processing_lint_v2(invoice_id=invoice_id, owner=Sessions.get(token=token).user)
     
-    return invoice_processing_report_lint_v2(invoice_id=invoice_id, invoice_text=invoice.text, owner=Sessions.get(token=token).user)
+    return invoice_processing_lint_v2(invoice_id=invoice_id, invoice_text=invoice.text, owner=Sessions.get(token=token).user)
+
+@app.post("/invoice_processing/get/v2", tags=["v2 invoice_processing"])
+async def api_invoice_processing_get_v2(invoice_id: int, verbose: bool = True, token = Depends(get_token)):
+    return invoice_processing_get_v2(invoice_id=invoice_id, verbose=verbose, owner=Sessions.get(token=token).user)
+
+@app.get("/invoice_processing/list_all/v2", tags=["v2 invoice_processing"])
+async def invoice_processing_list_all_v2(token = Depends(get_token)) -> ReportIDs:
+    return invoice_processing_list_all_v2(owner=Sessions.get(token=token).user)
 
 
 # AUTHENTICATION

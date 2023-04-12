@@ -1,5 +1,5 @@
 from datetime import datetime
-from src.error import InputError, NotFoundError
+from src.error import ForbiddenError, InputError, NotFoundError
 from src.type_structure import *
 from src.database import Invoices, LineItems
 import requests
@@ -132,11 +132,14 @@ def invoice_processing_upload_text_v2(invoice_name: str, invoice_text: str, owne
     return InvoiceID(invoice_id=store_and_process_invoice(invoice_name, invoice_text, owner))
 
 
-def invoice_processing_report_lint_v2(invoice_id: int, owner: int, invoice_text: str = None) -> LintReport:
+def invoice_processing_lint_v2(invoice_id: int, owner: int, invoice_text: str = None) -> LintReport:
     try:
         invoice = Invoices.get_by_id(invoice_id)
     except DoesNotExist:
         raise NotFoundError(detail=f"Invoice with id {invoice_id} not found")
+    
+    if invoice.owner != None and invoice.owner != owner:
+        raise ForbiddenError("You do not own this invoice")
     
     if invoice_text is None:
         invoice_text = invoice.text_content
@@ -150,5 +153,19 @@ def invoice_processing_report_lint_v2(invoice_id: int, owner: int, invoice_text:
         num_warnings=num_warnings,
         report=diagonostics
     )
+
+def invoice_processing_get_v2(invoice_id: int, owner: int, verbose: bool = False):
+    try:
+        invoice = Invoices.get_by_id(invoice_id)
+    except DoesNotExist:
+        raise NotFoundError(detail=f"Invoice with id {invoice_id} not found")
+    
+    if invoice.owner != None and invoice.owner != owner:
+        raise ForbiddenError("You do not own this invoice")
+    
+    return invoice.to_json(verbose=verbose)
+    
+    
+
 
 

@@ -149,6 +149,7 @@ class Invoices(BaseModel):
                 "is_valid": self.is_valid,
                 "invoice_title": self.invoice_title,
             }
+        
         return {
             "id": self.id,
             "name": self.name,
@@ -177,7 +178,7 @@ class Invoices(BaseModel):
             "customer_contact_email": self.customer_contact_email,
             "customer_contact_phone": self.customer_contact_phone,
             "total_amount": self.total_amount,
-            "line_items": [line_item.to_json() for line_item in self.invoices]
+            "line_items": [line_item.to_json() for line_item in self.line_items]
         }
 
 class LineItems(BaseModel):
