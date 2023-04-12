@@ -254,10 +254,11 @@ def report_lint_v1(invoice: TextInvoice) -> Server_call_return:
 
 def auth_register_v2(email: str, password: str) -> Server_call_return:
     payload = {
+        "name": "Test",
         "email": email,
         "password": password
     }
-    response = requests.post(full_url + 'auth_register/v2', params=payload)
+    response = requests.post(full_url + 'auth_register/v2', json=payload)
 
     return json.loads(response.text)
 
