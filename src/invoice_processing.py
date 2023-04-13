@@ -269,6 +269,25 @@ def invoice_processing_delete_v2(invoice_id: int, owner: int):
     
     return {}
 
+def coord_distance(lat1, lon1, lat2, lon2):
+    from math import sin, cos, sqrt, atan2, radians
+
+    # Approximate radius of earth in km
+    R = 6373.0
+
+    lat1 = radians(lat1)
+    lon1 = radians(lon1)
+    lat2 = radians(lat2)
+    lon2 = radians(lon2)
+
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return R * c
+
 def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner: int):
     if query == "numActiveCustomers":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
@@ -310,6 +329,7 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             "value": num_active_customers,
             "change": percentage_change,
         }
+    
     elif query == "numInvoices":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
@@ -386,17 +406,99 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             "change": percentage_change
         }
         
+    elif query == "avgDeliveryDistance":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        query = (Invoices.select(Invoices.supplier_latitude, Invoices.supplier_longitude, Invoices.delivery_latitude, Invoices.delivery_longitude)
+                .where((Invoices.is_valid == True) &
+                       (Invoices.invoice_start_date >= from_date) &
+                       (Invoices.invoice_start_date <= to_date) &
+                       (Invoices.owner == owner)))
+        
+        total = 0
+        number = 0
+        for invoice in query:
+            total += coord_distance(invoice.supplier_latitude, invoice.supplier_longitude, invoice.delivery_latitude, invoice.delivery_longitude)
+            number += 1
+        
+        if number:
+            average = total / number
+        else:
+            average = 0
+        
+        # calculate the percentage change from the previous 12 months
+        previous_year_end = from_date - timedelta(days=1)
+        previous_year_start = previous_year_end - timedelta(days=365)
+
+        previous_year_query = (Invoices.select(Invoices.supplier_latitude, Invoices.supplier_longitude, Invoices.delivery_latitude, Invoices.delivery_longitude)
+                .where((Invoices.is_valid == True) &
+                       (Invoices.invoice_start_date >= previous_year_start) &
+                       (Invoices.invoice_start_date <= previous_year_end) &
+                       (Invoices.owner == owner)))
+
+        previous_year_total = 0
+        previous_year_number = 0
+        for invoice in previous_year_query:
+            previous_year_total += coord_distance(invoice.supplier_latitude, invoice.supplier_longitude, invoice.delivery_latitude, invoice.delivery_longitude)
+            previous_year_number += 1
+        
+        if previous_year_number:
+            previous_year_average = previous_year_total / previous_year_number
+        else:
+            previous_year_average = 0
+        
+        if previous_year_average:
+            percentage_change = (average - previous_year_average) / previous_year_average * 100
+        else:
+            percentage_change = 0
+        
+        return {
+            "value": average,
+            "change": percentage_change
+        }
+        
+    elif query == "clientDataTable":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        # Get name, total invoices and total invoice value for each client
+        
+        query = (Invoices.select(Invoices.customer_name,
+                                 fn.COUNT(Invoices.id).alias('total_invoices'),
+                                 fn.SUM(Invoices.total_amount).alias('total_invoice_value'))
+                    .where((Invoices.is_valid == True) &
+                           (Invoices.invoice_start_date >= from_date) &
+                           (Invoices.invoice_start_date <= to_date) &
+                           (Invoices.owner == owner))
+        )
+        
+        query = query.group_by(Invoices.customer_name)
+        
+        client_data = []
+        for i, invoice in enumerate(query):
+            client_data.append({
+                "id": i,
+                "name": invoice.customer_name,
+                "total-deliveries": invoice.total_invoices,
+                "total-revenue": '{:.2f}'.format(round(invoice.total_invoice_value, 2))
+            })
+            
+        return {
+            "data": client_data
+        }
+        
     elif query == "heatmapCoords":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
         
-        delivery_coords = []
         query = (Invoices.select(Invoices.delivery_latitude, Invoices.delivery_longitude, Invoices.total_amount)
                 .where((Invoices.is_valid == True) &
                        (Invoices.invoice_start_date >= from_date) &
                        (Invoices.invoice_start_date <= to_date) &
                        (Invoices.owner == owner)))
         
+        delivery_coords = []
         for invoice in query:
             delivery_coords.append({
                 "lat": invoice.delivery_latitude,

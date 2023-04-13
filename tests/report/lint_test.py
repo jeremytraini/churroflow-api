@@ -18,6 +18,8 @@ def test_lint_valid_invoice():
     lint_report = report_lint_v1(invoice)
     
     assert lint_report == {
+        "num_errors": 0,
+        "num_warnings": 0,
         "report": []
     }
 

@@ -6,8 +6,8 @@ from src.database import Invoices, LineItems, db
 # Instantiate a Faker object
 fake = Faker()
 
-NUM_INVOICES = 50
-NUM_LINE_ITEMS = 200
+NUM_INVOICES = 100
+NUM_LINE_ITEMS = 300
 
 def random_lat():
     min_lat, max_lat = -34.05, -33.568
@@ -31,7 +31,7 @@ fake_customers = [(fake.company(),
                    fake.name(),
                    fake.email(),
                    fake.phone_number(),
-                   ) for i in range(20)]
+                   ) for _ in range(20)]
 
 # Generate fake data for the invoices table
 invoices = []
@@ -70,8 +70,10 @@ for i in range(1, NUM_INVOICES + 1):
         customer[0],
         customer[1],
         delivery_date.strftime('%Y-%m-%d'),
-        customer[2],
-        customer[3],
+        round(random.uniform(supplier_warehouse[0], customer[2]), 6),
+        round(random.uniform(supplier_warehouse[1], customer[3]), 6),
+        # customer[2],
+        # customer[3],
         customer[4],
         customer[5],
         customer[6],

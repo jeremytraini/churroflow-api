@@ -3,7 +3,6 @@ import requests
 import json
 from src.config import full_url
 from src.type_structure import *
-from src.constants import ADMIN_TOKEN
 
 # Invoice Endpoints
 
@@ -219,19 +218,19 @@ def report_check_validity_v1(report_id: int) -> Server_call_return:
 
 def report_delete_v2(token: str, report_id: int) -> Server_call_return:
     payload = {
-        "token": ADMIN_TOKEN,
         "report_id": report_id
     }
     headers = {
         "Authorization": "bearer " + token
     }
     response = requests.delete(full_url + 'report/delete/v2', params=payload, headers=headers)
+    
+    print(response.json())
 
-    return json.loads(response.text)
+    return response.json()
 
 def report_change_name_v2(token: str, report_id: int, new_name: str) -> Server_call_return:
     payload = {
-        "token": ADMIN_TOKEN,
         "report_id": report_id,
         "new_name": new_name
     }

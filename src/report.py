@@ -95,15 +95,14 @@ def report_delete_v2(token: str, report_id: int) -> Dict[None, None]:
         report = Reports.get_by_id(report_id)
     except DoesNotExist:
         raise NotFoundError(detail=f"Report with id {report_id} not found")
-
-    if not token == ADMIN_TOKEN:
-        try:
-            session =  Sessions.get(token=token)
-        except DoesNotExist:
-            raise UnauthorisedError("Invalid token")
-        
-        if not report.owner == session.user:
-            raise ForbiddenError("You do not have permission to delete this report")
+    
+    try:
+        session = Sessions.get(token=token)
+    except DoesNotExist:
+        raise UnauthorisedError("Invalid token")
+    
+    if not report.owner == session.user:
+        raise ForbiddenError("You do not have permission to delete this report")
     
     report.delete_instance()
     

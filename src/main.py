@@ -97,14 +97,14 @@ async def not_found_error_exception_handler(request: Request, exc: NotFoundError
         },
     )
 
-@app.exception_handler(InternalServerError)
-async def validation_exception_handler(request: Request, exc: InternalServerError):
+@app.exception_handler(Exception)
+async def validation_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={
             "code": 500,
             "name": "Internal Server Error",
-            "detail": exc.detail
+            "detail": str(exc)
         },
     )
 
