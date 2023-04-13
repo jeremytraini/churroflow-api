@@ -357,7 +357,7 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
         
         query = (Invoices.select(fn.avg(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
-         .where(
+         .where((Invoices.is_valid == True) &
                 (Invoices.invoice_start_date >= from_date) &
                 (Invoices.invoice_start_date <= to_date) &
                 (Invoices.owner == owner)))
@@ -385,5 +385,45 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             "value": result,
             "change": percentage_change
         }
+        
+    elif query == "heatmapCoords":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        delivery_coords = []
+        query = (Invoices.select(Invoices.delivery_latitude, Invoices.delivery_longitude, Invoices.total_amount)
+                .where((Invoices.is_valid == True) &
+                       (Invoices.invoice_start_date >= from_date) &
+                       (Invoices.invoice_start_date <= to_date) &
+                       (Invoices.owner == owner)))
+        
+        for invoice in query:
+            delivery_coords.append({
+                "lat": invoice.delivery_latitude,
+                "lon": invoice.delivery_longitude,
+                "value": invoice.total_amount
+                })
+        
+        return {
+            "data": delivery_coords
+        }
     
+    elif query == "warehouseCoords":
+        warehouse_coords = []
+        query = (Invoices.select(Invoices.supplier_latitude, Invoices.supplier_longitude, Invoices.supplier_name, Invoices.total_amount)
+            .where((Invoices.is_valid == True) &
+                   (Invoices.owner == owner))
+            .distinct(Invoices.supplier_latitude, Invoices.supplier_longitude))
+        
+        for invoice in query:
+            warehouse_coords.append({
+                "lat": invoice.supplier_latitude,
+                "lon": invoice.supplier_longitude,
+                "value": invoice.total_amount
+                })
+        
+        return {
+            "data": warehouse_coords
+        }
+        
     return {}
