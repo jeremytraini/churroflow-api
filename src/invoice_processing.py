@@ -13,6 +13,88 @@ def get_invoice_field(invoice_data: dict, field: str) -> str:
     else:
         raise InputError(detail=f"Field {field} not found in invoice")
 
+def process_and_update_invoice(invoice_text: str, invoice: Invoices):
+    num_errors, num_warnings, diagonostics = generate_diagnostic_list(invoice_text)
+    
+    if num_errors > 0:
+        invoice.num_warnings = num_warnings
+        invoice.num_errors = num_errors
+        invoice.is_valid = False
+        invoice.text_content = invoice_text
+    else:
+        response = requests.post(
+            "https://macroservices.masterofcubesau.com/api/v3/invoice/render/json",
+            headers={
+                "accept": "application/json",
+                "api-key": "67b158a62fc240d8ba9411c5d4c9e99d",
+                'Content-Type': 'multipart/form-data; boundary=------------------------abcdef1234567890'
+            },
+            data=(
+                '--' + '------------------------abcdef1234567890\r\n' +
+                'Content-Disposition: form-data; name="file"; filename="invoice.xml"\r\n' +
+                'Content-Type: text/xml\r\n\r\n' +
+                invoice_text + '\r\n' +
+                '--' + '------------------------abcdef1234567890--\r\n'
+            )
+        )
+        
+        if response.status_code != 200:
+            raise InputError(detail="Could not parse invoice, please check your invoice")
+        else:
+            invoice_data = response.json()
+            supplier_latitude, supplier_longitude = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
+            delivery_latitude, delivery_longitude = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
+            
+            invoice.date_last_modified = datetime.now()
+            invoice.num_warnings = num_warnings
+            invoice.num_errors = num_errors
+            invoice.is_valid = True
+            invoice.text_content = invoice_text
+            
+            invoice.invoice_title = invoice_data["ID"]
+            invoice.issue_date = invoice_data["IssueDate"]
+            invoice.due_date = invoice_data["DueDate"]
+            invoice.order_id = invoice_data["OrderReference"]["ID"]
+            invoice.invoice_start_date = invoice_data["InvoicePeriod"]["StartDate"]
+            invoice.invoice_end_date = invoice_data["InvoicePeriod"]["EndDate"]
+            
+            invoice.supplier_name = invoice_data["AccountingSupplierParty"]["Party"]["PartyName"]["Name"]
+            invoice.supplier_abn = invoice_data["AccountingSupplierParty"]["Party"]["PartyLegalEntity"]["CompanyID"]["_text"]
+            invoice.supplier_latitude = supplier_latitude
+            invoice.supplier_longitude = supplier_longitude
+            
+            invoice.customer_name = invoice_data["AccountingCustomerParty"]["Party"]["PartyName"]["Name"]
+            invoice.customer_abn = invoice_data["AccountingCustomerParty"]["Party"]["PartyLegalEntity"]["CompanyID"]["_text"]
+            
+            invoice.delivery_date = invoice_data["Delivery"]["ActualDeliveryDate"]
+            invoice.delivery_latitude = delivery_latitude
+            invoice.delivery_longitude = delivery_longitude
+            
+            invoice.customer_contact_name = invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["Name"]
+            invoice.customer_contact_email = invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["ElectronicMail"]
+            invoice.customer_contact_phone = invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["Telephone"]
+            
+            invoice.total_amount =  invoice_data["LegalMonetaryTotal"]["PrepaidAmount"]["_text"] + \
+                                    invoice_data["LegalMonetaryTotal"]["PayableAmount"]["_text"]
+            
+            print(invoice)
+            invoice.save()
+            LineItems.delete().where(LineItems.invoice == invoice).execute()
+            for line_item in invoice_data["InvoiceLine"]:
+                LineItems.create(
+                    invoice=invoice,
+                    description=line_item["Item"]["Description"],
+                    quantity=line_item["InvoicedQuantity"]["_text"],
+                    unit_price=line_item["Price"]["PriceAmount"]["_text"],
+                    total_price=line_item["LineExtensionAmount"]["_text"],
+                )
+    
+    return LintReport(
+        num_errors=num_errors,
+        num_warnings=num_warnings,
+        report=diagonostics
+    )
+
 def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) -> int:
     num_errors, num_warnings, _ = generate_diagnostic_list(invoice_text)
     
@@ -73,12 +155,12 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
                 invoice_end_date=invoice_data["InvoicePeriod"]["EndDate"],
                 
                 supplier_name=invoice_data["AccountingSupplierParty"]["Party"]["PartyName"]["Name"],
-                supplier_abn=int(invoice_data["AccountingSupplierParty"]["Party"]["PartyLegalEntity"]["CompanyID"]["_text"]),
+                supplier_abn=invoice_data["AccountingSupplierParty"]["Party"]["PartyLegalEntity"]["CompanyID"]["_text"],
                 supplier_latitude=supplier_latitude,
                 supplier_longitude=supplier_longitude,
                 
                 customer_name=invoice_data["AccountingCustomerParty"]["Party"]["PartyName"]["Name"],
-                customer_abn=int(invoice_data["AccountingCustomerParty"]["Party"]["PartyLegalEntity"]["CompanyID"]["_text"]),
+                customer_abn=invoice_data["AccountingCustomerParty"]["Party"]["PartyLegalEntity"]["CompanyID"]["_text"],
 
                 delivery_date=invoice_data["Delivery"]["ActualDeliveryDate"],
                 delivery_latitude=delivery_latitude,
@@ -132,6 +214,9 @@ def invoice_processing_upload_text_v2(invoice_name: str, invoice_text: str, owne
     return InvoiceID(invoice_id=store_and_process_invoice(invoice_name, invoice_text, owner))
 
 
+
+
+
 def invoice_processing_lint_v2(invoice_id: int, owner: int, invoice_text: str = None) -> LintReport:
     try:
         invoice = Invoices.get_by_id(invoice_id)
@@ -144,8 +229,8 @@ def invoice_processing_lint_v2(invoice_id: int, owner: int, invoice_text: str = 
     if invoice_text is None:
         invoice_text = invoice.text_content
     else:
-        invoice.text_content = invoice_text
-        # TODO: Logic to update invoice data
+        # Update invoice
+        return process_and_update_invoice(invoice=invoice, invoice_text=invoice_text)
     
     num_errors, num_warnings, diagonostics = generate_diagnostic_list(invoice_text)
     return LintReport(
