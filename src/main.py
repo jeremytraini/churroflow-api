@@ -390,6 +390,9 @@ async def api_invoice_processing_list_all_v2(is_valid: bool = None, verbose: boo
 async def api_invoice_processing_delete_v2(invoice_id: int, token = Depends(get_token)):
     return invoice_processing_delete_v2(invoice_id=invoice_id, owner=Sessions.get(token=token).user)
 
+@app.get("/invoice_processing/query/v2", tags=["v2 invoice_processing"])
+async def api_invoice_processing_query_v2(query: str, from_date: str, to_date: str, token = Depends(get_token)):
+    return invoice_processing_query_v2(query=query, from_date=from_date, to_date=to_date, owner=Sessions.get(token=token).user)
 
 # AUTHENTICATION
 

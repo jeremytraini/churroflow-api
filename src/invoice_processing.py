@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.error import ForbiddenError, InputError, NotFoundError
 from src.type_structure import *
 from src.database import Invoices, LineItems
@@ -272,3 +272,43 @@ def invoice_processing_delete_v2(invoice_id: int, owner: int):
     
     # Delete invoice
     invoice.delete_instance()
+
+def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner: int):
+    if query == "numActiveCustomers":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+
+        # Query the database for active customers within the date range
+        active_customers = Invoices.select().where(
+            (Invoices.invoice_end_date >= from_date) &
+            (Invoices.invoice_end_date <= to_date) &
+            (Invoices.owner == owner)
+        ).distinct(Invoices.customer_name)
+
+        # Count the number of active customers
+        num_active_customers = active_customers.count()
+
+        # Define the date range to query for the previous 12 months
+        prev_year_to_date = to_date - timedelta(days=365)
+        prev_year_from_date = prev_year_to_date - timedelta(days=90)
+
+        # Query the database for active customers within the previous 12 months
+        prev_year_active_customers = Invoices.select().where(
+            (Invoices.invoice_end_date >= prev_year_from_date) &
+            (Invoices.invoice_end_date <= prev_year_to_date) &
+            (Invoices.owner == owner)
+        ).distinct(Invoices.customer_name)
+
+        # Count the number of active customers in the previous 12 months
+        num_prev_year_active_customers = prev_year_active_customers.count()
+
+        # Calculate the percentage change in active customers from the previous 12 months
+        if num_prev_year_active_customers == 0:
+            percentage_change = 0
+        else:
+            percentage_change = ((num_active_customers - num_prev_year_active_customers) / num_prev_year_active_customers) * 100
+
+        return {
+            "value": num_active_customers,
+            "change": percentage_change,
+        }
