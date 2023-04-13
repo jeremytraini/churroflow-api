@@ -164,8 +164,11 @@ def invoice_processing_get_v2(invoice_id: int, owner: int, verbose: bool = False
         raise ForbiddenError("You do not own this invoice")
     
     return invoice.to_json(verbose=verbose)
+
+def invoice_processing_list_all_v2(owner: int, is_valid: bool = None, verbose: bool = False):
+    if is_valid is None:
+        invoices = Invoices.select().where(Invoices.owner == owner)
+    else:
+        invoices = Invoices.select().where(Invoices.owner == owner, Invoices.is_valid == is_valid)
     
-    
-
-
-
+    return [invoice.to_json(verbose=verbose) for invoice in invoices]

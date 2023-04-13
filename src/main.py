@@ -383,8 +383,8 @@ async def api_invoice_processing_get_v2(invoice_id: int, verbose: bool = True, t
     return invoice_processing_get_v2(invoice_id=invoice_id, verbose=verbose, owner=Sessions.get(token=token).user)
 
 @app.get("/invoice_processing/list_all/v2", tags=["v2 invoice_processing"])
-async def invoice_processing_list_all_v2(token = Depends(get_token)) -> ReportIDs:
-    return invoice_processing_list_all_v2(owner=Sessions.get(token=token).user)
+async def api_invoice_processing_list_all_v2(is_valid: bool = None, verbose: bool = True, token = Depends(get_token)):
+    return invoice_processing_list_all_v2(is_valid=is_valid, verbose=verbose, owner=Sessions.get(token=token).user)
 
 
 # AUTHENTICATION
