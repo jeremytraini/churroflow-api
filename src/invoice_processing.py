@@ -4,7 +4,7 @@ from src.type_structure import *
 from src.database import Invoices, LineItems
 import requests
 from src.generation import generate_diagnostic_list
-from peewee import DoesNotExist
+from peewee import DoesNotExist, fn
 
 
 def get_invoice_field(invoice_data: dict, field: str) -> str:
@@ -205,17 +205,11 @@ def get_lat_long_from_address(data: str) -> tuple:
             return data[0]["lat"], data[0]["lon"]
     raise InputError(detail="Could not find location of party. Address: " + " ".join(query))
 
-
-
 def invoice_processing_upload_text_v2(invoice_name: str, invoice_text: str, owner: int) -> InvoiceID:
     if len(invoice_name) > 100:
         raise InputError(detail="Name cannot be longer than 100 characters")
     
     return InvoiceID(invoice_id=store_and_process_invoice(invoice_name, invoice_text, owner))
-
-
-
-
 
 def invoice_processing_lint_v2(invoice_id: int, owner: int, invoice_text: str = None) -> LintReport:
     try:
@@ -272,6 +266,8 @@ def invoice_processing_delete_v2(invoice_id: int, owner: int):
     
     # Delete invoice
     invoice.delete_instance()
+    
+    return {}
 
 def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner: int):
     if query == "numActiveCustomers":
@@ -280,6 +276,7 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
 
         # Query the database for active customers within the date range
         active_customers = Invoices.select().where(
+            (Invoices.is_valid == True) &
             (Invoices.invoice_end_date >= from_date) &
             (Invoices.invoice_end_date <= to_date) &
             (Invoices.owner == owner)
@@ -294,6 +291,7 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
 
         # Query the database for active customers within the previous 12 months
         prev_year_active_customers = Invoices.select().where(
+            (Invoices.is_valid == True) &
             (Invoices.invoice_end_date >= prev_year_from_date) &
             (Invoices.invoice_end_date <= prev_year_to_date) &
             (Invoices.owner == owner)
@@ -312,3 +310,80 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             "value": num_active_customers,
             "change": percentage_change,
         }
+    elif query == "numInvoices":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+
+        # Query the database for invoices within the date range
+        invoices = Invoices.select().where(
+            (Invoices.is_valid == True) &
+            (Invoices.invoice_end_date >= from_date) &
+            (Invoices.invoice_end_date <= to_date) &
+            (Invoices.owner == owner)
+        )
+
+        # Count the number of invoices
+        num_invoices = invoices.count()
+
+        # Define the date range to query for the previous 12 months
+        prev_year_to_date = to_date - timedelta(days=365)
+        prev_year_from_date = prev_year_to_date - timedelta(days=90)
+
+        # Query the database for invoices within the previous 12 months
+        prev_year_invoices = Invoices.select().where(
+            (Invoices.is_valid == True) &
+            (Invoices.is_valid == True) &
+            (Invoices.invoice_end_date >= prev_year_from_date) &
+            (Invoices.invoice_end_date <= prev_year_to_date) &
+            (Invoices.owner == owner)
+        )
+
+        # Count the number of invoices in the previous 12 months
+        num_prev_year_invoices = prev_year_invoices.count()
+
+        # Calculate the percentage change in invoices from the previous 12 months
+        if num_prev_year_invoices == 0:
+            percentage_change = 0
+        else:
+            percentage_change = ((num_invoices - num_prev_year_invoices) / num_prev_year_invoices) * 100
+
+        return {
+            "value": num_invoices,
+            "change": percentage_change,
+        }
+    
+    elif query == "averageDeliveryTime":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        query = (Invoices.select(fn.avg(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
+         .where(
+                (Invoices.invoice_start_date >= from_date) &
+                (Invoices.invoice_start_date <= to_date) &
+                (Invoices.owner == owner)))
+
+        result = query.scalar()
+
+        # calculate the percentage change from the previous 12 months
+        previous_year_end = from_date - timedelta(days=1)
+        previous_year_start = previous_year_end - timedelta(days=365)
+
+        previous_year_query = (Invoices.select(fn.avg(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
+         .where((Invoices.is_valid == True) &
+                (Invoices.invoice_start_date >= previous_year_start) &
+                (Invoices.invoice_start_date <= previous_year_end) &
+                (Invoices.owner == owner)))
+
+        previous_year_result = previous_year_query.scalar()
+
+        if previous_year_result:
+            percentage_change = (result - previous_year_result) / previous_year_result * 100
+        else:
+            percentage_change = 0
+
+        return {
+            "value": result,
+            "change": percentage_change
+        }
+    
+    return {}

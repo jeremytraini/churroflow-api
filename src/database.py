@@ -113,8 +113,8 @@ class Invoices(BaseModel):
     text_content = TextField(null=True,default=None)
     
     invoice_title = TextField(null=True,default=None)
-    issue_date = TextField(null=True,default=None)
-    due_date = TextField(null=True,default=None)
+    issue_date = DateField(null=True,default=None)
+    due_date = DateField(null=True,default=None)
     order_id = TextField(null=True,default=None)
     invoice_start_date = DateField(null=True,default=None)
     invoice_end_date = DateField(null=True,default=None)
