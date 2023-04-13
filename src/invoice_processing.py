@@ -172,3 +172,18 @@ def invoice_processing_list_all_v2(owner: int, is_valid: bool = None, verbose: b
         invoices = Invoices.select().where(Invoices.owner == owner, Invoices.is_valid == is_valid)
     
     return [invoice.to_json(verbose=verbose) for invoice in invoices]
+
+def invoice_processing_delete_v2(invoice_id: int, owner: int):
+    try:
+        invoice = Invoices.get_by_id(invoice_id)
+    except DoesNotExist:
+        raise NotFoundError(detail=f"Invoice with id {invoice_id} not found")
+    
+    if invoice.owner != None and invoice.owner != owner:
+        raise ForbiddenError("You do not own this invoice")
+    
+    # Delete line items
+    LineItems.delete().where(LineItems.invoice == invoice).execute()
+    
+    # Delete invoice
+    invoice.delete_instance()
