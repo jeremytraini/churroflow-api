@@ -1,6 +1,5 @@
 from peewee import *
 import os
-from src.constants import ADMIN_TOKEN
 
 db = None
 if 'RDS_DB_NAME' in os.environ:
@@ -23,6 +22,7 @@ class BaseModel(Model):
       database = db
 
 class Users(BaseModel):
+    name = TextField()
     email = TextField(unique=True)
     password_hash = TextField()
 
@@ -55,7 +55,7 @@ class Reports(BaseModel):
     schema = ForeignKeyField(Evaluations, backref='schema', null=True, default=None)
     syntax = ForeignKeyField(Evaluations, backref='syntax', null=True, default=None)
     peppol = ForeignKeyField(Evaluations, backref='peppol', null=True, default=None)
-    owner = ForeignKeyField(Users, backref='users', null=True)
+    owner = ForeignKeyField(Users, backref='owner', null=True)
     
     def to_json(self):
         return {
@@ -71,7 +71,6 @@ class Reports(BaseModel):
             "syntax_evaluation": self.syntax.to_json() if self.syntax else None,
             "peppol_evaluation": self.peppol.to_json() if self.peppol else None
         }
-
 
 class Violations(BaseModel):
     evaluation = ForeignKeyField(Evaluations, backref='violations', null=True, default=None)
@@ -96,21 +95,125 @@ class Violations(BaseModel):
             "column": self.column
         }
 
-
 class Sessions(BaseModel):
     user = ForeignKeyField(Users, backref='sessions')
     token = TextField(unique=True)
     date_created = DateTimeField()
     date_expires = DateTimeField()
 
-tables = [Users, Evaluations, Reports, Violations, Sessions]
+class Invoices(BaseModel):
+    name = TextField()
+    owner = ForeignKeyField(Users, backref='invoices')
+    date_last_modified = DateField()
+    date_added = DateField()
+    num_warnings = IntegerField()
+    num_errors = IntegerField()
+    
+    is_valid = BooleanField()
+    text_content = TextField(null=True,default=None)
+    
+    invoice_title = TextField(null=True,default=None)
+    issue_date = DateField(null=True,default=None)
+    due_date = DateField(null=True,default=None)
+    order_id = TextField(null=True,default=None)
+    invoice_start_date = DateField(null=True,default=None)
+    invoice_end_date = DateField(null=True,default=None)
+    
+    supplier_name = TextField(null=True,default=None)
+    supplier_abn = TextField(null=True,default=None)
+    supplier_latitude = FloatField(null=True,default=None)
+    supplier_longitude = FloatField(null=True,default=None)
+    
+    customer_name = TextField(null=True,default=None)
+    customer_abn = TextField(null=True,default=None)
+    
+    delivery_date = DateField(null=True,default=None)
+    delivery_latitude = FloatField(null=True,default=None)
+    delivery_longitude = FloatField(null=True,default=None)
+    
+    customer_contact_name = TextField(null=True,default=None)
+    customer_contact_email = TextField(null=True,default=None)
+    customer_contact_phone = TextField(null=True,default=None)
+    
+    total_amount = FloatField(null=True,default=None)
+    
+    def to_json(self, verbose = True):
+        if not verbose:
+            return {
+                "id": self.id,
+                "name": self.name,
+                "date_last_modified": str(self.date_last_modified),
+                "date_added": str(self.date_added),
+                "num_warnings": self.num_warnings,
+                "num_errors": self.num_errors,
+                "is_valid": self.is_valid,
+                "invoice_title": self.invoice_title,
+            }
+        
+        return {
+            "id": self.id,
+            "name": self.name,
+            "date_last_modified": str(self.date_last_modified),
+            "date_added": str(self.date_added),
+            "num_warnings": self.num_warnings,
+            "num_errors": self.num_errors,
+            "is_valid": self.is_valid,
+            "text_content": self.text_content,
+            "invoice_title": self.invoice_title,
+            "issue_date": self.issue_date,
+            "due_date": self.due_date,
+            "order_id": self.order_id,
+            "invoice_start_date": str(self.invoice_start_date),
+            "invoice_end_date": str(self.invoice_end_date),
+            "supplier_name": self.supplier_name,
+            "supplier_abn": self.supplier_abn,
+            "supplier_latitude": self.supplier_latitude,
+            "supplier_longitude": self.supplier_longitude,
+            "customer_name": self.customer_name,
+            "customer_abn": self.customer_abn,
+            "delivery_date": str(self.delivery_date),
+            "delivery_latitude": self.delivery_latitude,
+            "delivery_longitude": self.delivery_longitude,
+            "customer_contact_name": self.customer_contact_name,
+            "customer_contact_email": self.customer_contact_email,
+            "customer_contact_phone": self.customer_contact_phone,
+            "total_amount": self.total_amount,
+            "line_items": [line_item.to_json() for line_item in self.line_items]
+        }
+
+class LineItems(BaseModel):
+    invoice = ForeignKeyField(Invoices, backref='line_items')
+    
+    description = TextField()
+    quantity = IntegerField()
+    unit_price = FloatField()
+    total_price = FloatField()
+    
+    def to_json(self):
+        return {
+            "description": self.description,
+            "quantity": self.quantity,
+            "unit_price": self.unit_price,
+            "total_price": self.total_price
+        }
+
+
+tables = [Users, Evaluations, Reports, Violations, Sessions, Invoices, LineItems]
 
 # Create the tables in the database
 def create_tables():
     with db:
+        if db.table_exists('users'):
+            # add name column to users table if it doesn't exist
+            db.execute_sql('ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;')
+            
+        if db.table_exists('reports'):
+            # add owner column to reports table if it doesn't exist
+            db.execute_sql('ALTER TABLE reports ADD COLUMN IF NOT EXISTS owner_id INTEGER REFERENCES users(id);')
+            
         db.create_tables(tables)
 
-def clear_v1(token: str):
+def clear_v2(token: str):
     session = Sessions.get(token=token)
     
     if session.user.email != "churros@admin.com":

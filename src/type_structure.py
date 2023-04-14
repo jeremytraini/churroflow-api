@@ -65,6 +65,9 @@ class ReportList(BaseModel):
 class ReportID(BaseModel):
     report_id: int
     
+class InvoiceID(BaseModel):
+    invoice_id: int
+    
 class ReportIDs(BaseModel):
     report_ids: List[int]
 
@@ -85,7 +88,14 @@ class LintDiagnostic(BaseModel):
     severity: Literal["error", "warning"]
 
 class LintReport(BaseModel):
+    num_errors: int
+    num_warnings: int
     report: List[LintDiagnostic]
+    
+class AuthRegister(BaseModel):
+    name: str
+    email: str
+    password: str
 
 class AuthReturnV1(BaseModel):
     auth_user_id: int

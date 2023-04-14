@@ -1,4 +1,4 @@
-from tests.server_calls import auth_login_v2, auth_register_v2, clear_v1
+from tests.server_calls import auth_login_v2, auth_register_v2, clear_v2
 from tests.helpers import clear_database
 from time import sleep
 """

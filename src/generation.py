@@ -95,12 +95,18 @@ def generate_report(invoice_name: str, invoice_text: str, owner) -> int:
     
     return report.id
 
-def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
+def generate_diagnostic_list(invoice_text: str):
+    num_errors = 0
+    num_warnings = 0
     report = []
     
     wellformedness_violations = get_wellformedness_violations(invoice_text)
     
     for violation in wellformedness_violations:
+        if violation.is_fatal:
+            num_errors += 1
+        else:
+            num_warnings += 1
         report.append(LintDiagnostic(
             rule_id=violation.rule_id,
             line=violation.line,
@@ -112,11 +118,15 @@ def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
         ))
     
     if wellformedness_violations:
-        return report
+        return num_errors, num_warnings, report
     
     schema_violations = get_schema_violations(invoice_text)
     
     for violation in schema_violations:
+        if violation.is_fatal:
+            num_errors += 1
+        else:
+            num_warnings += 1
         report.append(LintDiagnostic(
             rule_id=violation.rule_id,
             line=violation.line,
@@ -128,12 +138,16 @@ def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
         ))
     
     if schema_violations:
-        return report
+        return num_errors, num_warnings, report
 
     syntax_violations, _, _, _ = get_xslt_violations(SYNTAX_EXECUTABLE, invoice_text)
     peppol_violations, _, _, _ = get_xslt_violations(PEPPOL_EXECUTABLE, invoice_text)
     
     for violation in syntax_violations + peppol_violations:
+        if violation.is_fatal:
+            num_errors += 1
+        else:
+            num_warnings += 1
         line = get_line_from_xpath(invoice_text, violation.xpath)
         report.append(LintDiagnostic(
             rule_id=violation.rule_id,
@@ -145,4 +159,4 @@ def generate_diagnostic_list(invoice_text: str) -> List[LintDiagnostic]:
             severity="error" if violation.is_fatal else "warning"
         ))
     
-    return report
+    return num_errors, num_warnings, report
