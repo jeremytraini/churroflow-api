@@ -61,7 +61,6 @@ class TokenAndUserReturn(BaseModel):
     id: int
     name: str
     email: str
-    role: str
 
 class ReportList(BaseModel):
     reports: List[Report]
@@ -106,3 +105,4 @@ class AuthReturnV1(BaseModel):
 
 class AuthReturnV2(BaseModel):
     token: str
+    id: int
