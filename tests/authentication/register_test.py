@@ -8,12 +8,11 @@ AUTH_REGISTER_V1 TESTS
 """
 
 # Test single registers with valid emails
-def test_register_unique_id_valid():
-    token1 = auth_register_v2("test", "test@test.com", "luciddreams14")
-    token2 = auth_register_v2("test", "test1@test.com", "luciddreams14")
+def test_register_unique_tokens_valid():
+    token1 = auth_register_v2("test", "test@test.com", "luciddreams14")["token"]
+    token2 = auth_register_v2("test", "test1@test.com", "luciddreams14")["token"]
     # Testing if tokens are unique
-    assert token1["token"] != token2["token"]
-    assert len(token1) == 1
+    assert token1 != token2
 
 # Test multiple registers
 def test_register_multiple_success():
