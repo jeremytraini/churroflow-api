@@ -4,6 +4,16 @@ import random
 import datetime
 import binascii
 import requests
+import sys
+
+# Check for file input and folder input
+
+if len(sys.argv) < 3:
+    print("Usage: python3 generate_invoices.py <template_file> <output_folder>")
+    sys.exit(1)
+    
+TEMPLATE_FILE = sys.argv[1]
+OUTPUT_FOLDER = sys.argv[2]
 
 # Instantiate a Faker object
 fake = Faker()
@@ -109,18 +119,18 @@ for i in range(1, NUM_INVOICES + 1):
 
 # List of stationary supply items and their price
 possible_items = [
-        ('Pens', 1.00),
-        ('Pencils', 0.50),
+        ('Pens', 1000.00),
+        ('Pencils', 1000.00),
         ('Paper', 0.10),
         ('Stapler', 5.00),
-        ('Staples', 0.05),
-        ('Paper Clips', 0.01),
+        ('Staples', 1.00),
+        ('Paper Clips', 1.00),
         ('Ruler', 0.50),
         ('Eraser', 0.10),
-        ('Glue', 0.50),
-        ('Scissors', 1.00),
-        ('Tape', 0.50),
-        ('Sticky Notes', 0.50),
+        ('Glue', 3.00),
+        ('Scissors', 6.00),
+        ('Tape', 5.00),
+        ('Sticky Notes', 4.00),
 ]
 
 # Generate fake data for the lineitems table
@@ -134,13 +144,14 @@ for i in range(1, NUM_LINE_ITEMS + 1):
         item[0],
         quantity,
         item[1],
-        round(quantity * item[1], 2)
+        # round(quantity * item[1], 2)
+        random.randint(200, 3000)
     ))
     
 
 
 TEMPLATE_INVOICE = None
-with open('AUInvoice_template.xml', 'r') as f:
+with open(TEMPLATE_FILE, 'r') as f:
     TEMPLATE_INVOICE = f.read()
 
 def get_address_data(lat, lon):
@@ -169,7 +180,7 @@ for invoice in invoices:
         continue
     sleep(0.5)
     
-    with open(f'sample_invoices/{invoice[0]}', 'w') as f:
+    with open(f'{OUTPUT_FOLDER}/{invoice[0]}', 'w') as f:
         invoice_text = TEMPLATE_INVOICE
         supplier_road = supplier_address_data["road"]
         supplier_suburb = supplier_address_data["suburb"]
