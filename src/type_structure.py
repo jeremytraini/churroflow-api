@@ -55,9 +55,12 @@ class Report(BaseModel):
     syntax_evaluation: Union[Evaluation, None]
     peppol_evaluation: Union[Evaluation, None]
 
-class Token(BaseModel):
+class TokenAndUserReturn(BaseModel):
     access_token: str
     token_type: str
+    id: int
+    name: str
+    email: str
 
 class ReportList(BaseModel):
     reports: List[Report]
@@ -102,3 +105,4 @@ class AuthReturnV1(BaseModel):
 
 class AuthReturnV2(BaseModel):
     token: str
+    id: int
