@@ -408,7 +408,9 @@ async def get_virtual_warehouse_data(n_clusters: int, from_date: str, to_date: s
 
 @app.post("/auth_login/v2", tags=["v2 auth"], responses=res_auth_login_v2)
 async def auth_login(form_data: OAuth2PasswordRequestForm = Depends()):
-    return Token(access_token=auth_login_v2(form_data.username, form_data.password).token, token_type="bearer")
+    token = auth_login_v2(form_data.username, form_data.password).token
+    user = Sessions.get(token=token).user
+    return TokenAndUserReturn(access_token=token, token_type="bearer", id=user.id, name=user.name, email=user.email)
 
 @app.post("/auth_register/v2", tags=["v2 auth"], responses=res_auth_register_v2)
 async def auth_register(form_data: AuthRegister) -> AuthReturnV2:

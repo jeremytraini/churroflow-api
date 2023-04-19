@@ -10,7 +10,7 @@ from tests.constants import VALID_INVOICE_TEXT
 """
 # Testing that the report was generated properly and matches input data
 def test_change_name_valid():
-    token = AuthReturnV2(**auth_register_v2("test@test.com", "abc123")).token
+    token = AuthReturnV2(**auth_register_v2("test", "test@test.com", "abc123")).token
     invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
     report_id = invoice_upload_text_v2(token, invoice.name, invoice.text)["report_id"]
 
@@ -26,20 +26,20 @@ def test_change_name_valid():
     assert report.invoice_name == "New Name"
 
 def test_change_name_valid_upload_invalid_token():
-    token = AuthReturnV2(**auth_register_v2("test@test.com", "abc123")).token
+    token = AuthReturnV2(**auth_register_v2("test", "test@test.com", "abc123")).token
     report_id = invoice_upload_text_v2(token, "invoice", VALID_INVOICE_TEXT)["report_id"]
     
     assert report_change_name_v2("invalid", report_id, "New Name")['detail'] == "Invalid token, please login/register"
 
 def test_change_name_not_owner():
-    token = AuthReturnV2(**auth_register_v2("test@test.com", "abc123")).token
-    token2 = AuthReturnV2(**auth_register_v2("test1@gmail.com", "abc123")).token
+    token = AuthReturnV2(**auth_register_v2("test", "test@test.com", "abc123")).token
+    token2 = AuthReturnV2(**auth_register_v2("test", "test1@gmail.com", "abc123")).token
     report_id = invoice_upload_text_v2(token, "invoice", VALID_INVOICE_TEXT)["report_id"]
     
     assert report_change_name_v2(token2, report_id, "New Name")['detail'] == "You do not have permission to rename this report"
 
 def test_change_name_long_invalid():
-    token = AuthReturnV2(**auth_register_v2("test@test.com", "abc123")).token
+    token = AuthReturnV2(**auth_register_v2("test", "test@test.com", "abc123")).token
     invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
     report_id = invoice_upload_text_v2(token, invoice.name, invoice.text)["report_id"]
 
@@ -52,7 +52,7 @@ def test_change_name_long_invalid():
     assert report_change_name_v2(token, report_id, new_name)['detail'] == "New name is longer than 100 characters"
 
 def test_change_name_invalid_report_id_negative():
-    token = AuthReturnV2(**auth_register_v2("test@test.com", "abc123")).token
+    token = AuthReturnV2(**auth_register_v2("test", "test@test.com", "abc123")).token
     invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
     report_id = invoice_upload_text_v2(token, invoice.name, invoice.text)["report_id"]
 
@@ -64,7 +64,7 @@ def test_change_name_invalid_report_id_negative():
     assert report_change_name_v2(token, -1, "New Name")['detail'] == "Report id cannot be less than 0"
 
 def test_change_name_invalid_report_id_not_found():
-    token = AuthReturnV2(**auth_register_v2("test@test.com", "abc123")).token
+    token = AuthReturnV2(**auth_register_v2("test", "test@test.com", "abc123")).token
     invoice = TextInvoice(name="My Invoice", text=VALID_INVOICE_TEXT)
     report_id = invoice_upload_text_v2(token, invoice.name, invoice.text)["report_id"]
 
