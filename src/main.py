@@ -9,6 +9,7 @@ from src.invoice_processing import *
 from src.type_structure import *
 from src.responses import *
 from src.database import clear_v2
+from src.kmeans import *
 from fastapi import Depends, FastAPI, Request, UploadFile, File
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
 from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
@@ -394,6 +395,15 @@ async def api_invoice_processing_delete_v2(invoice_id: int, token = Depends(get_
 async def api_invoice_processing_query_v2(query: str, from_date: str, to_date: str, token = Depends(get_token)):
     return invoice_processing_query_v2(query=query, from_date=from_date, to_date=to_date, owner=Sessions.get(token=token).user)
 
+@app.get("/virtual_warehouse_coords")
+async def get_virtual_warehouse_data(n_clusters: int, from_date: str, to_date: str, token = Depends(get_token)):
+    all_data = invoice_processing_query_v2(query="heatmapCoords", from_date=from_date, to_date=to_date, owner=Sessions.get(token=token).user)
+    if all_data == []:
+        return {"content": {"centers": []}}
+
+    centers = kmeans(all_data, n_clusters)
+    return {"content": centers}
+
 # AUTHENTICATION
 
 @app.post("/auth_login/v2", tags=["v2 auth"], responses=res_auth_login_v2)
@@ -411,6 +421,9 @@ async def invoice_generate_hash(invoice_text: TextInvoice) -> str:
 @app.delete("/clear/v2", tags=["v2 auth"])
 async def clear(token = Depends(get_token)):
     return clear_v2(token)
+
+
+
 
 
 # ENDPOINTS ABOVE
