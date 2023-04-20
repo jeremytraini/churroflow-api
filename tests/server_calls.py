@@ -251,9 +251,9 @@ def report_lint_v1(invoice: TextInvoice) -> Server_call_return:
 
 # Authentication endpoints
 
-def auth_register_v2(email: str, password: str) -> Server_call_return:
+def auth_register_v2(name: str, email: str, password: str) -> Server_call_return:
     payload = {
-        "name": "Test",
+        "name": name,
         "email": email,
         "password": password
     }

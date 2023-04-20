@@ -502,8 +502,8 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
         for invoice in query:
             delivery_coords.append({
                 "lat": invoice.delivery_latitude,
-                "lon": invoice.delivery_longitude,
-                "value": invoice.total_amount
+                "lng": invoice.delivery_longitude,
+                "count": invoice.total_amount
                 })
         
         return {
