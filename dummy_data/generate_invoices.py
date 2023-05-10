@@ -18,7 +18,7 @@ OUTPUT_FOLDER = sys.argv[2]
 # Instantiate a Faker object
 fake = Faker()
 
-NUM_INVOICES = 50
+NUM_INVOICES = 1200
 NUM_LINE_ITEMS = 300
 
 weighting = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
@@ -107,6 +107,8 @@ for i in range(1, NUM_INVOICES + 1):
         customer[0],
         customer[1],
         delivery_date.strftime('%Y-%m-%d'),
+        # random_lat(),
+        # random_lon(),
         round(random.uniform(supplier_warehouse[0], customer[2]), 6),
         round(random.uniform(supplier_warehouse[1], customer[3]), 6),
         # customer[2],
@@ -145,7 +147,7 @@ for i in range(1, NUM_LINE_ITEMS + 1):
         quantity,
         item[1],
         # round(quantity * item[1], 2)
-        random.randint(200, 3000)
+        random.randint(50, 500)
     ))
     
 
@@ -155,30 +157,63 @@ with open(TEMPLATE_FILE, 'r') as f:
     TEMPLATE_INVOICE = f.read()
 
 def get_address_data(lat, lon):
-    return requests.get(f"https://geocode.maps.co/reverse", params={
-        "lat": str(invoice[16]),
-        "lon": str(invoice[17]),
-    }).json()['address']
-
-for invoice in invoices:
-    supplier_address_data = get_address_data(invoice[16], invoice[17])
-        
-    flag = False
-    for key in ['road', 'suburb', 'city', 'state', 'postcode', 'country']:
-        if key not in supplier_address_data:
-            flag = True
-    if flag:
-        continue
     sleep(0.5)
     
+    addy = requests.get(f"https://geocode.maps.co/reverse", params={
+        "lat": str(lat),
+        "lon": str(lon),
+    }).json()['address']
+    
+    for key in ['road', 'suburb', 'postcode', 'country']:
+        if key not in addy:
+            return False
+    
+    return addy
+
+addresses = []
+for i in range(3):
+    addy = get_address_data(supplier_warehouses[i][0], supplier_warehouses[i][1])
+    while not addy:
+        print('retrying')
+        addy = get_address_data(supplier_warehouses[i][0], supplier_warehouses[i][1])
+    addresses.append(addy)
+
+# supplier_warehouses
+warehouse_addresses = {
+    supplier_warehouses[0][0]: addresses[0],
+    supplier_warehouses[1][0]: addresses[1],
+    supplier_warehouses[2][0]: addresses[2],
+}
+
+
+for invoice in invoices:
+    print('supplier coords', invoice[16], invoice[17])
+    print('delivery coords', invoice[21], invoice[22])
+    
+    # supplier_address_data = random.choice(warehouse_addresses)
+    supplier_address_data = warehouse_addresses[invoice[16]]
+        
+    # flag = False
+    # for key in ['road', 'postcode', 'country']:
+    #     if key not in supplier_address_data:
+    #         flag = True
+    # if flag:
+    #     continue
+    
     delivery_address_data = get_address_data(invoice[21], invoice[22])
-    flag = False
-    for key in ['road', 'suburb', 'city', 'state', 'postcode', 'country']:
-        if key not in delivery_address_data:
-            flag = True
-    if flag:
+    
+    if not delivery_address_data:
         continue
-    sleep(0.5)
+    # flag = False
+    # for key in ['road', 'postcode', 'country']:
+    #     if key not in delivery_address_data:
+    #         flag = True
+    # if flag:
+    #     continue
+    
+    # if supplier_address_data['road'] == delivery_address_data['road']:
+    #     print('Same road' + supplier_address_data['road'])
+    #     continue
     
     with open(f'{OUTPUT_FOLDER}/{invoice[0]}', 'w') as f:
         invoice_text = TEMPLATE_INVOICE
@@ -190,11 +225,10 @@ for invoice in invoices:
         supplier_country = supplier_address_data["country"]
         
         delivery_road = delivery_address_data["road"]
-        delivery_suburb = delivery_address_data["suburb"]
-        delivery_city = delivery_address_data["city"]
-        delivery_state = delivery_address_data["state"]
+        delivery_suburb = delivery_address_data["suburb"] if "suburb" in delivery_address_data else ""
+        delivery_city = delivery_address_data["city"] if "city" in delivery_address_data else ""
+        delivery_state = delivery_address_data["state"] if "state" in delivery_address_data else ""
         delivery_postcode = delivery_address_data["postcode"]
-        delivery_country = delivery_address_data["country"]
         
         invoice_text = invoice_text.replace("{{name}}", invoice[8])
         invoice_text = invoice_text.replace("{{issue_date}}", invoice[9])
@@ -207,11 +241,11 @@ for invoice in invoices:
         invoice_text = invoice_text.replace("{{order_ref}}", 'CF%06X' % random.randint(0, 256**3-1))
         
         invoice_text = invoice_text.replace("{{supplier_road}}", supplier_road)
-        invoice_text = invoice_text.replace("{{supplier_suburb}}", supplier_suburb)
-        invoice_text = invoice_text.replace("{{supplier_city}}", supplier_city)
-        invoice_text = invoice_text.replace("{{supplier_state}}", supplier_state)
+        invoice_text = invoice_text.replace("{{supplier_suburb}}", supplier_suburb if supplier_suburb else "")
+        invoice_text = invoice_text.replace("{{supplier_city}}", supplier_city if supplier_city else "")
+        invoice_text = invoice_text.replace("{{supplier_state}}", supplier_state if supplier_state else "")
         invoice_text = invoice_text.replace("{{supplier_postcode}}", supplier_postcode)
-        invoice_text = invoice_text.replace("{{supplier_country}}", supplier_country)
+        invoice_text = invoice_text.replace("{{supplier_country}}", "Australia")
         
         invoice_text = invoice_text.replace("{{customer_name}}", invoice[18])
         invoice_text = invoice_text.replace("{{customer_abn}}", str(invoice[19]))
@@ -222,7 +256,7 @@ for invoice in invoices:
         invoice_text = invoice_text.replace("{{delivery_city}}", delivery_city)
         invoice_text = invoice_text.replace("{{delivery_state}}", delivery_state)
         invoice_text = invoice_text.replace("{{delivery_postcode}}", delivery_postcode)
-        invoice_text = invoice_text.replace("{{delivery_country}}", delivery_country)
+        invoice_text = invoice_text.replace("{{delivery_country}}", "Australia")
         
         invoice_text = invoice_text.replace("{{customer_contact_name}}", invoice[23])
         invoice_text = invoice_text.replace("{{customer_contact_email}}", invoice[24])

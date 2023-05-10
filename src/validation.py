@@ -4,6 +4,7 @@ from lxml import etree
 from src.helpers import create_temp_file
 from os import unlink
 from src.database import Violations
+from src.error import InputError
 
 
 def get_wellformedness_violations(invoice_text: str) -> List[Violation]:
@@ -51,7 +52,7 @@ def get_xslt_violations(executable, invoice_text: str):
     unlink(tmp_filename)
     
     if not schematron_output:
-        raise Exception("Could not generate evaluation due to invalid XML!")
+        raise InputError("Could not generate evaluation due to invalid XML!")
     
     violations = []
     

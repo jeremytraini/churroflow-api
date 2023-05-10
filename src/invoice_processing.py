@@ -135,6 +135,11 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
             supplier_latitude, supplier_longitude = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
             delivery_latitude, delivery_longitude = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
             
+            print(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
+            print("supplier location", supplier_latitude, supplier_longitude)
+            print(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
+            print("delivery location", delivery_latitude, delivery_longitude)
+            
             invoice = Invoices.create(
                 name=invoice_name,
                 owner=owner,
