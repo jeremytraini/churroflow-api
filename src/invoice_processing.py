@@ -526,7 +526,8 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             warehouse_coords.append({
                 "lat": invoice.supplier_latitude,
                 "lon": invoice.supplier_longitude,
-                "value": invoice.total_amount
+                "value": invoice.total_amount,
+                "name": invoice.supplier_name,
                 })
         
         return {

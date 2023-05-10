@@ -14,11 +14,12 @@ if len(sys.argv) < 3:
     
 TEMPLATE_FILE = sys.argv[1]
 OUTPUT_FOLDER = sys.argv[2]
+START_AT = 1
 
 # Instantiate a Faker object
 fake = Faker()
 
-NUM_INVOICES = 1200
+NUM_INVOICES = 500
 NUM_LINE_ITEMS = 300
 
 weighting = [10, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
@@ -56,10 +57,14 @@ def random_lon():
 
 supplier = ("Churros Pty Ltd", abn())
 supplier_warehouses = [
-    (random_lat(), random_lon()),
-    (random_lat(), random_lon()),
-    (random_lat(), random_lon()),
+    (-33.913944, 151.022874),
+    (-33.848536, 150.901258),
+    (-33.791443, 151.072199),
 ]
+
+# -33.913944, 151.022874
+# -33.848536, 150.901258
+# -33.791443, 151.072199
 
 fake_customers = [(fake.company(),
                    abn(),
@@ -72,7 +77,7 @@ fake_customers = [(fake.company(),
 
 # Generate fake data for the invoices table
 invoices = []
-for i in range(1, NUM_INVOICES + 1):
+for i in range(START_AT, NUM_INVOICES + 1):
     customer = random.choice(fake_customers)
     
     issue_date = fake.date_time_between(start_date="-2y", end_date="now")
