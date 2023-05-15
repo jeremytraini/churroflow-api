@@ -534,112 +534,73 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             "data": warehouse_coords
         }
         
-    # warehouseUnitsOverTime
-    # warehouseAvgDeliveryDistance
-    # warehouseAvgDeliveryTime
-    elif query == "warehouseUnitsOverTime":
+    elif query == "deliveriesMadeMonthly":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
         
-        if warehouse_lat and warehouse_long:
-            warehouse_lat = float(warehouse_lat)
-            warehouse_lon = float(warehouse_long)
-            query = (Invoices.select(fn.SUM(Invoices.total_amount), fn.DATE_TRUNC('month', Invoices.invoice_start_date).alias('year_month'))
-                .where((Invoices.is_valid == True) &
-                          (Invoices.invoice_start_date >= from_date) &
-                            (Invoices.invoice_start_date <= to_date) &
-                            (Invoices.supplier_latitude == warehouse_lat) &
-                            (Invoices.supplier_longitude == warehouse_lon) &
-                            (Invoices.owner == owner))
-                .group_by(fn.DATE_TRUNC('month', Invoices.invoice_start_date)))
-        else:
-            query = (Invoices.select(Invoices.total_amount, fn.DATE_TRUNC('month', Invoices.invoice_start_date).alias('year_month'))
-                .where((Invoices.is_valid == True) &
-                          (Invoices.invoice_start_date >= from_date) &
-                            (Invoices.invoice_start_date <= to_date) &
-                            (Invoices.owner == owner))
-                .group_by(fn.DATE_TRUNC('month', Invoices.invoice_start_date)))
-            
-        
-        data = []
-        for invoice in query:
-            data.append({
-                "date": invoice.invoice_start_date,
-                "value": invoice.total_amount
-                })
+        query = (LineItems
+             .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                     fn.COUNT('*').alias('count'))
+             .join(Invoices)
+             .where(Invoices.delivery_date.between(from_date, to_date))
+             .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+             .order_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon')))
+    
+        result = query.dicts()
+        labels = [item['month'] for item in result]
+        data = [item['count'] for item in result]
         
         return {
-            "labels": [d["year_month"] for d in data],
-            "data": [d["value"] for d in data]
+            "labels": labels,
+            "data": data
         }
-    elif query == "warehouseAvgDeliveryDistanceOverTime":
+        
+    elif query == "warehouseMonthlyAvgDeliveryTime":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
         
-        if warehouse_lat and warehouse_long:
-            warehouse_lat = float(warehouse_lat)
-            warehouse_lon = float(warehouse_long)
-            query = (Invoices.select(Invoices.supplier_latitude, Invoices.supplier_longitude, Invoices.delivery_latitude, Invoices.delivery_longitude, fn.DATE_TRUNC('month', Invoices.invoice_start_date).alias('year_month'))
-                .where((Invoices.is_valid == True) &
-                          (Invoices.invoice_start_date >= from_date) &
-                            (Invoices.invoice_start_date <= to_date) &
-                            (Invoices.supplier_latitude == warehouse_lat) &
-                            (Invoices.supplier_longitude == warehouse_lon) &
-                            (Invoices.owner == owner))
-                .group_by(fn.DATE_TRUNC('month', Invoices.invoice_start_date)))
-        else:
-            query = (Invoices.select(Invoices.supplier_latitude, Invoices.supplier_longitude, Invoices.delivery_latitude, Invoices.delivery_longitude, fn.DATE_TRUNC('month', Invoices.invoice_start_date).alias('year_month'))
-                .where((Invoices.is_valid == True) &
-                          (Invoices.invoice_start_date >= from_date) &
-                            (Invoices.invoice_start_date <= to_date) &
-                            (Invoices.owner == owner))
-                .group_by(fn.DATE_TRUNC('month', Invoices.invoice_start_date)))
-        
-        data = []
-        for invoice in query:
-            data.append({
-                "date": invoice.invoice_start_date,
-                "value": coord_distance(invoice.supplier_latitude, invoice.supplier_longitude, invoice.delivery_latitude, invoice.delivery_longitude)
-                })
+        query = (Invoices
+             .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                     fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('average_delivery_time'))
+             .where(Invoices.delivery_date.between(from_date, to_date))
+             .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+             .order_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon')))
+    
+        result = query.dicts()
+        labels = [item['month'] for item in result]
+        data = [item['average_delivery_time'] for item in result]
         
         return {
-            "labels": [d["year_month"] for d in data],
-            "data": [d["value"] for d in data]
+            "labels": labels,
+            "data": data
         }
-    elif query == "warehouseAvgDeliveryTimeOverTime":
+        
+    elif query == "warehouseMonthlyAvgDeliveryDistance":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
+
+        subquery = (Invoices
+                    .select(fn.AVG(Invoices.supplier_latitude).alias('avg_supplier_latitude'),
+                            fn.AVG(Invoices.supplier_longitude).alias('avg_supplier_longitude'),
+                            fn.AVG(Invoices.delivery_latitude).alias('avg_delivery_latitude'),
+                            fn.AVG(Invoices.delivery_longitude).alias('avg_delivery_longitude'))
+                    .where(Invoices.delivery_date.between(from_date, to_date))
+                    .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon')))
         
-        if warehouse_lat and warehouse_long:
-            warehouse_lat = float(warehouse_lat)
-            warehouse_lon = float(warehouse_long)
-            query = (Invoices.select(Invoices.supplier_latitude, Invoices.supplier_longitude, Invoices.delivery_latitude, Invoices.delivery_longitude, (Invoices.delivery_date - Invoices.invoice_start_date).alias('delivery_time'), fn.DATE_TRUNC('month', Invoices.invoice_start_date).alias('year_month'))
-                .where((Invoices.is_valid == True) &
-                          (Invoices.invoice_start_date >= from_date) &
-                            (Invoices.invoice_start_date <= to_date) &
-                            (Invoices.supplier_latitude == warehouse_lat) &
-                            (Invoices.supplier_longitude == warehouse_lon) &
-                            (Invoices.owner == owner))
-                .group_by(fn.DATE_TRUNC('month', Invoices.invoice_start_date)))
-        else:
-            query = (Invoices.select(Invoices.supplier_latitude, Invoices.supplier_longitude, Invoices.delivery_latitude, Invoices.delivery_longitude, (Invoices.delivery_date - Invoices.invoice_start_date).alias('delivery_time'), fn.DATE_TRUNC('month', Invoices.invoice_start_date).alias('year_month'))
-                .where((Invoices.is_valid == True) &
-                          (Invoices.invoice_start_date >= from_date) &
-                            (Invoices.invoice_start_date <= to_date) &
-                            (Invoices.owner == owner))
-                .group_by(fn.DATE_TRUNC('month', Invoices.invoice_start_date)))
+        query = (subquery
+                .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                        fn.AVG(fn.coord_distance(
+                            subquery.c.avg_supplier_latitude, subquery.c.avg_supplier_longitude,
+                            subquery.c.avg_delivery_latitude, subquery.c.avg_delivery_longitude)).alias('average_delivery_distance'))
+                .order_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon')))
         
-        data = []
-        for invoice in query:
-            data.append({
-                "year_month": invoice.year_month,
-                "value": invoice.delivery_time
-                })
+        result = query.dicts()
+        labels = [item['month'] for item in result]
+        data = [item['average_delivery_distance'] for item in result]
         
         return {
-            "labels": [d["year_month"] for d in data],
-            "data": [d["value"] for d in data]
+            "labels": labels,
+            "data": data
         }
-        
         
     return {}
