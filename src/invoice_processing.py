@@ -9,6 +9,9 @@ from collections import defaultdict
 import calendar
 
 
+TOLERANCE = 0.001
+
+
 def get_invoice_field(invoice_data: dict, field: str) -> str:
     if field in invoice_data:
         return invoice_data[field]
@@ -539,19 +542,38 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
     elif query == "deliveriesMadeMonthly":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
-        
-        query = (LineItems
-             .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
-                     fn.COUNT('*').alias('count'))
-             .join(Invoices)
-             .where(Invoices.delivery_date.between(from_date, to_date))
-             .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
-             .order_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon')))
-    
+
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            query = (LineItems
+                    .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                            fn.COUNT('*').alias('count'))
+                    .join(Invoices)
+                    .where((Invoices.is_valid == True) &
+                            (Invoices.owner == owner) &
+                            (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                            (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                            Invoices.delivery_date.between(from_date, to_date)
+                        )
+                    .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+                    .order_by(fn.MIN(Invoices.delivery_date)))
+        else:
+            query = (LineItems
+                .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                        fn.COUNT('*').alias('count'))
+                .join(Invoices)
+                .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        Invoices.delivery_date.between(from_date, to_date)
+                    )
+                .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+                .order_by(fn.MIN(Invoices.delivery_date)))
+
         result = query.dicts()
         labels = [item['month'] for item in result]
         data = [item['count'] for item in result]
-        
+
         return {
             "labels": labels,
             "data": data
@@ -561,12 +583,28 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
         
-        query = (Invoices
-             .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
-                     fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('average_delivery_time'))
-             .where(Invoices.delivery_date.between(from_date, to_date))
-             .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
-             .order_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon')))
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            query = (Invoices
+                .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                        fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('average_delivery_time'))
+                .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                        (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                        Invoices.delivery_date.between(from_date, to_date))
+                .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+                .order_by(fn.MIN(Invoices.delivery_date)))
+        else:
+            query = (Invoices
+                .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                        fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('average_delivery_time'))
+                .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        Invoices.delivery_date.between(from_date, to_date))
+                .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+                .order_by(fn.MIN(Invoices.delivery_date)))
     
         result = query.dicts()
         labels = [item['month'] for item in result]
@@ -581,24 +619,45 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
         
-        invoices = (
-            Invoices.select(
-                Invoices.delivery_date,
-                Invoices.supplier_latitude,
-                Invoices.supplier_longitude,
-                Invoices.delivery_latitude,
-                Invoices.delivery_longitude,
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            invoices = (
+                Invoices.select(
+                    Invoices.delivery_date,
+                    Invoices.supplier_latitude,
+                    Invoices.supplier_longitude,
+                    Invoices.delivery_latitude,
+                    Invoices.delivery_longitude,
+                )
+                .where(
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                    (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                    (Invoices.delivery_date >= from_date) &
+                    (Invoices.delivery_date <= to_date)
+                )
+                .order_by(Invoices.delivery_date)
             )
-            .where(
-                (Invoices.delivery_date >= from_date)
-                & (Invoices.delivery_date <= to_date)
-                & (Invoices.supplier_latitude.is_null(False))
-                & (Invoices.supplier_longitude.is_null(False))
-                & (Invoices.delivery_latitude.is_null(False))
-                & (Invoices.delivery_longitude.is_null(False))
+        else:
+            print("No warehouse coordinates provided")
+            invoices = (
+                Invoices.select(
+                    Invoices.delivery_date,
+                    Invoices.supplier_latitude,
+                    Invoices.supplier_longitude,
+                    Invoices.delivery_latitude,
+                    Invoices.delivery_longitude,
+                )
+                .where(
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (Invoices.delivery_date >= from_date)
+                    & (Invoices.delivery_date <= to_date)
+                )
+                .order_by(Invoices.delivery_date)
             )
-            .order_by(Invoices.delivery_date)
-        )
 
         monthly_distances = defaultdict(list)
         for invoice in invoices:
