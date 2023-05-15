@@ -5,6 +5,8 @@ from src.database import Invoices, LineItems
 import requests
 from src.generation import generate_diagnostic_list
 from peewee import DoesNotExist, fn
+from collections import defaultdict
+import calendar
 
 
 def get_invoice_field(invoice_data: dict, field: str) -> str:
@@ -578,29 +580,46 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
     elif query == "warehouseMonthlyAvgDeliveryDistance":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        invoices = (
+            Invoices.select(
+                Invoices.delivery_date,
+                Invoices.supplier_latitude,
+                Invoices.supplier_longitude,
+                Invoices.delivery_latitude,
+                Invoices.delivery_longitude,
+            )
+            .where(
+                (Invoices.delivery_date >= from_date)
+                & (Invoices.delivery_date <= to_date)
+                & (Invoices.supplier_latitude.is_null(False))
+                & (Invoices.supplier_longitude.is_null(False))
+                & (Invoices.delivery_latitude.is_null(False))
+                & (Invoices.delivery_longitude.is_null(False))
+            )
+            .order_by(Invoices.delivery_date)
+        )
 
-        subquery = (Invoices
-                    .select(fn.AVG(Invoices.supplier_latitude).alias('avg_supplier_latitude'),
-                            fn.AVG(Invoices.supplier_longitude).alias('avg_supplier_longitude'),
-                            fn.AVG(Invoices.delivery_latitude).alias('avg_delivery_latitude'),
-                            fn.AVG(Invoices.delivery_longitude).alias('avg_delivery_longitude'))
-                    .where(Invoices.delivery_date.between(from_date, to_date))
-                    .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon')))
-        
-        query = (subquery
-                .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
-                        fn.AVG(fn.coord_distance(
-                            subquery.c.avg_supplier_latitude, subquery.c.avg_supplier_longitude,
-                            subquery.c.avg_delivery_latitude, subquery.c.avg_delivery_longitude)).alias('average_delivery_distance'))
-                .order_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon')))
-        
-        result = query.dicts()
-        labels = [item['month'] for item in result]
-        data = [item['average_delivery_distance'] for item in result]
-        
-        return {
-            "labels": labels,
-            "data": data
+        monthly_distances = defaultdict(list)
+        for invoice in invoices:
+            month = invoice.delivery_date.strftime("%b")
+            distance = coord_distance(
+                invoice.supplier_latitude,
+                invoice.supplier_longitude,
+                invoice.delivery_latitude,
+                invoice.delivery_longitude,
+            )
+            monthly_distances[month].append(distance)
+
+        avg_monthly_distances = {
+            month: sum(distances) / len(distances)
+            for month, distances in monthly_distances.items()
         }
+
+        result = {
+            "labels": list(avg_monthly_distances.keys()),
+            "data": list(avg_monthly_distances.values()),
+        }
+        return result
         
     return {}
