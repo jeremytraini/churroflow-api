@@ -392,8 +392,8 @@ async def api_invoice_processing_delete_v2(invoice_id: int, token = Depends(get_
     return invoice_processing_delete_v2(invoice_id=invoice_id, owner=Sessions.get(token=token).user)
 
 @app.get("/invoice_processing/query/v2", tags=["v2 invoice_processing"])
-async def api_invoice_processing_query_v2(query: str, from_date: str, to_date: str, token = Depends(get_token)):
-    return invoice_processing_query_v2(query=query, from_date=from_date, to_date=to_date, owner=Sessions.get(token=token).user)
+async def api_invoice_processing_query_v2(query: str, from_date: str, to_date: str, warehouse_lat: str = None, warehouse_long = None, token = Depends(get_token)):
+    return invoice_processing_query_v2(query=query, from_date=from_date, to_date=to_date, warehouse_lat=warehouse_lat, warehouse_long=warehouse_long, owner=Sessions.get(token=token).user)
 
 @app.get("/virtual_warehouse_coords")
 async def get_virtual_warehouse_data(n_clusters: int, from_date: str, to_date: str, token = Depends(get_token)):
