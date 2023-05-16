@@ -512,30 +512,117 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
         
         # Get suburb name, total deliveries, total revenue and average delivery time for each suburb
-        suburb_query = (Invoices
-                .select(Invoices.delivery_suburb,
-                        fn.COUNT('*').alias('total_deliveries'),
-                        fn.SUM(Invoices.total_amount).alias('total_revenue'),
-                        fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
-                .where((Invoices.is_valid == True) &
-                       (Invoices.owner == owner) &
-                       (Invoices.invoice_start_date >= from_date) &
-                       (Invoices.invoice_start_date <= to_date))
-                .group_by(Invoices.delivery_suburb))
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            suburb_query = (Invoices
+                    .select(Invoices.delivery_suburb,
+                            fn.COUNT('*').alias('total_deliveries'),
+                            fn.SUM(Invoices.total_amount).alias('total_revenue'),
+                            fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
+                    .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                        (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                        (Invoices.invoice_start_date >= from_date) &
+                        (Invoices.invoice_start_date <= to_date))
+                    .group_by(Invoices.delivery_suburb))
 
-        result = {"data": []}
+            result = {"data": []}
 
-        for i, suburb in enumerate(suburb_query):
-            suburb_data = {
-                "id": i,
-                "name": suburb.delivery_suburb if suburb.delivery_suburb else "Not Specified",
-                "total-deliveries": suburb.total_deliveries,
-                "total-revenue": suburb.total_revenue,
-                "avg-delivery-time": suburb.avg_delivery_time
-            }
-            result["data"].append(suburb_data)
+            for i, suburb in enumerate(suburb_query):
+                suburb_data = {
+                    "id": i,
+                    "name": suburb.delivery_suburb if suburb.delivery_suburb else "Not Specified",
+                    "total-deliveries": suburb.total_deliveries,
+                    "total-revenue": suburb.total_revenue,
+                    "avg-delivery-time": suburb.avg_delivery_time
+                }
+                result["data"].append(suburb_data)
+        else:
+            suburb_query = (Invoices
+                    .select(Invoices.delivery_suburb,
+                            fn.COUNT('*').alias('total_deliveries'),
+                            fn.SUM(Invoices.total_amount).alias('total_revenue'),
+                            fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
+                    .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        (Invoices.invoice_start_date >= from_date) &
+                        (Invoices.invoice_start_date <= to_date))
+                    .group_by(Invoices.delivery_suburb))
+
+            result = {"data": []}
+
+            for i, suburb in enumerate(suburb_query):
+                suburb_data = {
+                    "id": i,
+                    "name": suburb.delivery_suburb if suburb.delivery_suburb else "Not Specified",
+                    "total-deliveries": suburb.total_deliveries,
+                    "total-revenue": suburb.total_revenue,
+                    "avg-delivery-time": suburb.avg_delivery_time
+                }
+                result["data"].append(suburb_data)
         
         return result
+    
+    elif query == "warehouseProductDataTable":
+        # Convert from_date and to_date to datetime objects
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+
+            # Query the database and calculate the desired values
+            results = []
+            line_items = (LineItems.select(LineItems.description,
+                                        fn.SUM(LineItems.quantity).alias('total_units'),
+                                        fn.SUM(LineItems.total_price).alias('total_value'))
+                                .join(Invoices)
+                                .where((Invoices.is_valid == True) &
+                                        (Invoices.owner == owner) &
+                                        (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                                        (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                                        (Invoices.invoice_start_date >= from_date) &
+                                        (Invoices.invoice_start_date <= to_date))
+                                .group_by(LineItems.description))
+
+            for i, item in enumerate(line_items):
+                # Append the result to the list
+                result = {
+                    "id": i,
+                    "name": item.description,
+                    "total-units": item.total_units,
+                    "total-value": item.total_value,
+                }
+                results.append(result)
+        else:
+            # Query the database and calculate the desired values
+            results = []
+            line_items = (LineItems.select(LineItems.description,
+                                        fn.SUM(LineItems.quantity).alias('total_units'),
+                                        fn.SUM(LineItems.total_price).alias('total_value'))
+                                .join(Invoices)
+                                .where((Invoices.is_valid == True) &
+                                        (Invoices.owner == owner) &
+                                        (Invoices.invoice_start_date >= from_date) &
+                                        (Invoices.invoice_start_date <= to_date))
+                                .group_by(LineItems.description))
+
+            for i, item in enumerate(line_items):
+                # Append the result to the list
+                result = {
+                    "id": i,
+                    "name": item.description,
+                    "total-units": item.total_units,
+                    "total-value": item.total_value,
+                }
+                results.append(result)
+
+        # Create the final output dictionary
+        return {"data": results}
         
     elif query == "heatmapCoords":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
