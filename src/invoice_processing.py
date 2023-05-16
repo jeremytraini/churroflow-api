@@ -47,8 +47,8 @@ def process_and_update_invoice(invoice_text: str, invoice: Invoices):
             raise InputError(detail="Could not parse invoice, please check your invoice")
         else:
             invoice_data = response.json()
-            supplier_latitude, supplier_longitude = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
-            delivery_latitude, delivery_longitude = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
+            supplier_latitude, supplier_longitude, _ = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
+            delivery_latitude, delivery_longitude, delivery_suburb = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
             
             invoice.date_last_modified = datetime.now()
             invoice.num_warnings = num_warnings
@@ -74,6 +74,7 @@ def process_and_update_invoice(invoice_text: str, invoice: Invoices):
             invoice.delivery_date = invoice_data["Delivery"]["ActualDeliveryDate"]
             invoice.delivery_latitude = delivery_latitude
             invoice.delivery_longitude = delivery_longitude
+            invoice.delivery_suburb = delivery_suburb
             
             invoice.customer_contact_name = invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["Name"]
             invoice.customer_contact_email = invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["ElectronicMail"]
@@ -137,8 +138,8 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
             raise InputError(detail="Could not parse invoice, please check your invoice")
         else:
             invoice_data = response.json()
-            supplier_latitude, supplier_longitude = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
-            delivery_latitude, delivery_longitude = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
+            supplier_latitude, supplier_longitude, _ = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
+            delivery_latitude, delivery_longitude, delivery_suburb = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
             
             print(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
             print("supplier location", supplier_latitude, supplier_longitude)
@@ -175,6 +176,7 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
                 delivery_date=invoice_data["Delivery"]["ActualDeliveryDate"],
                 delivery_latitude=delivery_latitude,
                 delivery_longitude=delivery_longitude,
+                delivery_suburb=delivery_suburb,
 
                 customer_contact_name=invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["Name"],
                 customer_contact_email=invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["ElectronicMail"],
@@ -197,6 +199,7 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
 
 def get_lat_long_from_address(data: str) -> tuple:
     query = []
+    suburb = None
     
     for field in ["StreetName", "AdditionalStreetName", "CityName", "PostalZone", "CountrySubentity", "AddressLine", "Country"]:
         if field in data:
@@ -204,6 +207,12 @@ def get_lat_long_from_address(data: str) -> tuple:
                 query.append(str(list(data[field].values())[0]))
             else:
                 query.append(str(data[field]))
+                
+            if field == "AdditionalStreetName":
+                suburb = str(data[field])
+    
+    if not suburb:
+        raise InputError(detail="No suburb found")
     
     response = requests.get(f"https://geocode.maps.co/search", params={
         "q": " ".join(query),
@@ -212,7 +221,7 @@ def get_lat_long_from_address(data: str) -> tuple:
     if response.status_code == 200:
         data = response.json()
         if data:
-            return data[0]["lat"], data[0]["lon"]
+            return data[0]["lat"], data[0]["lon"], suburb
     raise InputError(detail="Could not find location of party. Address: " + " ".join(query))
 
 def invoice_processing_upload_text_v2(invoice_name: str, invoice_text: str, owner: int) -> InvoiceID:
@@ -498,6 +507,36 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             "data": client_data
         }
         
+    elif query == "suburbDataTable":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        # Get suburb name, total deliveries, total revenue and average delivery time for each suburb
+        suburb_query = (Invoices
+                .select(Invoices.delivery_suburb,
+                        fn.COUNT('*').alias('total_deliveries'),
+                        fn.SUM(Invoices.total_amount).alias('total_revenue'),
+                        fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
+                .where((Invoices.is_valid == True) &
+                       (Invoices.owner == owner) &
+                       (Invoices.invoice_start_date >= from_date) &
+                       (Invoices.invoice_start_date <= to_date))
+                .group_by(Invoices.delivery_suburb))
+
+        result = {"data": []}
+
+        for i, suburb in enumerate(suburb_query):
+            suburb_data = {
+                "id": i,
+                "name": suburb.delivery_suburb if suburb.delivery_suburb else "Not Specified",
+                "total-deliveries": suburb.total_deliveries,
+                "total-revenue": suburb.total_revenue,
+                "avg-delivery-time": suburb.avg_delivery_time
+            }
+            result["data"].append(suburb_data)
+        
+        return result
+        
     elif query == "heatmapCoords":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
@@ -781,6 +820,8 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
                 .where(
                     (Invoices.delivery_date >= from_date) &
                     (Invoices.delivery_date <= to_date) &
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
                     (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
                     (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE)
                 )
@@ -800,6 +841,8 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
                 .where(
                     (Invoices.delivery_date >= prev_year_from_date) &
                     (Invoices.delivery_date <= prev_year_to_date) &
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
                     (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
                     (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE)
                 )
@@ -825,8 +868,10 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
                 )
                 .join(LineItems, on=(Invoices.id == LineItems.invoice))
                 .where(
-                    (Invoices.delivery_date >= from_date)
-                    & (Invoices.delivery_date <= to_date)
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (Invoices.delivery_date >= from_date) &
+                    (Invoices.delivery_date <= to_date)
                 )
             )
 
@@ -842,8 +887,10 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
                 )
                 .join(LineItems, on=(Invoices.id == LineItems.invoice))
                 .where(
-                    (Invoices.delivery_date >= prev_year_from_date)
-                    & (Invoices.delivery_date <= prev_year_to_date)
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (Invoices.delivery_date >= prev_year_from_date) &
+                    (Invoices.delivery_date <= prev_year_to_date)
                 )
             )
             
