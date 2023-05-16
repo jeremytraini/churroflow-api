@@ -641,7 +641,6 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
                 .order_by(Invoices.delivery_date)
             )
         else:
-            print("No warehouse coordinates provided")
             invoices = (
                 Invoices.select(
                     Invoices.delivery_date,
@@ -680,5 +679,185 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             "data": list(avg_monthly_distances.values()),
         }
         return result
+    
+    elif query == "numUniqueCustomers":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+
+            # Query the database for active customers within the date range
+            active_customers = Invoices.select().where(
+                (Invoices.is_valid == True) &
+                (Invoices.invoice_end_date >= from_date) &
+                (Invoices.invoice_end_date <= to_date) &
+                (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                (Invoices.owner == owner)
+            ).distinct(Invoices.customer_name)
+
+            # Count the number of active customers
+            num_active_customers = active_customers.count()
+
+            # Define the date range to query for the previous 12 months
+            prev_year_to_date = to_date - timedelta(days=365)
+            prev_year_from_date = prev_year_to_date - timedelta(days=90)
+
+            # Query the database for active customers within the previous 12 months
+            prev_year_active_customers = Invoices.select().where(
+                (Invoices.is_valid == True) &
+                (Invoices.invoice_end_date >= prev_year_from_date) &
+                (Invoices.invoice_end_date <= prev_year_to_date) &
+                (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                (Invoices.owner == owner)
+            ).distinct(Invoices.customer_name)
+
+            # Count the number of active customers in the previous 12 months
+            num_prev_year_active_customers = prev_year_active_customers.count()
+
+            # Calculate the percentage change in active customers from the previous 12 months
+            if num_prev_year_active_customers == 0:
+                percentage_change = 0
+            else:
+                percentage_change = ((num_active_customers - num_prev_year_active_customers) / num_prev_year_active_customers) * 100
+
+            return {
+                "value": num_active_customers,
+                "change": percentage_change,
+            }
+        else:
+            # Query the database for active customers within the date range
+            active_customers = Invoices.select().where(
+                (Invoices.is_valid == True) &
+                (Invoices.invoice_end_date >= from_date) &
+                (Invoices.invoice_end_date <= to_date) &
+                (Invoices.owner == owner)
+            ).distinct(Invoices.customer_name)
+
+            # Count the number of active customers
+            num_active_customers = active_customers.count()
+
+            # Define the date range to query for the previous 12 months
+            prev_year_to_date = to_date - timedelta(days=365)
+            prev_year_from_date = prev_year_to_date - timedelta(days=90)
+
+            # Query the database for active customers within the previous 12 months
+            prev_year_active_customers = Invoices.select().where(
+                (Invoices.is_valid == True) &
+                (Invoices.invoice_end_date >= prev_year_from_date) &
+                (Invoices.invoice_end_date <= prev_year_to_date) &
+                (Invoices.owner == owner)
+            ).distinct(Invoices.customer_name)
+
+            # Count the number of active customers in the previous 12 months
+            num_prev_year_active_customers = prev_year_active_customers.count()
+
+            # Calculate the percentage change in active customers from the previous 12 months
+            if num_prev_year_active_customers == 0:
+                percentage_change = 0
+            else:
+                percentage_change = ((num_active_customers - num_prev_year_active_customers) / num_prev_year_active_customers) * 100
+
+            return {
+                "value": num_active_customers,
+                "change": percentage_change,
+            }
+    elif query == "totalRevenue":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            
+            invoices = (
+                Invoices.select(
+                    fn.SUM(LineItems.total_price).alias('total_revenue')
+                )
+                .join(LineItems, on=(Invoices.id == LineItems.invoice))
+                .where(
+                    (Invoices.delivery_date >= from_date) &
+                    (Invoices.delivery_date <= to_date) &
+                    (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                    (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE)
+                )
+            )
+
+            total_revenue = invoices[0].total_revenue if invoices else 0
+            
+            # Define the date range to query for the previous 12 months
+            prev_year_to_date = to_date - timedelta(days=365)
+            prev_year_from_date = prev_year_to_date - timedelta(days=90)
+            
+            prev_year_invoices = (
+                Invoices.select(
+                    fn.SUM(LineItems.total_price).alias('total_revenue')
+                )
+                .join(LineItems, on=(Invoices.id == LineItems.invoice))
+                .where(
+                    (Invoices.delivery_date >= prev_year_from_date) &
+                    (Invoices.delivery_date <= prev_year_to_date) &
+                    (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                    (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE)
+                )
+            )
+            
+            prev_year_total_revenue = prev_year_invoices[0].total_revenue if prev_year_invoices else 0
+            
+            # Calculate the percentage change in total revenue from the previous 12 months
+            if prev_year_total_revenue == 0:
+                percentage_change = 0
+            else:
+                percentage_change = ((total_revenue - prev_year_total_revenue) / prev_year_total_revenue) * 100
+            
+            return {
+                "value": total_revenue,
+                "change": percentage_change,
+            }
+            
+        else:
+            invoices = (
+                Invoices.select(
+                    fn.SUM(LineItems.total_price).alias('total_revenue')
+                )
+                .join(LineItems, on=(Invoices.id == LineItems.invoice))
+                .where(
+                    (Invoices.delivery_date >= from_date)
+                    & (Invoices.delivery_date <= to_date)
+                )
+            )
+
+            total_revenue = invoices[0].total_revenue if invoices else 0
+            
+            # Define the date range to query for the previous 12 months
+            prev_year_to_date = to_date - timedelta(days=365)
+            prev_year_from_date = prev_year_to_date - timedelta(days=90)
+            
+            prev_year_invoices = (
+                Invoices.select(
+                    fn.SUM(LineItems.total_price).alias('total_revenue')
+                )
+                .join(LineItems, on=(Invoices.id == LineItems.invoice))
+                .where(
+                    (Invoices.delivery_date >= prev_year_from_date)
+                    & (Invoices.delivery_date <= prev_year_to_date)
+                )
+            )
+            
+            prev_year_total_revenue = prev_year_invoices[0].total_revenue if prev_year_invoices else 0
+            
+            # Calculate the percentage change in total revenue from the previous 12 months
+            if prev_year_total_revenue == 0:
+                percentage_change = 0
+            else:
+                percentage_change = ((total_revenue - prev_year_total_revenue) / prev_year_total_revenue) * 100
+            
+            return {
+                "value": total_revenue,
+                "change": percentage_change,
+            }
         
     return {}
