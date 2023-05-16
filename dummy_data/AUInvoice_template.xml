@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+    xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+    xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+    <cbc:CustomizationID>urn:cen.eu:en16931:2017#conformant#urn:fdc:peppol.eu:2017:poacc:billing:international:aunz:3.0</cbc:CustomizationID>
+    <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
+    <cbc:ID>{{name}}</cbc:ID>
+    <cbc:IssueDate>{{issue_date}}</cbc:IssueDate>
+    <cbc:DueDate>{{due_date}}</cbc:DueDate>
+    <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+    <cbc:Note>Tax invoice</cbc:Note>
+    <cbc:DocumentCurrencyCode>AUD</cbc:DocumentCurrencyCode>
+    <cbc:AccountingCost>4025:123:4343</cbc:AccountingCost>
+    <cbc:BuyerReference>0150abc</cbc:BuyerReference>
+    <cac:InvoicePeriod>
+       <cbc:StartDate>{{invoice_start_date}}</cbc:StartDate>
+       <cbc:EndDate>{{invoice_end_date}}</cbc:EndDate>
+    </cac:InvoicePeriod>
+    <cac:OrderReference>
+       <cbc:ID>{{order_ref}}</cbc:ID>
+       <cbc:SalesOrderID>12345678</cbc:SalesOrderID>
+    </cac:OrderReference>
+    <cac:BillingReference>
+       <cac:InvoiceDocumentReference>
+           <cbc:ID>{{order_ref}}</cbc:ID>
+           <cbc:IssueDate>{{issue_date}}</cbc:IssueDate>
+       </cac:InvoiceDocumentReference>
+    </cac:BillingReference>
+    <cac:AccountingSupplierParty>
+        <cac:Party>
+            <cbc:EndpointID schemeID="0151">{{supplier_abn}}</cbc:EndpointID>
+            <cac:PartyIdentification>
+                <cbc:ID>{{supplier_abn}}</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>{{supplier_name}}</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>{{supplier_road}}</cbc:StreetName>
+                <cbc:AdditionalStreetName>{{supplier_suburb}}</cbc:AdditionalStreetName>
+                <cbc:CityName>{{supplier_city}} {{supplier_state}}</cbc:CityName>
+                <cbc:PostalZone>{{supplier_postcode}}</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cbc:CompanyID>{{supplier_abn}}</cbc:CompanyID>
+                <cac:TaxScheme>
+                    <cbc:ID>GST</cbc:ID>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>{{supplier_name}}</cbc:RegistrationName>
+                <cbc:CompanyID  schemeID="0151">{{supplier_abn}}</cbc:CompanyID>
+                <cbc:CompanyLegalForm>Partnership</cbc:CompanyLegalForm>
+            </cac:PartyLegalEntity>
+
+            <cac:Contact>
+                <cbc:Name>Ronald MacDonald</cbc:Name>
+                <cbc:Telephone>Mobile 0430123456</cbc:Telephone>
+                <cbc:ElectronicMail>ronald.macdonald@qualitygoods.com.au</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingSupplierParty>
+
+    <cac:AccountingCustomerParty>
+        <cac:Party>
+            <cbc:EndpointID schemeID="0151">{{customer_abn}}</cbc:EndpointID>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="0151">{{customer_abn}}</cbc:ID>
+            </cac:PartyIdentification>
+            <cac:PartyName>
+                <cbc:Name>{{customer_name}}</cbc:Name>
+            </cac:PartyName>
+            <cac:PostalAddress>
+                <cbc:StreetName>100 Queen Street</cbc:StreetName>
+                <cbc:AdditionalStreetName>Po box 878</cbc:AdditionalStreetName>
+                <cbc:CityName>Sydney</cbc:CityName>
+                <cbc:PostalZone>2000</cbc:PostalZone>
+                <cac:Country>
+                    <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+                </cac:Country>
+            </cac:PostalAddress>
+            <cac:PartyTaxScheme>
+                <cbc:CompanyID>{{customer_abn}}</cbc:CompanyID>
+                <cac:TaxScheme>
+                    <cbc:ID>GST</cbc:ID>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme>
+            <cac:PartyLegalEntity>
+                <cbc:RegistrationName>{{customer_name}}</cbc:RegistrationName>
+                <cbc:CompanyID schemeID="0151">{{customer_abn}}</cbc:CompanyID>
+            </cac:PartyLegalEntity>
+            <cac:Contact>
+                <cbc:Name>{{customer_contact_name}}</cbc:Name>
+                <cbc:Telephone>{{customer_contact_phone}}</cbc:Telephone>
+                <cbc:ElectronicMail>{{customer_contact_email}}</cbc:ElectronicMail>
+            </cac:Contact>
+        </cac:Party>
+    </cac:AccountingCustomerParty>
+
+    <cac:PayeeParty>
+       <cac:PartyIdentification>
+           <cbc:ID>{{customer_abn}}</cbc:ID>
+       </cac:PartyIdentification>
+       <cac:PartyName>
+           <cbc:Name>Mr Anderson</cbc:Name>
+       </cac:PartyName>
+
+       <cac:PartyLegalEntity>
+           <cbc:CompanyID schemeID="0151">{{customer_abn}}</cbc:CompanyID>
+       </cac:PartyLegalEntity>    
+    </cac:PayeeParty>
+
+    <cac:TaxRepresentativeParty>
+       <cac:PartyName>
+           <cbc:Name>Mr Wilson</cbc:Name>
+       </cac:PartyName>
+       <cac:PostalAddress>
+           <cbc:StreetName>16 Stout Street</cbc:StreetName>
+           <cbc:AdditionalStreetName>Po box 878</cbc:AdditionalStreetName>
+           <cbc:CityName>Sydney</cbc:CityName>
+           <cbc:PostalZone>2000</cbc:PostalZone>
+           <cbc:CountrySubentity>NSW</cbc:CountrySubentity>
+           <cac:AddressLine>
+               <cbc:Line>Unit 1</cbc:Line>
+           </cac:AddressLine>
+           <cac:Country>
+                    <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+           </cac:Country>
+      </cac:PostalAddress>
+           <cac:PartyTaxScheme>
+                <cbc:CompanyID>{{customer_abn}}</cbc:CompanyID>
+                <cac:TaxScheme>
+                    <cbc:ID>GST</cbc:ID>
+                </cac:TaxScheme>
+            </cac:PartyTaxScheme> 
+    </cac:TaxRepresentativeParty>
+
+
+    <cac:Delivery>
+        <cbc:ActualDeliveryDate>{{delivery_date}}</cbc:ActualDeliveryDate>
+        <cac:DeliveryLocation>
+            <cbc:ID schemeID="0151">{{customer_abn}}</cbc:ID>
+            <cac:Address>
+                <cbc:StreetName>{{delivery_road}}</cbc:StreetName>
+                <cbc:AdditionalStreetName>{{delivery_suburb}}</cbc:AdditionalStreetName>
+                <cbc:CityName>{{delivery_city}}</cbc:CityName>
+                <cbc:PostalZone>{{delivery_postcode}}</cbc:PostalZone>
+                <cbc:CountrySubentity>{{delivery_state}}</cbc:CountrySubentity>
+                <cac:Country>
+                    <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+                </cac:Country>
+            </cac:Address>
+        </cac:DeliveryLocation>
+        <cac:DeliveryParty>
+            <cac:PartyName>
+                <cbc:Name>Delivery party Name</cbc:Name>
+            </cac:PartyName>
+        </cac:DeliveryParty>
+    </cac:Delivery>
+    <cac:PaymentMeans>
+        <cbc:PaymentMeansCode name="Credit transfer">30</cbc:PaymentMeansCode>
+        <cbc:PaymentID>PaymentReferenceText</cbc:PaymentID>
+        <cac:PayeeFinancialAccount>
+            <cbc:ID>AccountNumber</cbc:ID>
+            <cbc:Name>AccountName</cbc:Name>
+            <cac:FinancialInstitutionBranch>
+                <cbc:ID>BSB Number</cbc:ID>
+            </cac:FinancialInstitutionBranch>
+        </cac:PayeeFinancialAccount>  
+    </cac:PaymentMeans>
+    <cac:PaymentTerms>
+        <cbc:Note>Payment within 30 days</cbc:Note>
+    </cac:PaymentTerms>
+    <cac:AllowanceCharge>
+        <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+        <cbc:AllowanceChargeReasonCode>SAA</cbc:AllowanceChargeReasonCode>
+        <cbc:AllowanceChargeReason>Shipping and Handling</cbc:AllowanceChargeReason>
+        <cbc:MultiplierFactorNumeric>0</cbc:MultiplierFactorNumeric>
+        <cbc:Amount currencyID="AUD">0</cbc:Amount>
+        <cbc:BaseAmount currencyID="AUD">0</cbc:BaseAmount>
+        <cac:TaxCategory>
+            <cbc:ID>S</cbc:ID>
+            <cbc:Percent>10</cbc:Percent>
+            <cac:TaxScheme>
+                <cbc:ID>GST</cbc:ID>
+            </cac:TaxScheme>
+        </cac:TaxCategory>
+    </cac:AllowanceCharge>
+
+
+    <cac:TaxTotal>
+        <cbc:TaxAmount currencyID="AUD">{{tax_amount}}</cbc:TaxAmount>
+        <cac:TaxSubtotal>
+            <cbc:TaxableAmount currencyID="AUD">{{pre_tax_total}}</cbc:TaxableAmount>
+            <cbc:TaxAmount currencyID="AUD">{{tax_amount}}</cbc:TaxAmount>
+            <cac:TaxCategory>
+                <cbc:ID>S</cbc:ID>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxScheme>
+                    <cbc:ID>GST</cbc:ID>
+                </cac:TaxScheme>
+            </cac:TaxCategory>
+        </cac:TaxSubtotal>
+    </cac:TaxTotal>
+
+
+
+    <cac:LegalMonetaryTotal>
+        <cbc:LineExtensionAmount currencyID="AUD">{{pre_tax_total}}</cbc:LineExtensionAmount>
+        <cbc:TaxExclusiveAmount currencyID="AUD">{{pre_tax_total}}</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount currencyID="AUD">{{total_amount}}</cbc:TaxInclusiveAmount>
+        <cbc:ChargeTotalAmount currencyID="AUD">0.00</cbc:ChargeTotalAmount>
+        <cbc:PrepaidAmount currencyID="AUD">0.00</cbc:PrepaidAmount>
+        <cbc:PayableAmount currencyID="AUD">{{total_amount}}</cbc:PayableAmount>
+    </cac:LegalMonetaryTotal>
+ 
+
+    <cac:InvoiceLine>
+       <cbc:ID>1</cbc:ID>
+       <cbc:InvoicedQuantity unitCode="E99">1</cbc:InvoicedQuantity>
+       <cbc:LineExtensionAmount currencyID= "AUD">{{pre_tax_total}}</cbc:LineExtensionAmount>
+           <cbc:AccountingCost>Consulting Fees</cbc:AccountingCost>
+           <cac:InvoicePeriod>
+           <cbc:StartDate>{{invoice_start_date}}</cbc:StartDate> 
+           <cbc:EndDate>{{invoice_end_date}}</cbc:EndDate> 
+       </cac:InvoicePeriod>
+       <cac:OrderLineReference>
+            <cbc:LineID>123</cbc:LineID>
+       </cac:OrderLineReference>
+       <cac:DocumentReference>
+            <cbc:ID schemeID="HWB">9000074677</cbc:ID>
+            <cbc:DocumentTypeCode>130</cbc:DocumentTypeCode> 
+       </cac:DocumentReference>
+
+    <cac:Item>
+        <cbc:Description>{{description}}</cbc:Description>
+           <cbc:Name>{{description}}</cbc:Name>
+           <cac:BuyersItemIdentification>
+              <cbc:ID>W659590</cbc:ID>
+           </cac:BuyersItemIdentification>
+           <cac:SellersItemIdentification>
+              <cbc:ID>WG546767</cbc:ID>
+           </cac:SellersItemIdentification>
+           <cac:StandardItemIdentification>
+              <cbc:ID  schemeID="0002">WG546767</cbc:ID>
+           </cac:StandardItemIdentification>
+            <cac:OriginCountry>
+                <cbc:IdentificationCode>AU</cbc:IdentificationCode>
+            </cac:OriginCountry>
+            <cac:CommodityClassification>
+                <cbc:ItemClassificationCode listID="SRV">09348023</cbc:ItemClassificationCode>
+            </cac:CommodityClassification>
+            <cac:ClassifiedTaxCategory>
+                <cbc:ID>S</cbc:ID>
+                <cbc:Percent>10</cbc:Percent>
+                <cac:TaxScheme>
+                    <cbc:ID>GST</cbc:ID>
+                </cac:TaxScheme>
+            </cac:ClassifiedTaxCategory>
+        </cac:Item>
+
+       <cac:Price>
+           <cbc:PriceAmount currencyID="AUD">{{pre_tax_total}}</cbc:PriceAmount>
+       </cac:Price>
+
+    </cac:InvoiceLine>
+
+
+</Invoice>

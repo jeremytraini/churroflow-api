@@ -5,6 +5,11 @@ from src.database import Invoices, LineItems
 import requests
 from src.generation import generate_diagnostic_list
 from peewee import DoesNotExist, fn
+from collections import defaultdict
+import calendar
+
+
+TOLERANCE = 0.001
 
 
 def get_invoice_field(invoice_data: dict, field: str) -> str:
@@ -42,8 +47,8 @@ def process_and_update_invoice(invoice_text: str, invoice: Invoices):
             raise InputError(detail="Could not parse invoice, please check your invoice")
         else:
             invoice_data = response.json()
-            supplier_latitude, supplier_longitude = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
-            delivery_latitude, delivery_longitude = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
+            supplier_latitude, supplier_longitude, _ = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
+            delivery_latitude, delivery_longitude, delivery_suburb = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
             
             invoice.date_last_modified = datetime.now()
             invoice.num_warnings = num_warnings
@@ -69,6 +74,7 @@ def process_and_update_invoice(invoice_text: str, invoice: Invoices):
             invoice.delivery_date = invoice_data["Delivery"]["ActualDeliveryDate"]
             invoice.delivery_latitude = delivery_latitude
             invoice.delivery_longitude = delivery_longitude
+            invoice.delivery_suburb = delivery_suburb
             
             invoice.customer_contact_name = invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["Name"]
             invoice.customer_contact_email = invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["ElectronicMail"]
@@ -132,8 +138,13 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
             raise InputError(detail="Could not parse invoice, please check your invoice")
         else:
             invoice_data = response.json()
-            supplier_latitude, supplier_longitude = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
-            delivery_latitude, delivery_longitude = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
+            supplier_latitude, supplier_longitude, _ = get_lat_long_from_address(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
+            delivery_latitude, delivery_longitude, delivery_suburb = get_lat_long_from_address(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
+            
+            print(invoice_data["AccountingSupplierParty"]["Party"]["PostalAddress"])
+            print("supplier location", supplier_latitude, supplier_longitude)
+            print(invoice_data["Delivery"]["DeliveryLocation"]["Address"])
+            print("delivery location", delivery_latitude, delivery_longitude)
             
             invoice = Invoices.create(
                 name=invoice_name,
@@ -165,6 +176,7 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
                 delivery_date=invoice_data["Delivery"]["ActualDeliveryDate"],
                 delivery_latitude=delivery_latitude,
                 delivery_longitude=delivery_longitude,
+                delivery_suburb=delivery_suburb,
 
                 customer_contact_name=invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["Name"],
                 customer_contact_email=invoice_data["AccountingCustomerParty"]["Party"]["Contact"]["ElectronicMail"],
@@ -187,6 +199,7 @@ def store_and_process_invoice(invoice_name: str, invoice_text: str, owner: int) 
 
 def get_lat_long_from_address(data: str) -> tuple:
     query = []
+    suburb = None
     
     for field in ["StreetName", "AdditionalStreetName", "CityName", "PostalZone", "CountrySubentity", "AddressLine", "Country"]:
         if field in data:
@@ -194,6 +207,12 @@ def get_lat_long_from_address(data: str) -> tuple:
                 query.append(str(list(data[field].values())[0]))
             else:
                 query.append(str(data[field]))
+                
+            if field == "AdditionalStreetName":
+                suburb = str(data[field])
+    
+    if not suburb:
+        raise InputError(detail="No suburb found")
     
     response = requests.get(f"https://geocode.maps.co/search", params={
         "q": " ".join(query),
@@ -202,7 +221,7 @@ def get_lat_long_from_address(data: str) -> tuple:
     if response.status_code == 200:
         data = response.json()
         if data:
-            return data[0]["lat"], data[0]["lon"]
+            return data[0]["lat"], data[0]["lon"], suburb
     raise InputError(detail="Could not find location of party. Address: " + " ".join(query))
 
 def invoice_processing_upload_text_v2(invoice_name: str, invoice_text: str, owner: int) -> InvoiceID:
@@ -288,7 +307,7 @@ def coord_distance(lat1, lon1, lat2, lon2):
 
     return R * c
 
-def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner: int):
+def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner: int, warehouse_lat: str = None, warehouse_long = None):
     if query == "numActiveCustomers":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
@@ -488,6 +507,123 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             "data": client_data
         }
         
+    elif query == "suburbDataTable":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        # Get suburb name, total deliveries, total revenue and average delivery time for each suburb
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            suburb_query = (Invoices
+                    .select(Invoices.delivery_suburb,
+                            fn.COUNT('*').alias('total_deliveries'),
+                            fn.SUM(Invoices.total_amount).alias('total_revenue'),
+                            fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
+                    .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                        (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                        (Invoices.invoice_start_date >= from_date) &
+                        (Invoices.invoice_start_date <= to_date))
+                    .group_by(Invoices.delivery_suburb))
+
+            result = {"data": []}
+
+            for i, suburb in enumerate(suburb_query):
+                suburb_data = {
+                    "id": i,
+                    "name": suburb.delivery_suburb if suburb.delivery_suburb else "Not Specified",
+                    "total-deliveries": suburb.total_deliveries,
+                    "total-revenue": suburb.total_revenue,
+                    "avg-delivery-time": suburb.avg_delivery_time
+                }
+                result["data"].append(suburb_data)
+        else:
+            suburb_query = (Invoices
+                    .select(Invoices.delivery_suburb,
+                            fn.COUNT('*').alias('total_deliveries'),
+                            fn.SUM(Invoices.total_amount).alias('total_revenue'),
+                            fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('avg_delivery_time'))
+                    .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        (Invoices.invoice_start_date >= from_date) &
+                        (Invoices.invoice_start_date <= to_date))
+                    .group_by(Invoices.delivery_suburb))
+
+            result = {"data": []}
+
+            for i, suburb in enumerate(suburb_query):
+                suburb_data = {
+                    "id": i,
+                    "name": suburb.delivery_suburb if suburb.delivery_suburb else "Not Specified",
+                    "total-deliveries": suburb.total_deliveries,
+                    "total-revenue": suburb.total_revenue,
+                    "avg-delivery-time": suburb.avg_delivery_time
+                }
+                result["data"].append(suburb_data)
+        
+        return result
+    
+    elif query == "warehouseProductDataTable":
+        # Convert from_date and to_date to datetime objects
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+
+            # Query the database and calculate the desired values
+            results = []
+            line_items = (LineItems.select(LineItems.description,
+                                        fn.SUM(LineItems.quantity).alias('total_units'),
+                                        fn.SUM(LineItems.total_price).alias('total_value'))
+                                .join(Invoices)
+                                .where((Invoices.is_valid == True) &
+                                        (Invoices.owner == owner) &
+                                        (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                                        (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                                        (Invoices.invoice_start_date >= from_date) &
+                                        (Invoices.invoice_start_date <= to_date))
+                                .group_by(LineItems.description))
+
+            for i, item in enumerate(line_items):
+                # Append the result to the list
+                result = {
+                    "id": i,
+                    "name": item.description,
+                    "total-units": item.total_units,
+                    "total-value": item.total_value,
+                }
+                results.append(result)
+        else:
+            # Query the database and calculate the desired values
+            results = []
+            line_items = (LineItems.select(LineItems.description,
+                                        fn.SUM(LineItems.quantity).alias('total_units'),
+                                        fn.SUM(LineItems.total_price).alias('total_value'))
+                                .join(Invoices)
+                                .where((Invoices.is_valid == True) &
+                                        (Invoices.owner == owner) &
+                                        (Invoices.invoice_start_date >= from_date) &
+                                        (Invoices.invoice_start_date <= to_date))
+                                .group_by(LineItems.description))
+
+            for i, item in enumerate(line_items):
+                # Append the result to the list
+                result = {
+                    "id": i,
+                    "name": item.description,
+                    "total-units": item.total_units,
+                    "total-value": item.total_value,
+                }
+                results.append(result)
+
+        # Create the final output dictionary
+        return {"data": results}
+        
     elif query == "heatmapCoords":
         from_date = datetime.strptime(from_date, "%Y-%m-%d")
         to_date = datetime.strptime(to_date, "%Y-%m-%d")
@@ -521,11 +657,341 @@ def invoice_processing_query_v2(query: str, from_date: str, to_date: str, owner:
             warehouse_coords.append({
                 "lat": invoice.supplier_latitude,
                 "lon": invoice.supplier_longitude,
-                "value": invoice.total_amount
+                "value": invoice.total_amount,
+                "name": invoice.supplier_name,
                 })
         
         return {
             "data": warehouse_coords
         }
+        
+    elif query == "deliveriesMadeMonthly":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            query = (LineItems
+                    .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                            fn.COUNT('*').alias('count'))
+                    .join(Invoices)
+                    .where((Invoices.is_valid == True) &
+                            (Invoices.owner == owner) &
+                            (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                            (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                            Invoices.delivery_date.between(from_date, to_date)
+                        )
+                    .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+                    .order_by(fn.MIN(Invoices.delivery_date)))
+        else:
+            query = (LineItems
+                .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                        fn.COUNT('*').alias('count'))
+                .join(Invoices)
+                .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        Invoices.delivery_date.between(from_date, to_date)
+                    )
+                .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+                .order_by(fn.MIN(Invoices.delivery_date)))
+
+        result = query.dicts()
+        labels = [item['month'] for item in result]
+        data = [item['count'] for item in result]
+
+        return {
+            "labels": labels,
+            "data": data
+        }
+        
+    elif query == "warehouseMonthlyAvgDeliveryTime":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            query = (Invoices
+                .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                        fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('average_delivery_time'))
+                .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                        (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                        Invoices.delivery_date.between(from_date, to_date))
+                .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+                .order_by(fn.MIN(Invoices.delivery_date)))
+        else:
+            query = (Invoices
+                .select(fn.TO_CHAR(Invoices.delivery_date, 'Mon').alias('month'),
+                        fn.AVG(Invoices.delivery_date - Invoices.invoice_start_date).alias('average_delivery_time'))
+                .where((Invoices.is_valid == True) &
+                        (Invoices.owner == owner) &
+                        Invoices.delivery_date.between(from_date, to_date))
+                .group_by(fn.TO_CHAR(Invoices.delivery_date, 'Mon'))
+                .order_by(fn.MIN(Invoices.delivery_date)))
+    
+        result = query.dicts()
+        labels = [item['month'] for item in result]
+        data = [item['average_delivery_time'] for item in result]
+        
+        return {
+            "labels": labels,
+            "data": data
+        }
+        
+    elif query == "warehouseMonthlyAvgDeliveryDistance":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            invoices = (
+                Invoices.select(
+                    Invoices.delivery_date,
+                    Invoices.supplier_latitude,
+                    Invoices.supplier_longitude,
+                    Invoices.delivery_latitude,
+                    Invoices.delivery_longitude,
+                )
+                .where(
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                    (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                    (Invoices.delivery_date >= from_date) &
+                    (Invoices.delivery_date <= to_date)
+                )
+                .order_by(Invoices.delivery_date)
+            )
+        else:
+            invoices = (
+                Invoices.select(
+                    Invoices.delivery_date,
+                    Invoices.supplier_latitude,
+                    Invoices.supplier_longitude,
+                    Invoices.delivery_latitude,
+                    Invoices.delivery_longitude,
+                )
+                .where(
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (Invoices.delivery_date >= from_date)
+                    & (Invoices.delivery_date <= to_date)
+                )
+                .order_by(Invoices.delivery_date)
+            )
+
+        monthly_distances = defaultdict(list)
+        for invoice in invoices:
+            month = invoice.delivery_date.strftime("%b")
+            distance = coord_distance(
+                invoice.supplier_latitude,
+                invoice.supplier_longitude,
+                invoice.delivery_latitude,
+                invoice.delivery_longitude,
+            )
+            monthly_distances[month].append(distance)
+
+        avg_monthly_distances = {
+            month: sum(distances) / len(distances)
+            for month, distances in monthly_distances.items()
+        }
+
+        result = {
+            "labels": list(avg_monthly_distances.keys()),
+            "data": list(avg_monthly_distances.values()),
+        }
+        return result
+    
+    elif query == "numUniqueCustomers":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+
+            # Query the database for active customers within the date range
+            active_customers = Invoices.select().where(
+                (Invoices.is_valid == True) &
+                (Invoices.invoice_end_date >= from_date) &
+                (Invoices.invoice_end_date <= to_date) &
+                (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                (Invoices.owner == owner)
+            ).distinct(Invoices.customer_name)
+
+            # Count the number of active customers
+            num_active_customers = active_customers.count()
+
+            # Define the date range to query for the previous 12 months
+            prev_year_to_date = to_date - timedelta(days=365)
+            prev_year_from_date = prev_year_to_date - timedelta(days=90)
+
+            # Query the database for active customers within the previous 12 months
+            prev_year_active_customers = Invoices.select().where(
+                (Invoices.is_valid == True) &
+                (Invoices.invoice_end_date >= prev_year_from_date) &
+                (Invoices.invoice_end_date <= prev_year_to_date) &
+                (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE) &
+                (Invoices.owner == owner)
+            ).distinct(Invoices.customer_name)
+
+            # Count the number of active customers in the previous 12 months
+            num_prev_year_active_customers = prev_year_active_customers.count()
+
+            # Calculate the percentage change in active customers from the previous 12 months
+            if num_prev_year_active_customers == 0:
+                percentage_change = 0
+            else:
+                percentage_change = ((num_active_customers - num_prev_year_active_customers) / num_prev_year_active_customers) * 100
+
+            return {
+                "value": num_active_customers,
+                "change": percentage_change,
+            }
+        else:
+            # Query the database for active customers within the date range
+            active_customers = Invoices.select().where(
+                (Invoices.is_valid == True) &
+                (Invoices.invoice_end_date >= from_date) &
+                (Invoices.invoice_end_date <= to_date) &
+                (Invoices.owner == owner)
+            ).distinct(Invoices.customer_name)
+
+            # Count the number of active customers
+            num_active_customers = active_customers.count()
+
+            # Define the date range to query for the previous 12 months
+            prev_year_to_date = to_date - timedelta(days=365)
+            prev_year_from_date = prev_year_to_date - timedelta(days=90)
+
+            # Query the database for active customers within the previous 12 months
+            prev_year_active_customers = Invoices.select().where(
+                (Invoices.is_valid == True) &
+                (Invoices.invoice_end_date >= prev_year_from_date) &
+                (Invoices.invoice_end_date <= prev_year_to_date) &
+                (Invoices.owner == owner)
+            ).distinct(Invoices.customer_name)
+
+            # Count the number of active customers in the previous 12 months
+            num_prev_year_active_customers = prev_year_active_customers.count()
+
+            # Calculate the percentage change in active customers from the previous 12 months
+            if num_prev_year_active_customers == 0:
+                percentage_change = 0
+            else:
+                percentage_change = ((num_active_customers - num_prev_year_active_customers) / num_prev_year_active_customers) * 100
+
+            return {
+                "value": num_active_customers,
+                "change": percentage_change,
+            }
+    elif query == "totalRevenue":
+        from_date = datetime.strptime(from_date, "%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%Y-%m-%d")
+        
+        if warehouse_lat and warehouse_long:
+            warehouse_lat = float(warehouse_lat)
+            warehouse_long = float(warehouse_long)
+            
+            invoices = (
+                Invoices.select(
+                    fn.SUM(LineItems.total_price).alias('total_revenue')
+                )
+                .join(LineItems, on=(Invoices.id == LineItems.invoice))
+                .where(
+                    (Invoices.delivery_date >= from_date) &
+                    (Invoices.delivery_date <= to_date) &
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                    (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE)
+                )
+            )
+
+            total_revenue = invoices[0].total_revenue if invoices else 0
+            
+            # Define the date range to query for the previous 12 months
+            prev_year_to_date = to_date - timedelta(days=365)
+            prev_year_from_date = prev_year_to_date - timedelta(days=90)
+            
+            prev_year_invoices = (
+                Invoices.select(
+                    fn.SUM(LineItems.total_price).alias('total_revenue')
+                )
+                .join(LineItems, on=(Invoices.id == LineItems.invoice))
+                .where(
+                    (Invoices.delivery_date >= prev_year_from_date) &
+                    (Invoices.delivery_date <= prev_year_to_date) &
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (fn.ABS(Invoices.supplier_latitude - warehouse_lat) <= TOLERANCE) &
+                    (fn.ABS(Invoices.supplier_longitude - warehouse_long) <= TOLERANCE)
+                )
+            )
+            
+            prev_year_total_revenue = prev_year_invoices[0].total_revenue if prev_year_invoices else 0
+            
+            # Calculate the percentage change in total revenue from the previous 12 months
+            if prev_year_total_revenue == 0:
+                percentage_change = 0
+            else:
+                percentage_change = ((total_revenue - prev_year_total_revenue) / prev_year_total_revenue) * 100
+            
+            return {
+                "value": total_revenue,
+                "change": percentage_change,
+            }
+            
+        else:
+            invoices = (
+                Invoices.select(
+                    fn.SUM(LineItems.total_price).alias('total_revenue')
+                )
+                .join(LineItems, on=(Invoices.id == LineItems.invoice))
+                .where(
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (Invoices.delivery_date >= from_date) &
+                    (Invoices.delivery_date <= to_date)
+                )
+            )
+
+            total_revenue = invoices[0].total_revenue if invoices else 0
+            
+            # Define the date range to query for the previous 12 months
+            prev_year_to_date = to_date - timedelta(days=365)
+            prev_year_from_date = prev_year_to_date - timedelta(days=90)
+            
+            prev_year_invoices = (
+                Invoices.select(
+                    fn.SUM(LineItems.total_price).alias('total_revenue')
+                )
+                .join(LineItems, on=(Invoices.id == LineItems.invoice))
+                .where(
+                    (Invoices.is_valid == True) &
+                    (Invoices.owner == owner) &
+                    (Invoices.delivery_date >= prev_year_from_date) &
+                    (Invoices.delivery_date <= prev_year_to_date)
+                )
+            )
+            
+            prev_year_total_revenue = prev_year_invoices[0].total_revenue if prev_year_invoices else 0
+            
+            # Calculate the percentage change in total revenue from the previous 12 months
+            if prev_year_total_revenue == 0:
+                percentage_change = 0
+            else:
+                percentage_change = ((total_revenue - prev_year_total_revenue) / prev_year_total_revenue) * 100
+            
+            return {
+                "value": total_revenue,
+                "change": percentage_change,
+            }
         
     return {}

@@ -86,7 +86,8 @@ def auth_login_v2(email, password) -> AuthReturnV2:
     id = auth_login_v1(email, password).auth_user_id
     now = datetime.now()
     token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
-    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=1))
+    
+    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=10))
     return AuthReturnV2(token=token, id=id)
 
 
@@ -94,5 +95,5 @@ def auth_register_v2(name, email, password) -> AuthReturnV2:
     id = auth_register_v1(name, email, password).auth_user_id
     now = datetime.now()
     token = hashlib.sha256(id.to_bytes(8, 'big') + now.strftime("%s").encode("utf-8")).hexdigest()
-    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=1))
+    Sessions.create(user=id, token=token, date_created=now, date_expires=now + timedelta(days=10))
     return AuthReturnV2(token=token, id=id)

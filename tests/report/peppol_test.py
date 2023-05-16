@@ -52,9 +52,6 @@ def test_peppol_single_violation():
     
     abn_violation = peppol_evaluation.violations[0]
     
-    # From 'A-NZ_Invoice_Extension_v1.0.8.docx' file:
-    # PEPPOL-COMMON-R050 | Australian Business Number (ABN) MUST be stated in the correct format. | Same | warning
-    
     # Check that the violation is for the correct rule and is flagged as fatal
     assert abn_violation.rule_id == "PEPPOL-COMMON-R050"
     assert abn_violation.is_fatal == False

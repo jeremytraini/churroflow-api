@@ -130,6 +130,7 @@ class Invoices(BaseModel):
     delivery_date = DateField(null=True,default=None)
     delivery_latitude = FloatField(null=True,default=None)
     delivery_longitude = FloatField(null=True,default=None)
+    delivery_suburb = TextField(null=True,default=None)
     
     customer_contact_name = TextField(null=True,default=None)
     customer_contact_email = TextField(null=True,default=None)
@@ -203,13 +204,9 @@ tables = [Users, Evaluations, Reports, Violations, Sessions, Invoices, LineItems
 # Create the tables in the database
 def create_tables():
     with db:
-        if db.table_exists('users'):
-            # add name column to users table if it doesn't exist
-            db.execute_sql('ALTER TABLE users ADD COLUMN IF NOT EXISTS name TEXT;')
-            
-        if db.table_exists('reports'):
-            # add owner column to reports table if it doesn't exist
-            db.execute_sql('ALTER TABLE reports ADD COLUMN IF NOT EXISTS owner_id INTEGER REFERENCES users(id);')
+        if db.table_exists('invoices'):
+            # add delivery_suburb column to invoices table if it doesn't exist
+            db.execute_sql('ALTER TABLE invoices ADD COLUMN IF NOT EXISTS delivery_suburb TEXT NULL DEFAULT NULL;')
             
         db.create_tables(tables)
 
