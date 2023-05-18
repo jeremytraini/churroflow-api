@@ -2,7 +2,6 @@ from src.type_structure import *
 from src.database import Reports
 from bs4 import BeautifulSoup
 from peewee import DoesNotExist
-from weasyprint import HTML
 from io import StringIO, BytesIO
 import csv
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -35,10 +34,7 @@ def export_pdf_report_v1(report_id: int, owner=None) -> bytes:
     if report.owner != None and report.owner != owner:
         raise ForbiddenError("You do not have permission to view report")
     
-    html = export_html_report_v1(report_id)
-    pdf_bytes = HTML(string=html).write_pdf()
-    
-    return pdf_bytes
+    return b"No pdf report available"
 
 def copy_element(element, parent):
     new_element = BeautifulSoup(str(element), "lxml").body.contents[0]
