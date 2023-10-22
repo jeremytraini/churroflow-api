@@ -1,67 +1,74 @@
-# SENG2021 23T1 CHURROS E-Invoicing Validation API
+# ChurroFlow API
 
-In order to run the server, we must
-- be running a Postgres database server with a database named "validation"
-- be inside a python3 virtual environment
-- install the necessary modules inside this virtual environment
-- set the appropriate envrionment variables for the database
-- run the server
+Welcome to ChurroFlow API, an invoice validation and processing solution. This API underpins the ChurroFlow web application, which you can find [here](http://www.churroflow.com).
 
-## Instructions below
 
-### Setup database
-To download and setup the database within WSL, follow [this tutorial](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-database).
+## Table of Contents
 
-Run the Postgres server with
+- [Introduction](#introduction)
+- [Features](#features)
+- [Deployment](#deployment)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Routes & Endpoints](#routes--endpoints)
+
+## Introduction
+
+Many business owners face challenges adopting the PEPPOL invoicing system due to the technical knowledge and resources required. Our interactive invoice validator simplifies this integration, offering a user-friendly platform to edit and validate invoices.
+
+## Features
+
+- **Real-time Validation:** Instant feedback on the wellformedness, syntax, schema, and PEPPOL standards of your invoices.
+- **Bulk Operations:** Upload, validate, and export multiple invoices simultaneously.
+- **Detailed Reports:** Access a comprehensive report detailing errors, suggestions, and more.
+- **Secure User Authentication:** Register, login, and manage your sessions with JWT authentication.
+- **Interactive Dashboards:** A visually appealing dashboard to overview your business's invoice statistics.
+- **Warehouse Analytics:** Dive deep into your warehouse operations with data-rich graphs and heatmaps.
+
+## Deployment
+
+The ChurroFlow API is currently deployed on AWS Elastic Beanstalk and is hosted at [api.churroflow.com](http://api.churroflow.com). You can interact directly with the API through this endpoint.
+
+## Installation
+
+If you want to run it locally, you can:
+
+First ensure that you have a postgresql database running on your machine with a database named `validation`. To set up the database, run the following commands:
+
 ```bash
 sudo service postgresql start
-```
-
-When first setting up, we must create a database named "validation"
-First, run
-```bash
 sudo -u postgres psql
-```
-Then press enter after typing
-```sql
 CREATE DATABASE validation;
-```
+\q
 
-### Setup virtual environment
-To setup the virtual environment, navigate to the repo folder and run 
-```bash
-python3 -m venv env
-```
-
-### Install the required modules
-To install the required modules in the previously setup virtual environment, run: 
-```bash
-source env/bin/activate && pip3 install -r requirements.txt
-```
-This will start the virtual environment then pip install the needed modules
-
-### Setting environment variables for database
-So that the server knows what database to connect to, run
-```bash
 export POSTGRES_HOST=localhost
 export POSTGRES_PORT=5433
 export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=postgres
 export POSTGRES_DB=validation
 ```
-Note: ensure these match the settings on the Postgres server you are running. The port may be 5432 and the password is whatever you set it to be when setting up the database.
 
-### Run the server
-Finally, to run the server, simply execute in the main repo folder:
+Then, clone the repository and run the following commands:
 ```bash
+git clone https://github.com/jeremytraini/churroflow-api.git
+cd churroflow-api
+python3 -m venv env
+source env/bin/activate
+pip3 install -r requirements.txt
+
 python3 -m src.main
 ```
 
-### Run tests
-To run the tests, first run the server, then run
-```bash
-pytest
-```
+Make sure you have Python and the necessary dependencies installed.
 
-## Deployment Link
-http://churros.eba-pyyazat7.ap-southeast-2.elasticbeanstalk.com/docs
+## Routes & Endpoints
+
+You can find a comprehensive list of routes and their descriptions in the [ENDPOINTS.md](ENDPOINTS.md) file.
+
+## Testing
+
+To run the suite of tests, run the following command:
+
+```bash
+python3 -m pytest
+```
