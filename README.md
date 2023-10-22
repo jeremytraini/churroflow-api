@@ -2,6 +2,12 @@
 
 Welcome to ChurroFlow API, an invoice validation and processing solution. This API underpins the ChurroFlow web application, which you can find [here](http://www.churroflow.com).
 
+## The Team
+- **Jeremy Traini** - Team Lead
+- **Ricardo Alkazzi** - Product Owner
+- **Ahona Dutta** - Scrum Master
+- **Denzel Iskandar** - Delivery Manager
+
 
 ## Table of Contents
 
