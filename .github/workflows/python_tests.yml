@@ -47,11 +47,11 @@ jobs:
         SERVER_LOG=$(mktemp)
         coverage run -m src.main >& $SERVER_LOG &
         serverPID=$!
-        sleep 3
+        sleep 5
         pytest tests/
         kill $serverPID
         cat $SERVER_LOG
-        sleep 3
+        sleep 5
     - name: Generate coverage report
       run: |
         coverage report -m
